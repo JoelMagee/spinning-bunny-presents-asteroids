@@ -1,13 +1,15 @@
-
 {
-	"name": "spinning-bunny-server",
-	"description": "Server for a web based multiplayer Asteroids-like game.",
-	"version": "0.0.1",
-    "private": true,
-    "dependencies": {
-		"morgan": "~1.0.*",
-		"commander": "~2.2.*",
-		"socksjs": "~0.3.*"
-	},
-	"main": "server.js"
+  "name": "spinning-bunny-server",
+  "description": "Server for a web based multiplayer Asteroids-like game.",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "body-parser": "~1.6.x",
+    "commander": "~2.3.x",
+    "express": "~4.8.x",
+    "method-override": "~2.1.x",
+    "morgan": "~1.2.x",
+    "socksjs": "~0.4.x"
+  },
+  "main": "server.js"
 }
