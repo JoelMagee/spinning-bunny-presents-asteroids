@@ -9,7 +9,8 @@
     "express": "~4.8.x",
     "method-override": "~2.1.x",
     "morgan": "~1.2.x",
-    "socksjs": "~0.4.x"
+    "sockjs": "~0.3.x",
+    "cli-color": "~0.3.x"
   },
   "main": "server.js"
 }

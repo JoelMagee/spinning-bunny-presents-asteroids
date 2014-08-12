@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script>
+		$(document).ready(function() {
+			var connectButton = $("#connect");
+			var connectText = $("#connect-message");
+
+			var messageText = $("#message");
+			var messageButton = $("#message-send");
+
+			var connection = undefined;
+
+			connectButton.on('click', function(){
+				connection = new WebSocket("ws://localhost:5000/socket/websocket");
+
+				connection.onopen = function() {
+					connectText.html("Connected...");
+					console.log("Connected to websocket on localhost");
+				};
+
+				connection.onclose = function() {
+					connectText.html("Connection to websocket closed");
+					console.log("Connection to localhost websocket has been closed");
+				}
+
+				connection.onmessage = function(e) {
+					console.log("Message from server: " + e);
+				}
+			});
+
+			messageButton.on('click', function() {
+				if (connection === undefined) {
+					connectText.html("Please connect first");
+				}
+
+				connection.send(message.val());
+				message.val("");
+			});
+		});
+		</script>
+	</head>
+	<body>
+		<h1>Socks JS test</h1>
+		<p>Socket makes connection on localhost:6400/echo</p>
+		<hr>
+		<button id="connect">Connect</button>
+		<p id="connect-message"></p>
+		<hr>
+		<input type="text" id="message">
+		<button id="message-send">Send message</button>
+	</body>
+</html>
