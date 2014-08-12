@@ -1,0 +1,13 @@
+
+{
+	"name": "spinning-bunny-server",
+	"description": "Server for a web based multiplayer Asteroids-like game.",
+	"version": "0.0.1",
+    "private": true,
+    "dependencies": {
+		"morgan": "~1.0.*",
+		"commander": "~2.2.*",
+		"socksjs": "~0.3.*"
+	},
+	"main": "server.js"
+}
