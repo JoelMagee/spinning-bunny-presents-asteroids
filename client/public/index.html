@@ -1,0 +1,158 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>spinning bunny</title>
+		<!-- Bootstrap -->
+		<link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+		
+		<script src="scripts/require.config.js"></script>
+		<script data-main="scripts/main" src="scripts/libs/require.js"></script>
+		
+	</head>
+	<body>
+		<div id="loginScreen" class="container-fluid">
+			<div class="row">
+				<div class="col-md-2 col-md-offset-1">
+					<h1>Login screen</h1>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-4 col-md-offset-4">
+					<div class="panel panel-primary">
+						<div class="panel-heading">Login</div>
+						<div class="panel-body">
+							<form role="form" data-bind="submit: login">
+								<div class="form-group">
+									<label for="usernameInput">Username</label>
+									<input type="text" class="form-control" id="usernameInput" placeholder="Username" data-bind="value: username">
+								</div>
+								<div class="form-group">
+									<label for="passwordInput">Password</label>
+									<input type="password" class="form-control" id="passwordInput" placeholder="Password" data-bind="value: password">
+								</div>
+								<button type="submit" class="btn btn-default">Login</button>
+							</form>	
+							<br/>
+							<p>Not registered? <a data-toggle="modal" data-target="#registerModal" style="cursor: pointer">Register here</a></p>
+							<div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+								<div class="modal-dialog">
+									<div class="modal-content">
+										<div class="modal-header">
+											<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+											<h4 class="modal-title" id="modalLabel">Register</h4>
+										</div>
+										<div class="modal-body">
+											<p>Register as a new user with a username and a password.</p>
+											<form role="form">
+												<div class="form-group">
+													<label for="usernameInputModal">Username</label>
+													<input type="text" class="form-control" id="usernameInputModal" placeholder="Username" data-bind="value: usernameModal">
+												</div>
+												<div class="form-group">
+													<label for="passwordInputModal">Password</label>
+													<input type="password" class="form-control" id="passwordInputModal" placeholder="Password" data-bind="value: passwordModal">
+												</div>
+											</form>	
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+											<button type="button" class="btn btn-primary" data-bind="click: register" >Submit</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!--<div class="alert alert-danger" role="alert" data-bind="text: errorMessage, visible: showError">
+						<button type="button" class="close" data-dismiss="alert" data-bind="visible: showError"><span aria-hidden="true" data-bind="visible: showError">&times;</span><span class="sr-only" data-bind="visible: showError">Close</span></button>
+					</div>-->
+				</div>
+			</div>
+		</div>
+		<div id="lobbyListScreen" style="display: none" class="container-fluid">
+			<div class="row">
+				<div class="col-md-2 col-md-offset-1">
+					<h1>Game lobbies</h1>
+				</div>
+				<div class="col-md-2 col-md-offset-7">
+					<button type="button" class="btn btn-default" data-bind="click: logout">Logout</button>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6 col-md-offset-2">
+					<div class="panel panel-default">
+						<div class="panel-heading">Open Lobbies</div>
+						<table class="table table-hover">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Name</th>
+									<th>Players</th>
+								</tr>
+							</thead>
+							<tbody data-bind="foreach: lobbies">
+								<tr data-bind="click: $parent.joinLobby">
+									<td data-bind="text: id "></td>
+									<td data-bind="text: name"></td>
+									<td data-bind="text: players"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="col-md-2 col-md-offset-1">
+					<div class="panel panel-default">
+						<div class="panel-heading">Users Online</div>
+						<ul class="list-group" data-bind="foreach: users">
+							<li class="list-group-item" data-bind="text: name"></li>
+						</ul>						
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="lobbyScreen" style="display: none" class="container-fluid">
+			<div class="row">
+				<br/>
+				<div class="col-md-6 col-md-offset-3">
+					<div class="panel panel-default">
+						<div class="panel-heading">Lobby name</div>
+						<br/>
+						<div class="row">
+							<div class="  col-md-4 col-md-offset-1">
+								<div class="panel panel-default">
+									<div class="panel-heading">Players</div>
+									<ul class="list-group" data-bind="foreach: players">
+										<li class="list-group-item" data-bind="text: name"></li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-md-5 col-md-offset-1">
+								<div class="panel panel-default">
+									<div class="panel-heading">Chat</div>
+										<ul class="list-group scrollable" data-bind="foreach: messages">
+											<li class="list-group-item" data-bind="text: $data"></li>
+										</ul>
+										<div class="input-group">
+										  <input type="text" class="form-control square" placeholder="..." data-bind="value: message">
+										  <span class="input-group-btn">
+											<button class="btn btn-default square" type="button" data-bind="click: sendMessage"><span class="glyphicon glyphicon-comment"></span></button>
+										  </span>
+										</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-1 col-md-offset-1">
+								<button type="button" class="btn btn-success" data-bind="click: startLobby">Start</button>								
+							</div>
+							<div class="col-md-1">
+								<button class="btn btn-danger" data-bind="click: leaveLobby">Leave</button>
+							</div>
+						</div>
+						<br/>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
