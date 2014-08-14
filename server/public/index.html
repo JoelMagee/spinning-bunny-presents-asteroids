@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
 		<script>
 		$(document).ready(function() {
 			var connectButton = $("#connect");
@@ -9,35 +10,90 @@
 
 			var messageText = $("#message");
 			var messageButton = $("#message-send");
+			var globalMessageText = $("#message-global");
+			var globalMessageButton = $("#message-send-global");
+
+			var joinButton = $("#join");
+			var endButton = $("#end");
+			var turnText = $("#turn-text");
 
 			var connection = undefined;
 
 			connectButton.on('click', function(){
-				connection = new WebSocket("ws://localhost:5000/socket/websocket");
+				var socket = io();
+				//socket.connect(); 
 
-				connection.onopen = function() {
+				joinButton.on('click', function() {
+					socket.emit('session', {});
+				});
+
+				endButton.on('click', function() {
+					socket.emit('turn', turnText.val());
+					turnText.val("");
+				});
+
+				messageButton.on('click', function() {
+					socket.emit('chat message', { message: messageText.val() });
+					messageText.val("");
+				});
+
+				globalMessageButton.on('click', function() {
+					socket.emit('global message', { message: globalMessageText.val() });
+					globalMessageText.val("");
+				});
+
+				socket.on('connect', function() {
 					connectText.html("Connected...");
 					console.log("Connected to websocket on localhost");
-				};
+				});
 
-				connection.onclose = function() {
+				socket.on('disconnect', function() {
 					connectText.html("Connection to websocket closed");
 					console.log("Connection to localhost websocket has been closed");
-				}
+				});
 
-				connection.onmessage = function(e) {
+				socket.on('chat message', function(e) {
 					console.log("Message from server: " + e);
-				}
+				});
+
+				socket.on('player join', function(e) {
+					console.log("Player joined: " + e);
+				});
+
+				socket.on('player leave', function(e) {
+					console.log("Player left: " + e);
+				});
+
+				socket.on('world', function(e) {
+					console.log(e);
+				});
+
+				socket.on('players', function(e) {
+					console.log("Players received");
+					console.log(e);
+				});
+
+				socket.on('error-message', function(e) {
+					console.error(e);
+				})
+
+				socket.on('turn result', function(e) {
+					turnText.val(e);
+				});
+
+				socket.on('message', function(e) {
+					console.log("Message from client");
+					console.log(e);
+				});
+
+				socket.on('global message', function(e) {
+					console.log("Global message from client");
+					console.log(e);
+				});
+
 			});
 
-			messageButton.on('click', function() {
-				if (connection === undefined) {
-					connectText.html("Please connect first");
-				}
 
-				connection.send(message.val());
-				message.val("");
-			});
 		});
 		</script>
 	</head>
@@ -48,7 +104,18 @@
 		<button id="connect">Connect</button>
 		<p id="connect-message"></p>
 		<hr>
+		<button id="join">Join</button>
+		<hr>
+		<input type="text" id="turn-text">
+		<button id="end">End Turn</button>
+		<hr>
+		<p>Turn Result:</p>
+		<p></p>
+		<hr>
 		<input type="text" id="message">
 		<button id="message-send">Send message</button>
+		<hr>
+		<input type="text" id="message-global">
+		<button id="message-send-global">Send Global message</button>
 	</body>
 </html>

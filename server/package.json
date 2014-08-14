@@ -9,8 +9,10 @@
     "express": "~4.8.x",
     "method-override": "~2.1.x",
     "morgan": "~1.2.x",
-    "sockjs": "~0.3.x",
-    "cli-color": "~0.3.x"
+    "socket.io": "~1.0.x",
+    "cli-color": "~0.3.x",
+    "redis": "0.12.x",
+    "bcrypt": "0.7.x"
   },
   "main": "server.js"
 }
