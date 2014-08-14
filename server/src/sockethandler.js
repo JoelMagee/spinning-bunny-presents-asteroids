@@ -11,50 +11,8 @@ var SocketHandler = function(io) {
 
 	//Redis queue Pub and Sub (different queues)
 	this.inputPublisher = redis.createClient();
-	//this.outputSubscriber = redis.createClient();
 
 	io.on('connection', this.clientConnected.bind(this));
-
-	//This deals with our outgoing messages
-	//this.outputSubscriber.subscribe('output message');
-
-	//Message is a stringified JSON object with the properties 'sessionID', 'channel' and 'data' and optionally 'broadcast'
-	// this.outputSubscriber.on('message', function(channel, message) {
-	// 	console.log("Message '" + message + "' on channel '" + channel + "' arrived!");
-	// 	var messageObj = JSON.parse(message);
-
-	// 	var socketClient = self._getFromConnectionMap(messageObj.sessionID);
-
-	// 	if (socketClient === undefined) {
-	// 		console.error("WARN: Trying to send message to session ID without a connection: " + messageObj.sessionID);
-	// 	} else {
-	// 		if (messageObj.broadcast) {
-	// 			socketClient.connection.broadcast.emit(messageObj.channel, messageObj.data);
-	// 		}
-	// 		socketClient.connection.emit(messageObj.channel, messageObj.data);
-	// 	}	
-	// });
-
-	// var chatSubscriber = redis.createClient();
-	// var chatPublisher = redis.createClient();
-
-	// chatSubscriber.psubscribe('global message:*');
-
-	// chatSubscriber.on('pmessage', function(channel, message) {
-	// 	console.log("Global chat message from redis queue");
-
-	// 	var sessionID = channel.substring(channel.indexOf(":") + 1);
-
-	// 	console.log("Global chat session: " + sessionID);
-
-	// 	chatPublisher.publish('output message', JSON.stringify(
-	// 		{
-	// 			sessionID: sessionID,
-	// 			channel: "global message",
-	// 			broadcast: true,
-	// 			data: message
-	// 		}));
-	// });
 
 };
 
@@ -82,9 +40,17 @@ SocketHandler.prototype.clientConnected = function(connection) {
 
 		//Create subscriber for output messages
 		var outputSubscriber = redis.createClient();
-		outputSubscriber.psubscribe(['output message', 'output message:' + sessionID]);
+		outputSubscriber.psubscribe('output message:' + sessionID);
+		outputSubscriber.subscribe('output message');
 
-		outputSubscriber.on('pmessage', function(channel, message) {
+		outputSubscriber.on('pmessage', function(channelPattern, actualChannel, message) {
+			console.log("PMessage to output for session " + sessionID + " found");
+			data = JSON.parse(message);
+			connection.emit(data.channel, data.data);
+		});
+
+		outputSubscriber.on('message', function(actualChannel, message) {
+			console.log("Message to output for session " + sessionID + " found");
 			data = JSON.parse(message);
 			connection.emit(data.channel, data.data);
 		});
@@ -138,8 +104,6 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			sessionID: sessionID,
 			data: data
 		}
-
-		console.log(queueData);
 
 		self.inputPublisher.publish('global message:' + sessionID, JSON.stringify(queueData));
 	});
