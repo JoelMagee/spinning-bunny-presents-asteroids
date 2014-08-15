@@ -50,7 +50,8 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		});
 
 		outputSubscriber.on('message', function(actualChannel, message) {
-			console.log("Message to output for session " + sessionID + " found");
+			console.log("Message to output for session " + sessionID + " found - " + message);
+			console.dir(message);
 			data = JSON.parse(message);
 			connection.emit(data.channel, data.data);
 		});
@@ -115,6 +116,8 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
+		console.log("Login message recieved");
+
 		var queueData = {
 			sessionID: sessionID,
 			data: data
@@ -129,6 +132,9 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			self.sendNoSessionError(connection);
 			return;
 		}
+
+		console.log("Logout message received");
+		console.log(sessionID);
 
 		var queueData = {
 			sessionID: sessionID,
@@ -145,10 +151,14 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
+		console.log("Registration request recieved");
+
 		var queueData = {
 			sessionID: sessionID,
 			data: data
 		}
+
+		console.log(queueData);
 
 		self.inputPublisher.publish('register:' + sessionID, JSON.stringify(queueData));
 	});
@@ -159,6 +169,8 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			self.sendNoSessionError(connection);
 			return;
 		}
+
+		console.log("Create lobby request recieved");
 
 		var queueData = {
 			sessionID: sessionID,
@@ -175,6 +187,8 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			self.sendNoSessionError(connection);
 			return;
 		}
+
+		console.log("Join lobby request recieved");
 
 		var queueData = {
 			sessionID: sessionID,
@@ -217,7 +231,7 @@ SocketHandler.prototype.clientConnected = function(connection) {
 
 SocketHandler.prototype.sendNoSessionError = function(connection) {
 	console.log("Sending error to client");
-	connection('message', "You have not created a session, send a SocketIO message on the channel 'session'");
+	connection.emit('error-message', "You have not created a session, send a SocketIO message on the channel 'session'");
 };
 
 SocketHandler.prototype._addToConnectionMap = function(socketClient) {

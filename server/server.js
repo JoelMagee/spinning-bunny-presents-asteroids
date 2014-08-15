@@ -14,8 +14,14 @@ var methodOverride = require('method-override');
 
 var redis          = require('redis');
 
-var SocketHandler = require('./src/sockethandler')(redis);
-var GlobalChat    = require('./src/globalchat')(redis);
+var SocketHandler  = require('./src/sockethandler')(redis);
+var GlobalChat     = require('./src/globalchat')(redis);
+var Auth           = require('./src/auth')(redis);
+var SessionManager = require('./src/session-manager')();
+
+var Login          = require('./src/login')(redis);
+var Logout         = require('./src/logout')(redis);
+var Register       = require('./src/register')(redis);
 
 // Parse provided arguments
 program
@@ -40,12 +46,16 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(methodOverride());
 
+var models = require('./src/models/models');
 
 // Load main internal modules
-
+var sessionManager = new SessionManager();
 var socketHandler = new SocketHandler(io);
-var globalChat = new GlobalChat();
+var globalChat = new GlobalChat(sessionManager);
 
+var login = new Login(sessionManager, models.UserModel);
+var logout = new Logout(sessionManager);
+var register = new Register(models.UserModel);
 
 // Listen on required port
 http.listen(program.port);

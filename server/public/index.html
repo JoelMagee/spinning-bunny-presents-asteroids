@@ -13,6 +13,16 @@
 			var globalMessageText = $("#message-global");
 			var globalMessageButton = $("#message-send-global");
 
+			var loginButton = $("#login-button");
+			var loginUsername = $("#login-username");
+			var loginPassword = $("#login-password");
+
+			var logoutButton = $("#logout-button");
+
+			var registerButton = $("#register-button");
+			var registerUsername = $("#register-username");
+			var registerPassword = $("#register-password");
+
 			var joinButton = $("#join");
 			var endButton = $("#end");
 			var turnText = $("#turn-text");
@@ -40,6 +50,36 @@
 				globalMessageButton.on('click', function() {
 					socket.emit('global message', { message: globalMessageText.val() });
 					globalMessageText.val("");
+				});
+
+				registerButton.on('click', function() {
+					console.log("Register button clicked");
+
+					var username = registerUsername.val();
+					var password = registerPassword.val();
+
+					socket.emit('register', {
+						username: username,
+						password: password
+					});
+				});
+
+				loginButton.on('click', function() {
+					console.log("Login button clicked");
+
+					var username = loginUsername.val();
+					var password = loginPassword.val();
+
+					socket.emit('login', {
+						username: username,
+						password: password
+					});
+				})
+
+				logoutButton.on('click', function() {
+					console.log("Logout button clicked");
+
+					socket.emit('logout', {});
 				});
 
 				socket.on('connect', function() {
@@ -91,6 +131,30 @@
 					console.log(e);
 				});
 
+				socket.on('register', function(e) {
+					if (e.success) {
+						console.log("Registration successful");
+					} else {
+						console.log("Registration failed: " + e.message);
+					}
+				});
+
+				socket.on('login', function(e) {
+					if (e.success) {
+						console.log("Login successful");
+					} else {
+						console.log("Login failed: " + e.message);
+					}
+				});
+
+				socket.on('logout', function(e) {
+					if (e.success) {
+						console.log("Logout successful");
+					} else {
+						console.log("Logout failed (WTF?)");
+					}
+				});
+
 			});
 
 
@@ -117,5 +181,15 @@
 		<hr>
 		<input type="text" id="message-global">
 		<button id="message-send-global">Send Global message</button>
+		<hr>
+		<input type="text" id="register-username" placeholder="Username">
+		<input type="text" id="register-password" placeholder="Password">
+		<button id="register-button">Register</button>
+		<hr>
+		<input type="text" id="login-username" placeholder="Username">
+		<input type="text" id="login-password" placeholder="Password">
+		<button id="login-button">Login</button>
+		<hr>
+		<button id="logout-button">Logout</button>
 	</body>
 </html>
