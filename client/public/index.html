@@ -22,18 +22,18 @@
 						<div class="panel-heading">Login</div>
 						<div class="panel-body">
 							<form role="form" data-bind="submit: login">
-								<div class="form-group">
+								<div id="username" class="form-group">
 									<label for="usernameInput">Username</label>
 									<input type="text" class="form-control" id="usernameInput" placeholder="Username" data-bind="value: username">
 								</div>
-								<div class="form-group">
+								<div id="password" class="form-group">
 									<label for="passwordInput">Password</label>
 									<input type="password" class="form-control" id="passwordInput" placeholder="Password" data-bind="value: password">
 								</div>
 								<button type="submit" class="btn btn-default">Login</button>
 							</form>	
 							<br/>
-							<p>Not registered? <a data-toggle="modal" data-target="#registerModal" style="cursor: pointer">Register here</a></p>
+							<p>Not registered? <a data-toggle="modal" data-target="#registerModal" style="cursor: pointer" data-bind="click: clearModal">Register here</a></p>
 							<div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
 								<div class="modal-dialog">
 									<div class="modal-content">
@@ -65,6 +65,10 @@
 					</div>
 					<!--<div class="alert alert-danger" role="alert" data-bind="text: errorMessage, visible: showError">
 						<button type="button" class="close" data-dismiss="alert" data-bind="visible: showError"><span aria-hidden="true" data-bind="visible: showError">&times;</span><span class="sr-only" data-bind="visible: showError">Close</span></button>
+					</div>
+					<div id="alert" class="alert alert-warning fade in" role="alert" style="display: none">
+						<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+						<strong>Holy guacamole!</strong> Best check yo self, you're not looking too good.
 					</div>-->
 				</div>
 			</div>
@@ -153,6 +157,9 @@
 					</div>
 				</div>
 			</div>
+		</div>
+		<div id="gameScreen" style="display: none">
+			<button id="endGameButton" class="btn btn-danger" data-bind="click: endGame">Leave game</button>
 		</div>
 	</body>
 </html>

@@ -41,6 +41,9 @@ define([
 		},
 		startLobby: function () {
 			console.log("lobby started");
+			$('#lobbyScreen').hide();
+			$('#gameScreen').show();
+			// $('canvas').css('display','block');
 		},
 		leaveLobby: function () {
 			console.log("player left lobby");
@@ -48,8 +51,6 @@ define([
 			$('#lobbyListScreen').show();
 		}
     };
-	
-	
   
     return LobbyVM;
 });

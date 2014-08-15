@@ -6210,3 +6210,12 @@ button.close {
 .square {
     border-radius: 0px;
 }
+
+canvas {
+	display: block;
+	z-index: -1;
+}
+
+#endGameButton { 
+	position: absolute;
+}

@@ -6,7 +6,8 @@ var require = {
         'knockout': 'libs/knockout-3.0.0.debug',
 		'pixi': 'libs/pixi.dev',
         'text': 'libs/text',
-		'bootstrap': '../bootstrap/js/bootstrap'
+		'bootstrap': '../bootstrap/js/bootstrap',
+		'socketio': 'https://cdn.socket.io/socket.io-1.0.0'
     },
     map: {
         '*': {

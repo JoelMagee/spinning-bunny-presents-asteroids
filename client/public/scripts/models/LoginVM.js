@@ -5,8 +5,6 @@ define([
 	'bootstrap'
 ], function (ko, $, User) {
     'use strict';
-    
-	
 	
     var LoginVM = function LoginVM() {
 		this.username = ko.observable();
@@ -21,16 +19,24 @@ define([
     };
 	
     LoginVM.prototype = {
-		login: function () {
-			if (this.username() === undefined || this.username() === "") {
+		_validateInput: function(username, password) {
+			if (username() === undefined || username() === "") {
+				// $( "#username" ).toggleClass( "has-error");
 				this.errorMessage("You must enter a username");
 				this.showError(true);
 				console.log(this.errorMessage());
-			} else if (this.password() === undefined  || this.password() === ""){
+			} else if (password() === undefined  || this.password() === ""){
+				// $( "#password" ).toggleClass( "has-error");
 				this.errorMessage("You must enter a password");
 				this.showError(true);
 				console.log(this.errorMessage());
 			} else {
+				return true;
+			}
+			return false;
+		},
+		login: function () {
+			if (this._validateInput(this.username, this.password)) {
 				console.log("logged in as " + this.username() + " with password " + this.password());
 				this.username("");
 				this.password("");
@@ -39,28 +45,18 @@ define([
 			}
 		},
 		register: function () {
-			console.log("registered as " + this.usernameModal() + " with password " + this.passwordModal());
-			$('#registerModal').modal('hide');
-			// return false;
-		},
-		_validateInput: function(username, password, type) {
-			if (username() === undefined || username() === "") {
-				this.errorMessage("You must enter a username");
-				this.showError(true);
-				console.log(this.errorMessage());
-			} else if (password() === undefined  || this.password() === ""){
-				this.errorMessage("You must enter a password");
-				this.showError(true);
-				console.log(this.errorMessage());
-			} else {
-				console.log("logged in as " + username() + " with password " + password());
-				username("");
-				password("");
+			if (this._validateInput(this.usernameModal, this.passwordModal)) {
+				console.log("registered as " + this.usernameModal() + " with password " + this.passwordModal());
+				this.usernameModal("");
+				this.passwordModal("");
+				$('#registerModal').modal('hide');
 			}
+		},
+		clearModal: function () {
+			this.usernameModal("");
+			this.passwordModal("");
 		}
     };
 	
-	
-  
     return LoginVM;
 });

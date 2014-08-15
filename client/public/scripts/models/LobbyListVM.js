@@ -5,8 +5,6 @@ define([
 	'models/User'
 ], function (ko, $, Lobby, User) {
     'use strict';
-    
-	
 	
     var LobbyListVM = function LobbyListVM() {
 		this.lobbies = ko.observableArray();
@@ -55,7 +53,5 @@ define([
 		}
     };
 	
-	
-  
     return LobbyListVM;
 });
