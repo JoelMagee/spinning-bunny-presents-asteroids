@@ -16,7 +16,6 @@ var redis          = require('redis');
 
 var SocketHandler  = require('./src/sockethandler')(redis);
 var GlobalChat     = require('./src/globalchat')(redis);
-var Auth           = require('./src/auth')(redis);
 var SessionManager = require('./src/session-manager')();
 
 var Login          = require('./src/login')(redis);
