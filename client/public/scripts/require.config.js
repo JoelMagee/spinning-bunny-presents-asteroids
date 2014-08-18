@@ -24,6 +24,9 @@ var require = {
         },
 		'bootstrap': {
 			deps: ['jquery']
+		},
+		'socketio': {
+		  exports: 'io'
 		}
     }
 };

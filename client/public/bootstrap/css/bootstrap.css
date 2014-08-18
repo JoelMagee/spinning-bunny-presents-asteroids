@@ -6219,3 +6219,7 @@ canvas {
 #endGameButton { 
 	position: absolute;
 }
+
+.screen {
+	display: none;
+}
