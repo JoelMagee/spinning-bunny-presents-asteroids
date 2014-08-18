@@ -56,6 +56,8 @@ var login = new Login(sessionManager, models.UserModel);
 var logout = new Logout(sessionManager);
 var register = new Register(models.UserModel);
 
+var lobbyManager   = require('./src/lobby')(redis, sessionManager); //Singleton
+
 // Listen on required port
 http.listen(program.port);
 

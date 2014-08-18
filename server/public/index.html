@@ -1,10 +1,24 @@
 <!doctype html>
 <html>
 	<head>
+		<title>Sockets Test for Spinning Bunny</title>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 		<script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
 		<script>
+
+		var lobbyTemplate = "<tr class='lobby-row' data-lobby-id='{0}'><td class='lobby-id'>{0}</td><td class='lobby-name'>{1}</td><td class='lobby-count'>{2}</td><td class='lobby-join'><button class='lobby-join-button'>Join</button></td><td class='lobby-leave'><button class='lobby-leave-button'>Leave</button></td><td class='lobby-refresh'><button class='lobby-refresh-button'>Refresh</button></td></tr>";
+
+if (!String.prototype.format) {
+	String.prototype.format = function() {
+		var args = arguments;
+		return this.replace(/{(\d+)}/g, function(match, number) { 
+			return typeof args[number] != 'undefined' ? args[number] : match;
+		});
+	};
+}
+
 		$(document).ready(function() {
+
 			var connectButton = $("#connect");
 			var connectText = $("#connect-message");
 
@@ -27,11 +41,25 @@
 			var endButton = $("#end");
 			var turnText = $("#turn-text");
 
+			var createLobbyButton = $("#create-lobby-button");
+			var createLobbyName = $("#create-lobby-name");
+
+			var updateLobbyButton = $("#update-lobby-button");
+
+			var lobbyListContainer = $("#lobby-list");
+
 			var connection = undefined;
 
+
 			connectButton.on('click', function(){
+				console.log("Connect button clicked");
+
 				var socket = io();
 				//socket.connect(); 
+
+				var updateLobby = function() {
+					socket.emit('info lobby', {});
+				};
 
 				joinButton.on('click', function() {
 					socket.emit('session', {});
@@ -80,6 +108,44 @@
 					console.log("Logout button clicked");
 
 					socket.emit('logout', {});
+				});
+
+				createLobbyButton.on('click', function() {
+					console.log("Create lobby button clicked");
+
+					var name = createLobbyName.val();
+					createLobbyName.val("");
+
+					socket.emit("create lobby", { name: name });
+				});
+
+				updateLobbyButton.on('click', function() {
+
+					updateLobby();
+				});
+
+				$("body").on('click', '.lobby-join-button', function(e) {
+					console.log("Lobby join button clicked");
+
+					var lobbyID = $(e.target).parent().parent().attr('data-lobby-id');
+
+					socket.emit('join lobby', { id: lobbyID });
+				});
+
+				$("body").on('click', '.lobby-leave-button', function(e) {
+					console.log("Lobby leave button clicked");
+
+					var lobbyID = $(e.target).parent().parent().attr('data-lobby-id');
+
+					socket.emit('leave lobby', { id: lobbyID });
+				});
+
+				$("body").on('click', '.lobby-refresh-button', function(e) {
+					console.log("Lobby refresh button clicked");
+
+					var lobbyID = $(e.target).parent().parent().attr('data-lobby-id');
+
+					socket.emit('info lobby', { id: lobbyID });
 				});
 
 				socket.on('connect', function() {
@@ -155,6 +221,49 @@
 					}
 				});
 
+				socket.on('create lobby', function(e) {
+					if (e.success) {
+						console.log("Creation of lobby was successful");
+						updateLobby();
+					} else {
+						console.log("Creation of lobby failed - " + e.message);
+
+					}
+				});
+
+				socket.on('info lobby', function(e) {
+					if (e.success) {
+
+						if (e.lobbyData instanceof Array) {
+							console.log("Info for all lobbies received");
+							console.dir(e);
+							//We've recieved a list of results
+							//Empty the list
+							lobbyListContainer.html("");
+
+							for (var i = 0; i < e.lobbyData.length; i++) {
+								lobbyListContainer.append(lobbyTemplate.format(e.lobbyData[i].id, e.lobbyData[i].name, e.lobbyData[i].usernames.length));
+							}
+						} else {
+							//Just the one sir
+							Console.log("Information for a single lobby recieved");
+						}
+
+					} else {
+						console.error("Loading lobby list failed somehow");
+					}
+				});
+
+				socket.on('join lobby', function(e) {
+					console.log("Join lobby message recieved");
+					console.dir(e);
+				});
+
+				socket.on('leave lobby', function(e) {
+					console.log("Leave lobby message recieved");
+					console.dir(e);
+				});
+
 			});
 
 
@@ -189,7 +298,26 @@
 		<input type="text" id="login-username" placeholder="Username">
 		<input type="text" id="login-password" placeholder="Password">
 		<button id="login-button">Login</button>
-		<hr>
 		<button id="logout-button">Logout</button>
+		<hr>
+		<p>Create a lobby</p>
+		<input type="text" id="create-lobby-name">
+		<button id="create-lobby-button">Create</button>
+		<hr>
+		<p>Lobby List <button id="update-lobby-button">Refresh</button></p>
+		<table style="width: 100%;">
+			<tr style="text-align: left">
+				<th>ID</th>
+				<th>Name</th>
+				<th>Number of players</th>
+				<th>Join</th>
+				<th>Leave</th>
+				<th>Refresh</th>
+			</tr>
+			<tbody id="lobby-list">
+				
+			</tbody>
+		</table>
+		<hr>
 	</body>
 </html>
