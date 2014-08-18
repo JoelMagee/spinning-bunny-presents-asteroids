@@ -1,5 +1,8 @@
+/*jslint white: true */
+
 //Module dependencies
 var redis;
+var sessionManager;
 
 var SocketHandler = function(io) {
 	var self = this;
@@ -31,8 +34,8 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		} else {
 			console.log("Client requesting new session");
 			//Create new session ID
-			sessionID = self.sessionGenerator.generateSessionID();
-			console.log("Given client session ID " + sessionID);
+			sessionID = sessionManager.createSession();
+			console.log("Created new session for client with ID: " + sessionID);
 		}
 
 		var socketClient = new SocketClient(sessionID, connection);
@@ -198,6 +201,23 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		self.inputPublisher.publish('join lobby:' + sessionID, JSON.stringify(queueData));
 	});
 
+	connection.on('info lobby', function(data) {
+		if (sessionID === undefined) {
+			//Nothing happens, they never requested a session
+			self.sendNoSessionError(connection);
+			return;
+		}
+
+		console.log("Lobby info request recieved");
+
+		var queueData = {
+			sessionID: sessionID,
+			data: data
+		}
+
+		self.inputPublisher.publish('info lobby:' + sessionID, JSON.stringify(queueData));
+	});
+
 	connection.on('start game', function(data) {
 		if (sessionID === undefined) {
 			//Nothing happens, they never requested a session
@@ -258,17 +278,11 @@ var SocketClient = function(sessionID, connection) {
 	connection.emit('session', { sessionID: sessionID });
 };
 
-var SessionGenerator = function() {
-	this.sessionNumber = 0;
-}
-
-SessionGenerator.prototype.generateSessionID = function() {
-	return this.sessionNumber++;
-}
 
 
-module.exports = function(_redis) {
+module.exports = function(_redis, _sessionManager) {
 	redis = _redis;
+	sessionManager = _sessionManager;
 
 	return SocketHandler;
 }
