@@ -1,7 +1,6 @@
 /*jslint white: true */
 
 var redis;
-var sessionManager;
 
 //Redis subscribers
 var joinListener;
@@ -12,7 +11,9 @@ var infoListener;
 //Redis publisher
 var outputPub;
 
-var LobbyManager = function() {
+var LobbyManager = function(sessionManager) {
+	this.sessionManager = sessionManager;
+
 	this.lobbies = [];
 	this.lobbiesMap = {};
 	this.lobbyCount = 0;
@@ -54,8 +55,9 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 	var messageObj = JSON.parse(message);
 	var sessionID = messageObj.sessionID;
 
-	var lobbyID = messageObj.id;
-	var username = messageObj.username;
+	var lobbyID = messageObj.data.id;
+	var username = this.sessionManager.getSessionProperty(sessionID, 'username');
+
 
 	if (!this.lobbiesMap.hasOwnProperty(lobbyID)) {
 		//Error, tried to join a lobby which doesn't exist
@@ -103,7 +105,7 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 	lobbyResponse.username = username;
 	
 	outputPub.publish('output message:' + sessionID, JSON.stringify(response));
-	lobby.publishToAll("user joined lobby", JSON.stringify(lobbyResponse));
+	lobby.sendToAll("user joined lobby", JSON.stringify(lobbyResponse));
 };
 
 LobbyManager.prototype._leaveMessageReceived = function(channelPattern, actualPattern, message) {
@@ -290,7 +292,7 @@ Lobby.prototype.sendToAll = function(channel, responseData) {
 		response.sessionID = this.users[i].sessionID;
 		response.channel = channel;
 		response.data = responseData;
-		outputPub.publish('output message:' + sessionID, JSON.stringify(response));
+		outputPub.publish('output message:' + response.sessionID, JSON.stringify(response));
 	}
 
 }
@@ -307,9 +309,8 @@ Lobby.prototype.getLobbyInfo = function() {
 	};
 };
 
-module.exports = function(_redis, _sessionManager) {
+module.exports = function(_redis) {
 	redis = _redis;
-	sessionManager = _sessionManager;
 
 	joinListener = redis.createClient(); //Lobby joins
 	createListener = redis.createClient(); //Lobby creates
@@ -318,6 +319,5 @@ module.exports = function(_redis, _sessionManager) {
 
 	outputPub = redis.createClient(); //Output messages;
 
-	//Singleton class
-	return new LobbyManager();
+	return LobbyManager;
 };

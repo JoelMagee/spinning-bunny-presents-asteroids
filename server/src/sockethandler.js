@@ -133,6 +133,12 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
 		console.log("Logout message received");
 		console.log(sessionID);
 
@@ -170,6 +176,12 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
 		console.log("Create lobby request recieved");
 
 		var queueData = {
@@ -185,6 +197,12 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		if (sessionID === undefined) {
 			//Nothing happens, they never requested a session
 			self.sendNoSessionError(connection);
+			return;
+		}
+
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
 			return;
 		}
 
@@ -222,6 +240,12 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
 		var queueData = {
 			sessionID: sessionID,
 			data: data
@@ -237,6 +261,12 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
 		var queueData = {
 			sessionID: sessionID,
 			data: data
@@ -247,8 +277,11 @@ SocketHandler.prototype.clientConnected = function(connection) {
 };
 
 SocketHandler.prototype.sendNoSessionError = function(connection) {
-	console.log("Sending error to client");
 	connection.emit('error-message', "You have not created a session, send a SocketIO message on the channel 'session'");
+};
+
+SocketHandler.prototype.sendNotLoggedInError = function(connection) {
+	connection.emit('error-message', "You have not logged in, please log in before continuing");
 };
 
 SocketHandler.prototype._addToConnectionMap = function(socketClient) {

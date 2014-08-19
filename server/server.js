@@ -17,6 +17,7 @@ var redis          = require('redis');
 var SocketHandler  = require('./src/sockethandler')(redis);
 var GlobalChat     = require('./src/globalchat')(redis);
 var SessionManager = require('./src/session-manager')();
+var LobbyManager   = require('./src/lobby')(redis);
 
 var Login          = require('./src/login')(redis);
 var Logout         = require('./src/logout')(redis);
@@ -33,19 +34,17 @@ if (program.dev) {
 	//Set any dev vars here
 	console.log(clc.red("Running development"));
 
-
-
 	//Static directory for test files
 	console.log("Using __dirname/public as static file directory");
-	app.use(express.static(__dirname + '/public')); 	
+	app.use(express.static(__dirname + '/public'));
+
+	// Set up morgan for logging
+	app.use(morgan('dev'));
+	app.use(bodyParser.json());
+	app.use(methodOverride());
 } else {
 	console.log(clc.green("Running production"));
 }
-
-// Set up morgan for logging
-app.use(morgan('dev'));
-app.use(bodyParser.json());
-app.use(methodOverride());
 
 var models = require('./src/models/models');
 
@@ -54,11 +53,12 @@ var sessionManager = new SessionManager();
 var socketHandler = new SocketHandler(io, sessionManager);
 var globalChat = new GlobalChat(sessionManager);
 
+var lobbyManager   = new LobbyManager(sessionManager);
+
 var login = new Login(sessionManager, models.UserModel);
 var logout = new Logout(sessionManager);
 var register = new Register(models.UserModel);
 
-var lobbyManager   = require('./src/lobby')(redis, sessionManager); //Singleton
 
 // Listen on required port
 http.listen(program.port);
