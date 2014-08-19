@@ -2,17 +2,14 @@
 
 //Module dependencies
 var redis;
-var sessionManager;
 
-var SocketHandler = function(io) {
-	var self = this;
-
+var SocketHandler = function(io, sessionManager) {
 	this.io = io;
-	this.sessionGenerator = new SessionGenerator();
+	this.sessionManager = sessionManager;
 
 	this.connectionMap = {};
 
-	//Redis queue Pub and Sub (different queues)
+	//Redis message queue publisher
 	this.inputPublisher = redis.createClient();
 
 	io.on('connection', this.clientConnected.bind(this));
@@ -34,7 +31,7 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		} else {
 			console.log("Client requesting new session");
 			//Create new session ID
-			sessionID = sessionManager.createSession();
+			sessionID = self.sessionManager.createSession();
 			console.log("Created new session for client with ID: " + sessionID);
 		}
 
@@ -47,13 +44,13 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		outputSubscriber.subscribe('output message');
 
 		outputSubscriber.on('pmessage', function(channelPattern, actualChannel, message) {
-			console.log("PMessage to output for session " + sessionID + " found");
+			//console.log("PMessage to output for session " + sessionID + " found");
 			data = JSON.parse(message);
 			connection.emit(data.channel, data.data);
 		});
 
 		outputSubscriber.on('message', function(actualChannel, message) {
-			console.log("Message to output for session " + sessionID + " found - " + message);
+			//console.log("Message to output for session " + sessionID + " found - " + message);
 			console.dir(message);
 			data = JSON.parse(message);
 			connection.emit(data.channel, data.data);
@@ -280,9 +277,8 @@ var SocketClient = function(sessionID, connection) {
 
 
 
-module.exports = function(_redis, _sessionManager) {
+module.exports = function(_redis) {
 	redis = _redis;
-	sessionManager = _sessionManager;
 
 	return SocketHandler;
 }

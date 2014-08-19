@@ -1,3 +1,5 @@
+/*jslint white: true */
+
 var SessionManager = require('../src/session-manager')();
 
 describe("session creation", function() {
@@ -75,11 +77,48 @@ describe("session setting properties", function() {
 	});
 });
 
+describe("unsetting session properties", function() {
+
+	var sessionManager = new SessionManager();
+
+	var sessionID = 1;
+	var property = "my name";
+	var val = "Sam";
+
+	var createdSessionID = sessionManager._createSession(sessionID);
+
+	it("should set the session property", function() {
+		var setSuccessful = sessionManager._setSessionProperty(sessionID, property, val);
+
+		expect(setSuccessful).toBe(true);
+
+		var getValue = sessionManager._getSessionProperty(sessionID, property);
+
+		expect(getValue).toBe("Sam");
+
+		var anotherGetValue = sessionManager.getSessionProperty(sessionID, property);
+
+		expect(anotherGetValue).toBe("Sam");
+	});
+
+	it("should unset the session property", function() {
+		var unsetSuccessful = sessionManager._deleteSessionProperty(sessionID, property);
+
+		expect(unsetSuccessful).toBe(true);
+
+		var getValue = sessionManager.getSessionProperty(sessionID, property);
+
+		expect(getValue).toBe(null);
+	});
+
+});
+
 describe("session logging in properties", function() {
 	var sessionManager = new SessionManager();
 
 	var sessionID = sessionManager.createSession();
 	var username = "samsam";
+
 
 	it("should log a user in by storing their username in the session", function() {
 		
@@ -92,5 +131,46 @@ describe("session logging in properties", function() {
 		var nowLoggedIn = sessionManager.loggedIn(sessionID);
 
 		expect(nowLoggedIn).toBe(true);
+
+		var fetchedUsername = sessionManager.getLoggedInUser(sessionID);
+
+		expect(fetchedUsername).toNotBe(false);
+		expect(fetchedUsername).toBe("samsam");
+	});
+});
+
+describe("session logging out", function() {
+
+	var sessionManager = new SessionManager();
+
+	var sessionID = sessionManager.createSession();
+	var username = "samsam";
+	var property = "testing";
+	var value = "is cool";
+
+	sessionManager.loginUser(sessionID, username);
+
+	it("should have the user now logged in and store some extra properties", function() {
+		var nowLoggedIn = sessionManager.loggedIn(sessionID);
+
+		expect(nowLoggedIn).toBe(true);
+
+		sessionManager.setSessionProperty(sessionID, property, value);
+
+		var fetchedValue = sessionManager.getSessionProperty(sessionID, property);
+
+		expect(fetchedValue).toBe("is cool");
+	});
+
+	it("should log out the user and clear all stored session information", function() {
+		sessionManager.logoutUser(sessionID);
+
+		var nowLoggedIn = sessionManager.loggedIn(sessionID);
+
+		expect(nowLoggedIn).toBe(false);
+
+		var fetchedValue = sessionManager.getSessionProperty(sessionID, property);
+
+		expect(fetchedValue).toBe(null);
 	});
 });

@@ -33,6 +33,8 @@ if (program.dev) {
 	//Set any dev vars here
 	console.log(clc.red("Running development"));
 
+
+
 	//Static directory for test files
 	console.log("Using __dirname/public as static file directory");
 	app.use(express.static(__dirname + '/public')); 	
@@ -49,7 +51,7 @@ var models = require('./src/models/models');
 
 // Load main internal modules
 var sessionManager = new SessionManager();
-var socketHandler = new SocketHandler(io);
+var socketHandler = new SocketHandler(io, sessionManager);
 var globalChat = new GlobalChat(sessionManager);
 
 var login = new Login(sessionManager, models.UserModel);

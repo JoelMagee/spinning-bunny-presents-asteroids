@@ -15,7 +15,7 @@ var SessionManager = function() {
 
 SessionManager.prototype.loginUser = function(sessionID, username) {
 	this._setSessionProperty(sessionID, 'loggedIn', true);
-	this._setSessionProperty(sessionID, 'username', username)
+	this._setSessionProperty(sessionID, 'username', username);
 };
 
 SessionManager.prototype.logoutUser = function(sessionID) {
@@ -26,6 +26,20 @@ SessionManager.prototype.loggedIn = function(sessionID) {
 	if (this._sessionExists(sessionID)) {
 		if (this.sessions[sessionID].hasOwnProperty('loggedIn')) {
 			return this.sessions[sessionID]['loggedIn'];
+		}
+	}
+
+	return false;
+}
+
+SessionManager.prototype.getLoggedInUser = function(sessionID) {
+	if (this._sessionExists(sessionID)) {
+		if (this.sessions[sessionID].hasOwnProperty('loggedIn')) {
+			if (this.sessions[sessionID].hasOwnProperty('username')) {
+				return this.sessions[sessionID]['username'];
+			} else {
+				console.error("User logged in but no username is set in the session");
+			}
 		}
 	}
 
@@ -51,6 +65,14 @@ SessionManager.prototype.createSession = function() {
 	return this._createSession(sessionID);
 };
 
+SessionManager.prototype.getSessionProperty = function(sessionID, property) {
+	return this._getSessionProperty(sessionID, property)
+};
+
+SessionManager.prototype.setSessionProperty = function(sessionID, property, value) {
+	return this._setSessionProperty(sessionID, property, value);
+};
+
 SessionManager.prototype._setSessionProperty = function(sessionID, property, val) {
 	if (this.sessions.hasOwnProperty(sessionID)) {
 		this.sessions[sessionID][property] = val;
@@ -73,7 +95,10 @@ SessionManager.prototype._getSessionProperty = function(sessionID, property) {
 SessionManager.prototype._deleteSessionProperty = function(sessionID, property) {
 	if (this.sessions[sessionID].hasOwnProperty(property)) {
 		delete this.sessions[sessionID][property];
+		return true;
 	}
+
+	return false;
 }
 
 SessionManager.prototype._storeSession = function(sessionID, sessionData) {

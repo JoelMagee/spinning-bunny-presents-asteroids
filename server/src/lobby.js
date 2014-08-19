@@ -50,6 +50,7 @@ LobbyManager.prototype._createMessageReceived = function(channelPattern, actualP
 };
 
 LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPattern, message) {
+	console.log("Processing join request");
 	var messageObj = JSON.parse(message);
 	var sessionID = messageObj.sessionID;
 
