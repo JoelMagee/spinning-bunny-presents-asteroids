@@ -18,6 +18,8 @@ var LobbyManager = function(sessionManager) {
 	this.lobbiesMap = {};
 	this.lobbyCount = 0;
 
+	this.usernameToLobbyMap = {};
+
 	createListener.on('pmessage', this._createMessageReceived.bind(this));
 	joinListener.on('pmessage', this._joinMessageReceived.bind(this));
 	leaveListener.on('pmessage', this._leaveMessageReceived.bind(this));
@@ -77,6 +79,20 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 	//Lobby exists
 	var lobby = this.lobbiesMap[lobbyID];
 
+	if (this.usernameToLobbyMap.hasOwnProperty(username)) {
+		//User is already in another lobby, don't let them join another
+		var response = {};
+		response.data = {};
+
+		response.sessionID = sessionID;
+		response.channel = "join lobby";
+		response.data.success = false;
+		response.data.message = "Error joining lobby, you're already in a lobby!";
+
+		outputPub.publish('output message:' + sessionID, JSON.stringify(response));
+		return;
+	}
+
 	if (!lobby.userJoin(sessionID, username)) {
 		//Joining lobby failed - Figure out reasons later
 		var response = {};
@@ -90,6 +106,10 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 		outputPub.publish('output message:' + sessionID, JSON.stringify(response));
 		return;
 	}
+
+	this.usernameToLobbyMap[username] = lobbyID;
+
+	console.log(this.usernameToLobbyMap);
 
 	//Response to joining user which states the join was successful
 	var response = {};
@@ -109,11 +129,12 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 };
 
 LobbyManager.prototype._leaveMessageReceived = function(channelPattern, actualPattern, message) {
+	console.log("Processing leave request");
 	var messageObj = JSON.parse(message);
 	var sessionID = messageObj.sessionID;
 
-	var lobbyID = messageObj.id;
-	var username = messageObj.username;
+	var lobbyID = messageObj.data.id;
+	var username = this.sessionManager.getSessionProperty(sessionID, 'username');
 
 
 	if (!this.lobbiesMap.hasOwnProperty(lobbyID)) {
@@ -150,6 +171,7 @@ LobbyManager.prototype._leaveMessageReceived = function(channelPattern, actualPa
 	}
 
 	lobby.userLeave(username);
+	delete this.usernameToLobbyMap[username];
 
 	var response = {};
 	response.data = {};
@@ -164,17 +186,17 @@ LobbyManager.prototype._leaveMessageReceived = function(channelPattern, actualPa
 	lobbyResponse.username = username;
 	
 	outputPub.publish('output message:' + sessionID, JSON.stringify(response));
-	lobby.publishToAll("user left lobby", JSON.stringify(lobbyResponse));
+	lobby.sendToAll("user left lobby", JSON.stringify(lobbyResponse));
 };
 
 LobbyManager.prototype._infoMessageReceived = function(channelPattern, actualPattern, message) {
 	var messageObj = JSON.parse(message);
 	var sessionID = messageObj.sessionID;
 
-	if (messageObj.hasOwnProperty('id')) {
+	if (messageObj.data.hasOwnProperty('id')) {
 		//Request for info about a single lobby
 		
-		if (!this.lobbiesMap.hasOwnProperty(messageObj.id)) {
+		if (!this.lobbiesMap.hasOwnProperty(messageObj.data.id)) {
 			//No such lobby
 			var response = {};
 			response.data = {};
@@ -188,7 +210,7 @@ LobbyManager.prototype._infoMessageReceived = function(channelPattern, actualPat
 			return;
 		}
 
-		var lobby = lobbiesMap[messageObj.lobbyID];
+		var lobby = this.lobbiesMap[messageObj.lobbyID];
 
 		var response = {};
 		response.data = {};

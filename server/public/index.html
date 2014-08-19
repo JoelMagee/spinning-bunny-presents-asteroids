@@ -242,7 +242,7 @@ if (!String.prototype.format) {
 							lobbyListContainer.html("");
 
 							for (var i = 0; i < e.lobbyData.length; i++) {
-								lobbyListContainer.append(lobbyTemplate.format(e.lobbyData[i].id, e.lobbyData[i].name, e.lobbyData[i].usernames.length));
+								lobbyListContainer.append(lobbyTemplate.format(e.lobbyData[i].id, e.lobbyData[i].name, e.lobbyData[i].usernames.length + "(" + e.lobbyData[i].usernames.join(", ") + ")"));
 							}
 						} else {
 							//Just the one sir

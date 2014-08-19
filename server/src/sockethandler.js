@@ -7,8 +7,6 @@ var SocketHandler = function(io, sessionManager) {
 	this.io = io;
 	this.sessionManager = sessionManager;
 
-	this.connectionMap = {};
-
 	//Redis message queue publisher
 	this.inputPublisher = redis.createClient();
 
@@ -24,6 +22,13 @@ SocketHandler.prototype.clientConnected = function(connection) {
 
 	connection.on('session', function(data) {
 
+		if (sessionID !== undefined) {
+			//Client requesting a new session but they already have one, don't allow it
+			//TODO: Error message to client
+			
+			return;
+		}
+
 		if (data.sessionID) {
 			console.log("Client requesting old session");
 			//reconnect to old session
@@ -36,7 +41,6 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		}
 
 		var socketClient = new SocketClient(sessionID, connection);
-		self._addToConnectionMap(socketClient);
 
 		//Create subscriber for output messages
 		var outputSubscriber = redis.createClient();
@@ -64,10 +68,6 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		}
 
 		console.log("Client disconnected - " + sessionID);
-
-		//Remove them from the session-connection map
-		//TODO: Make not remove, just change so sessions can be regained
-		self._removeFromConnectionMap(sessionID);
 	});
 
 
@@ -216,6 +216,27 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		self.inputPublisher.publish('join lobby:' + sessionID, JSON.stringify(queueData));
 	});
 
+	connection.on('leave lobby', function(data) {
+		if (sessionID === undefined) {
+			//Nothing happens, they never requested a session
+			self.sendNoSessionError(connection);
+			return;
+		}
+
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
+		var queueData = {
+			sessionID: sessionID,
+			data: data
+		}
+
+		self.inputPublisher.publish('leave lobby:' + sessionID, JSON.stringify(queueData));
+	});
+
 	connection.on('info lobby', function(data) {
 		if (sessionID === undefined) {
 			//Nothing happens, they never requested a session
@@ -283,22 +304,6 @@ SocketHandler.prototype.sendNoSessionError = function(connection) {
 SocketHandler.prototype.sendNotLoggedInError = function(connection) {
 	connection.emit('error-message', "You have not logged in, please log in before continuing");
 };
-
-SocketHandler.prototype._addToConnectionMap = function(socketClient) {
-	this.connectionMap[socketClient.sessionID] = socketClient;
-};
-
-SocketHandler.prototype._removeFromConnectionMap = function(sessionID) {
-	delete this.connectionMap[sessionID];
-};
-
-SocketHandler.prototype._getFromConnectionMap = function(sessionID) {
-	if (this.connectionMap.hasOwnProperty(sessionID)) {
-		return this.connectionMap[sessionID];
-	}
-
-	return undefined;
-}
 
 var SocketClient = function(sessionID, connection) {
 	this.sessionID = sessionID;
