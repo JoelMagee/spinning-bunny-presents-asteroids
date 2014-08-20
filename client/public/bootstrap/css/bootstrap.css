@@ -6203,7 +6203,8 @@ button.close {
 /*# sourceMappingURL=bootstrap.css.map */
 
 .scrollable {
-    max-height: 246px;
+    min-height: 246px;
+	max-height: 246px;
     overflow-y: scroll;
 }
 
@@ -6218,6 +6219,8 @@ canvas {
 
 #endGameButton { 
 	position: absolute;
+	top: 0;
+	right: 0;
 }
 
 .screen {

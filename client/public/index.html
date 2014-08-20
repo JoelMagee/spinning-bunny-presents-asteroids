@@ -24,7 +24,7 @@
 							<form role="form" data-bind="submit: login">
 								<div class="form-group">
 									<label for="usernameInput">Username</label>
-									<input type="text" class="form-control" id="usernameInput" placeholder="Username" data-bind="value: username">
+									<input type="text" class="form-control" id="usernameInput" placeholder="Username" data-bind="value: username" autofocus>
 								</div>
 								<div class="form-group">
 									<label for="passwordInput">Password</label>
@@ -72,15 +72,22 @@
 		</div>
 		<div id="lobbyListScreen" class="screen container-fluid">
 			<div class="row">
-				<div class="col-md-2 col-md-offset-1">
+				<div class="col-md-4 col-md-offset-1">
 					<h1>Game lobbies</h1>
 				</div>
-				<div class="col-md-2 col-md-offset-7">
+				<div class="col-md-2 col-md-offset-5">
 					<button type="button" class="btn btn-default" data-bind="click: logout">Logout</button>
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-md-6 col-md-offset-2">
+				<div class="col-md-2 col-md-offset-1">
+					<button class="btn btn-default" data-bind="click: refreshLobbies">Refresh Lobby List</button>
+					<br/>
+					<button class="btn btn-default" data-bind="click: createLobby">Create Lobby</button>
+					<br/>
+					<input data-bind="value: lobbyName">
+				</div>
+				<div class="col-md-6">
 					<div class="panel panel-default">
 						<div class="panel-heading">Open Lobbies</div>
 						<table class="table table-hover">
@@ -92,7 +99,7 @@
 								</tr>
 							</thead>
 							<tbody data-bind="foreach: lobbies">
-								<tr data-bind="click: $parent.joinLobby">
+								<tr data-bind="click: function () {$parent.joinLobby($data)}"> <!-- didn't work otherwise -->
 									<td data-bind="text: id "></td>
 									<td data-bind="text: name"></td>
 									<td data-bind="text: players"></td>
@@ -101,7 +108,7 @@
 						</table>
 					</div>
 				</div>
-				<div class="col-md-2 col-md-offset-1">
+				<div class="col-md-2">
 					<div class="panel panel-default">
 						<div class="panel-heading">Users Online</div>
 						<ul class="list-group" data-bind="foreach: users">
@@ -116,7 +123,7 @@
 				<br/>
 				<div class="col-md-6 col-md-offset-3">
 					<div class="panel panel-default">
-						<div class="panel-heading">Lobby name</div>
+						<div class="panel-heading" data-bind="text: name">Lobby name</div>
 						<br/>
 						<div class="row">
 							<div class="  col-md-4 col-md-offset-1">
@@ -130,15 +137,17 @@
 							<div class="col-md-5 col-md-offset-1">
 								<div class="panel panel-default">
 									<div class="panel-heading">Chat</div>
-										<ul class="list-group scrollable" data-bind="foreach: messages">
+										<ul id="chatbody" class="list-group scrollable" data-bind="foreach: messages">
 											<li class="list-group-item" data-bind="text: $data"></li>
 										</ul>
-										<div class="input-group">
-										  <input type="text" class="form-control square" placeholder="..." data-bind="value: message">
-										  <span class="input-group-btn">
-											<button class="btn btn-default square" type="button" data-bind="click: sendMessage"><span class="glyphicon glyphicon-comment"></span></button>
-										  </span>
-										</div>
+										<form role="form">
+											<div class="input-group">
+											  <input type="text" class="form-control square" placeholder="..." data-bind="value: message">
+											  <span class="input-group-btn">
+												<button class="btn btn-default square" type="submit" data-bind="click: sendMessage"><span class="glyphicon glyphicon-comment"></span></button>
+											  </span>
+											</div>
+										</form>
 								</div>
 							</div>
 						</div>
@@ -157,6 +166,18 @@
 		</div>
 		<div id="gameScreen" class="screen">
 			<button id="endGameButton" class="btn btn-danger" data-bind="click: endGame">Leave game</button>
+			<h1>Guess an integer between 1-100</h1>
+			<div class="col-md-3">
+				<p>Guess a number: <input data-bind="value: guess"></p>
+				<button data-bind="click: _sendGuessToServer">Send guess</button>
+			</div>
+			<div class="col-md-3">
+				<p>The number was: <span data-bind="text: number"></span></p>
+				<p>The winner was: <span data-bind="text: winner"></span></p>
+			</div>
+			<div class="col-md-3">
+				<p>Opponent guessed: <span data-bind="text: opponentGuess"></span></p>
+			</div>
 		</div>
 	</body>
 </html>

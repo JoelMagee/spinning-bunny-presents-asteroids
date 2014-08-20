@@ -6,16 +6,25 @@ define([
 ], function (ko, $, Lobby, User) {
     'use strict';
 	
-    var LobbyVM = function LobbyVM() {
+    var LobbyVM = function LobbyVM(socket) {
 		this.name = ko.observable("Lobby name");
 		this.players = ko.observableArray();
 	
 		this.message = ko.observable();
 		this.messages = ko.observableArray();
-		
-		// this.chat = new Chat(this);
         
         this._loadData();
+		
+		this.socket = socket;
+		
+		// doesnt trigger yet
+		this.socket.on('leave lobby', function(response) {
+			console.log("Leave lobby message received");
+			console.dir(response);
+		});
+		
+		this.lobby = undefined;
+		
     };
 	
     LobbyVM.prototype = {
@@ -34,18 +43,29 @@ define([
 				}
 			});
         },
+		displayLobby: function (lobby) {
+			
+			this.lobby = lobby;
+			this.name(lobby.name);
+		},
 		sendMessage: function () {
-			this.messages.push(this.message());
-			console.log("message sent");
-			this.message("");
+			if (this.message() !== undefined && this.message() !== "") {
+				this.messages.push(this.message());
+				console.log("message sent");
+				this.message("");
+				$("#chatbody")[0].scrollTop = $("#chatbody")[0].scrollHeight;
+			}
 		},
 		startLobby: function () {
 			console.log("lobby started");
 			$('#lobbyScreen').hide();
 			$('#gameScreen').show();
-			// $('canvas').css('display','block');
 		},
 		leaveLobby: function () {
+			
+			this.socket.emit('leave lobby', { id: this.lobby.id });
+			// this.socket.emit('info lobby', { id: this.lobby.id });
+		
 			console.log("player left lobby");
 			$('#lobbyScreen').hide();
 			$('#lobbyListScreen').show();

@@ -16,14 +16,30 @@ define([
 		console.log("Connected to websocket on localhost");
 	});
 	
-    var gameVM = new GameVM();
-	var lobbyListVM = new LobbyListVM(socket);
+	
 	var loginVM = new LoginVM(socket);
-	var lobbyVM = new LobbyVM();
+	var lobbyListVM = new LobbyListVM(socket);
+	var lobbyVM = new LobbyVM(socket);
+	var gameVM = new GameVM();
+	
+	lobbyListVM.on('lobby-select', function(lobby) {
+		lobbyVM.displayLobby(lobby);
+	});
+	
+	// var viewModel = {
+	
+		// loginVM : loginVM,
+		// lobbyListVM : lobbyListVM,
+		// lobbyVM : lobbyVM,
+		// gameVM : gameVM
+	
+	// };
+	
+	// ko.applyBindings(viewModel);
 
-    ko.applyBindings(loginVM, document.getElementById('loginScreen'));
-	ko.applyBindings(lobbyListVM, document.getElementById('lobbyListScreen'));
-	ko.applyBindings(lobbyVM, document.getElementById('lobbyScreen'));
-	ko.applyBindings(gameVM, document.getElementById('gameScreen'));
+    ko.applyBindings(loginVM, $('#loginScreen')[0]);
+	ko.applyBindings(lobbyListVM, $('#lobbyListScreen')[0]);
+	ko.applyBindings(lobbyVM, $('#lobbyScreen')[0]);
+	ko.applyBindings(gameVM, $('#gameScreen')[0]);
 	
 });
