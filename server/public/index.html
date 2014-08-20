@@ -6,7 +6,7 @@
 		<script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
 		<script>
 
-		var lobbyTemplate = "<tr class='lobby-row' data-lobby-id='{0}'><td class='lobby-id'>{0}</td><td class='lobby-name'>{1}</td><td class='lobby-count'>{2}</td><td class='lobby-join'><button class='lobby-join-button'>Join</button></td><td class='lobby-leave'><button class='lobby-leave-button'>Leave</button></td><td class='lobby-refresh'><button class='lobby-refresh-button'>Refresh</button></td></tr>";
+		var lobbyTemplate = "<tr class='lobby-row' data-lobby-id='{0}'><td class='lobby-id'>{0}</td><td class='lobby-name'>{1}</td><td class='lobby-count'>{2}</td><td class='lobby-join'><button class='lobby-join-button'>Join</button></td><td class='lobby-leave'><button class='lobby-leave-button'>Leave</button></td><td class='lobby-refresh'><button class='lobby-refresh-button'>Refresh</button></td><td><button class='start-game-button'>Start</button></td></tr>";
 
 if (!String.prototype.format) {
 	String.prototype.format = function() {
@@ -146,6 +146,14 @@ if (!String.prototype.format) {
 					var lobbyID = $(e.target).parent().parent().attr('data-lobby-id');
 
 					socket.emit('info lobby', { id: lobbyID });
+				});
+
+				$("body").on('click', '.start-game-button', function(e) {
+					console.log("Start game button clicked");
+
+					var lobbyID = $(e.target).parent().parent().attr('data-lobby-id');
+
+					socket.emit('start game', { id: lobbyID });
 				});
 
 				socket.on('connect', function() {
@@ -318,6 +326,11 @@ if (!String.prototype.format) {
 				
 			</tbody>
 		</table>
+		<hr>
+		<p>Submit turn</p>
+		<input type="text" placeholder="game ID" id="game-id"><input type="text" placeholder="Guess" id="turn-guess"><button id="submit-turn">Submit</button>
+		<hr>
+		<p id="game-finish-text"></p>
 		<hr>
 	</body>
 </html>

@@ -18,6 +18,7 @@ var SocketHandler  = require('./src/sockethandler')(redis);
 var GlobalChat     = require('./src/globalchat')(redis);
 var SessionManager = require('./src/session-manager')();
 var LobbyManager   = require('./src/lobby')(redis);
+var GameManager    = require('./src/game-manager')(redis);
 
 var Login          = require('./src/login')(redis);
 var Logout         = require('./src/logout')(redis);
@@ -53,7 +54,9 @@ var sessionManager = new SessionManager();
 var socketHandler = new SocketHandler(io, sessionManager);
 var globalChat = new GlobalChat(sessionManager);
 
-var lobbyManager   = new LobbyManager(sessionManager);
+var gameManager = new GameManager(sessionManager);
+var lobbyManager = new LobbyManager(sessionManager, gameManager);
+
 
 var login = new Login(sessionManager, models.UserModel);
 var logout = new Logout(sessionManager);

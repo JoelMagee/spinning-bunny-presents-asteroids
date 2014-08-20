@@ -1,18 +1,21 @@
-/*jslint white: true */
+/*jslint white: true node: true */
 
 var redis;
 
 //Redis subscribers
 var joinListener;
 var createListener;
+var destroyListener;
 var leaveListener;
 var infoListener;
+var startListener;
 
 //Redis publisher
 var outputPub;
 
-var LobbyManager = function(sessionManager) {
+var LobbyManager = function(sessionManager, gameManager) {
 	this.sessionManager = sessionManager;
+	this.gameManager = gameManager;
 
 	this.lobbies = [];
 	this.lobbiesMap = {};
@@ -21,14 +24,18 @@ var LobbyManager = function(sessionManager) {
 	this.usernameToLobbyMap = {};
 
 	createListener.on('pmessage', this._createMessageReceived.bind(this));
+	destroyListener.on('pmessage', this._destroyMessageRecieved.bind(this));
 	joinListener.on('pmessage', this._joinMessageReceived.bind(this));
 	leaveListener.on('pmessage', this._leaveMessageReceived.bind(this));
 	infoListener.on('pmessage', this._infoMessageReceived.bind(this));
+	startListener.on('pmessage', this._startMessageReceived.bind(this));
 
 	createListener.psubscribe('create lobby:*');
+	destroyListener.psubscribe('destroy lobby:*');
 	joinListener.psubscribe('join lobby:*');
 	leaveListener.psubscribe('leave lobby:*');
 	infoListener.psubscribe('info lobby:*');
+	startListener.psubscribe('start game:*');
 };
 
 LobbyManager.prototype._createMessageReceived = function(channelPattern, actualPattern, message) {
@@ -50,6 +57,33 @@ LobbyManager.prototype._createMessageReceived = function(channelPattern, actualP
 	response.data.id = newLobby.id;
 
 	outputPub.publish('output message:' + sessionID, JSON.stringify(response));
+};
+
+LobbyManager.prototype._destroyMessageRecieved = function(channelPattern, actualChannel, message) {
+	var messageObj = JSON.parse(message);
+	var sessionID = messageObj.sessionID;
+	var lobbyID = messageObj.data.id;
+
+	console.log("Processing destroy message");
+
+	if (!this.lobbiesMap.hasOwnProperty(lobbyID)) {
+		//Error, tried to join a lobby which doesn't exist
+		
+		var response = {};
+		response.data = {};
+
+		response.sessionID = sessionID;
+		response.channel = "join lobby";
+		response.data.success = false;
+		response.data.message = "No such lobby";
+
+		outputPub.publish('output message:' + sessionID, JSON.stringify(response));
+		return;
+	}
+
+	var lobby = this.lobbiesMap[lobbyID];
+
+	//TODO
 };
 
 LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPattern, message) {
@@ -210,7 +244,7 @@ LobbyManager.prototype._infoMessageReceived = function(channelPattern, actualPat
 			return;
 		}
 
-		var lobby = this.lobbiesMap[messageObj.lobbyID];
+		var lobby = this.lobbiesMap[messageObj.data.id];
 
 		var response = {};
 		response.data = {};
@@ -245,6 +279,47 @@ LobbyManager.prototype._infoMessageReceived = function(channelPattern, actualPat
 		outputPub.publish('output message:' + sessionID, JSON.stringify(response));
 		return;	
 	}
+};
+
+LobbyManager.prototype._startMessageReceived = function(channelPattern, actualPattern, message) {
+	console.log("Processing start game request");
+	var messageObj = JSON.parse(message);
+	var sessionID = messageObj.sessionID;
+
+	var lobbyID = messageObj.data.id;
+	var username = this.sessionManager.getSessionProperty(sessionID, 'username');
+
+	if (!this.lobbiesMap.hasOwnProperty(lobbyID)) {
+		//Error, tried to leave a lobby which doesn't exist
+		
+		var response = {};
+		response.data = {};
+
+		response.sessionID = sessionID;
+		response.channel = "leave lobby";
+		response.data.success = false;
+		response.data.message = "No such lobby";
+
+		outputPub.publish('output message:' + sessionID, JSON.stringify(response));
+		return;
+	}
+
+	//Lobby exists
+	var lobby = this.lobbiesMap[lobbyID];	
+
+	var game = this.gameManager.createGame(lobby.users, function() {
+
+		var response = {};
+		response.channel = "start game";
+		response.data = {};
+		response.data.success = true;
+		response.data.message = "Game started";
+
+		for (var i = 0; i < lobby.users.length; i++) {
+			response.sessionID = sessionID
+			outputPub.publish('output message:' + sessionID, JSON.stringify(response));
+		}
+	});
 };
 
 LobbyManager.prototype.getAllLobbies = function() {
@@ -331,13 +406,20 @@ Lobby.prototype.getLobbyInfo = function() {
 	};
 };
 
+Lobby.prototype.prepareForDestroy = function() {
+	//ToDo: mark as about to be destroyed
+	this.sendToAll("lobby destroy", {message: "This lobby has been destroyed", id: this.id });
+};
+
 module.exports = function(_redis) {
 	redis = _redis;
 
 	joinListener = redis.createClient(); //Lobby joins
+	destroyListener = redis.createClient(); //Lobby destroys
 	createListener = redis.createClient(); //Lobby creates
 	leaveListener = redis.createClient(); //Lobby leaves
 	infoListener = redis.createClient(); //Lobby info
+	startListener = redis.createClient(); //Game starts
 
 	outputPub = redis.createClient(); //Output messages;
 
