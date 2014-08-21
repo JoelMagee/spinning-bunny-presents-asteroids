@@ -1,11 +1,14 @@
 /*jslint white: true, node: true */
 
+var events = require('events');
+var util = require("util");
+
 var GuessingGame = function(id, usernames) {
 	console.log("New guessing game created");
 	this.id = id;
 	this.usernames = usernames;
 
-	this.randomNumber = 0;
+	this.randomNumber = Math.floor(Math.random()*100 + 1);
 
 	this.turnHistory = [];
 	this.turnResults = [];
@@ -14,21 +17,15 @@ var GuessingGame = function(id, usernames) {
 	this.currentTurn = 0;
 	this.totalTurns = 1;
 
-	this.onTurnBeginCallbacks = [];
-	this.onTurnEndCallbacks = [];
-	this.onGameEndCallbacks = [];
-	this.onPlayerLeaveCallbacks = [];
-
 	this.result = {};
 	this.finished = false;
+
+	events.EventEmitter.call(this);
 
 	this.init();
 };
 
-GuessingGame.prototype.init = function() {
-	//Assign a random number between 1 and 100
-	this.randomNumber = Math.floor(Math.random()*100 + 1);
-}
+util.inherits(GuessingGame, events.EventEmitter);
 
 GuessingGame.prototype.addTurn = function(username, turnData) {
 	this.lastTurn.push({username: username, turnData: turnData});
@@ -36,11 +33,6 @@ GuessingGame.prototype.addTurn = function(username, turnData) {
 
 GuessingGame.prototype.startTurn = function() {
 	this.currentTurn++;
-
-	//Run each of the turn begin callbacks we have saved
-	for (var i = 0; i < this.onTurnBeginCallbacks; i++) {
-		this.onTurnBeginCallbacks[i](this); 
-	}
 };
 
 GuessingGame.prototype.processTurnResult = function() {
@@ -67,29 +59,12 @@ GuessingGame.prototype.processTurnResult = function() {
 		closest: currentlyClosest
 	});
 
-	//Run each of the turn end callbacks we have saved
-	for (var i = 0; i < this.onTurnEndCallbacks.length; i++) {
-		this.onTurnEndCallbacks[i](this); 
-	}
 
 	if (this.checkFinishConditions()) {
 		this.gameFinished();
 	}
 };
 
-GuessingGame.prototype.on = function(event, callback) {
-	if (event === 'turn-begin') {
-		this.onTurnBeginCallbacks.push(callback);
-	} else if (event === 'turn-end') {
-		this.onTurnEndCallbacks.push(callback);
-	} else if (event === 'game-end') {
-		this.onGameEndCallbacks.push(callback);
-	} else if (event === 'player-leave') {
-		this.onGameEndCallbacks.push(callback);
-	} else {
-		console.error("Adding callback for an event that doesn't exist");
-	}
-}
 
 GuessingGame.prototype.checkFinishConditions = function() {
 	if (this.currentTurn >= this.totalTurns) {
@@ -101,9 +76,6 @@ GuessingGame.prototype.gameFinished = function() {
 	this.finished = true;
 	this.result.winner = this.turnResults[this.turnResults.length - 1].closest;
 
-	for (var i = 0; i < this.onGameEndCallbacks.length; i++) {
-		this.onGameEndCallbacks[i](this); 
-	}
 };
 
 /**
