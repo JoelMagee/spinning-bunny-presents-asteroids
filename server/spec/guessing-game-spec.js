@@ -1,6 +1,6 @@
 /*jslint white: true */
 
-var GuessingGame = require('../src/guessing-game')();
+var GuessingGame = require('../src/game/guessing-game')();
 
 describe("game initiation", function() {
 

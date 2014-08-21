@@ -20,6 +20,9 @@ SocketHandler.prototype.clientConnected = function(connection) {
 	console.log("Client connected");
 	var sessionID;
 
+	//Create subscriber for output messages
+	var outputSubscriber = redis.createClient();
+
 	connection.on('session', function(data) {
 
 		if (sessionID !== undefined) {
@@ -42,8 +45,7 @@ SocketHandler.prototype.clientConnected = function(connection) {
 
 		var socketClient = new SocketClient(sessionID, connection);
 
-		//Create subscriber for output messages
-		var outputSubscriber = redis.createClient();
+		
 		outputSubscriber.psubscribe('output message:' + sessionID);
 		outputSubscriber.subscribe('output message');
 
@@ -67,7 +69,12 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
-		console.log("Client disconnected - " + sessionID);
+		var queueData = { sessionID: sessionID }
+
+		outputSubscriber.punsubscribe('output message:' + sessionID);
+		outputSubscriber.unsubscribe('output message');
+
+		self.inputPublisher.publish('disconnect:' + sessionID, JSON.stringify(queueData));
 	});
 
 
@@ -191,6 +198,29 @@ SocketHandler.prototype.clientConnected = function(connection) {
 
 		//Channel becomes 'create lobby:12'
 		self.inputPublisher.publish('create lobby:' + sessionID, JSON.stringify(queueData));
+	});
+
+	connection.on('destroy lobby', function(data) {
+		if (sessionID === undefined) {
+			//Nothing happens, they never requested a session
+			self.sendNoSessionError(connection);
+			return;
+		}
+
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
+		console.log("Destroy lobby request recieved");
+
+		var queueData = {
+			sessionID: sessionID,
+			data: data
+		}
+
+		self.inputPublisher.publish('destroy lobby:' + sessionID, JSON.stringify(queueData));
 	});
 
 	connection.on('join lobby', function(data) {

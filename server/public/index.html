@@ -6,7 +6,7 @@
 		<script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
 		<script>
 
-		var lobbyTemplate = "<tr class='lobby-row' data-lobby-id='{0}'><td class='lobby-id'>{0}</td><td class='lobby-name'>{1}</td><td class='lobby-count'>{2}</td><td class='lobby-join'><button class='lobby-join-button'>Join</button></td><td class='lobby-leave'><button class='lobby-leave-button'>Leave</button></td><td class='lobby-refresh'><button class='lobby-refresh-button'>Refresh</button></td><td><button class='start-game-button'>Start</button></td></tr>";
+		var lobbyTemplate = "<tr class='lobby-row' data-lobby-id='{0}'><td class='lobby-id'>{0}</td><td class='lobby-name'>{1}</td><td class='lobby-count'>{2}</td><td class='lobby-join'><button class='lobby-join-button'>Join</button></td><td class='lobby-refresh'><button class='lobby-refresh-button'>Refresh</button></td></tr>";
 
 if (!String.prototype.format) {
 	String.prototype.format = function() {
@@ -40,6 +40,10 @@ if (!String.prototype.format) {
 			var joinButton = $("#join");
 			var endButton = $("#end");
 			var turnText = $("#turn-text");
+
+			var leaveButton = $("#leave-button");
+			var destroyButton = $("#destroy-button");
+			var startButton = $("#start-button");
 
 			var createLobbyButton = $("#create-lobby-button");
 			var createLobbyName = $("#create-lobby-name");
@@ -120,8 +124,18 @@ if (!String.prototype.format) {
 				});
 
 				updateLobbyButton.on('click', function() {
-
+					console.log("Update button clicked");
 					updateLobby();
+				});
+
+				leaveButton.on('click', function() {
+					console.log("Leave button clicked");
+					socket.emit('leave lobby', {});
+				});
+
+				destroyButton.on('click', function() {
+					console.log("Destroy button clicked");
+					socket.emit('destroy lobby', {});
 				});
 
 				$("body").on('click', '.lobby-join-button', function(e) {
@@ -132,14 +146,6 @@ if (!String.prototype.format) {
 					socket.emit('join lobby', { id: lobbyID });
 				});
 
-				$("body").on('click', '.lobby-leave-button', function(e) {
-					console.log("Lobby leave button clicked");
-
-					var lobbyID = $(e.target).parent().parent().attr('data-lobby-id');
-
-					socket.emit('leave lobby', { id: lobbyID });
-				});
-
 				$("body").on('click', '.lobby-refresh-button', function(e) {
 					console.log("Lobby refresh button clicked");
 
@@ -148,13 +154,6 @@ if (!String.prototype.format) {
 					socket.emit('info lobby', { id: lobbyID });
 				});
 
-				$("body").on('click', '.start-game-button', function(e) {
-					console.log("Start game button clicked");
-
-					var lobbyID = $(e.target).parent().parent().attr('data-lobby-id');
-
-					socket.emit('start game', { id: lobbyID });
-				});
 
 				socket.on('connect', function() {
 					connectText.html("Connected...");
@@ -254,7 +253,7 @@ if (!String.prototype.format) {
 							}
 						} else {
 							//Just the one sir
-							Console.log("Information for a single lobby recieved");
+							console.log("Information for a single lobby recieved");
 						}
 
 					} else {
@@ -264,12 +263,21 @@ if (!String.prototype.format) {
 
 				socket.on('join lobby', function(e) {
 					console.log("Join lobby message recieved");
-					console.dir(e);
+					if (e.success) {
+						updateLobby();
+					} else {
+						console.log("Join lobby failed");
+					}
+
 				});
 
 				socket.on('leave lobby', function(e) {
 					console.log("Leave lobby message recieved");
-					console.dir(e);
+					if (e.success) {
+						updateLobby();
+					} else {
+						console.log("Leave lobby failed");
+					}
 				});
 
 			});
@@ -285,13 +293,7 @@ if (!String.prototype.format) {
 		<button id="connect">Connect</button>
 		<p id="connect-message"></p>
 		<hr>
-		<button id="join">Join</button>
-		<hr>
-		<input type="text" id="turn-text">
-		<button id="end">End Turn</button>
-		<hr>
-		<p>Turn Result:</p>
-		<p></p>
+		<button id="join">Get Sesson</button>
 		<hr>
 		<input type="text" id="message">
 		<button id="message-send">Send message</button>
@@ -312,14 +314,13 @@ if (!String.prototype.format) {
 		<input type="text" id="create-lobby-name">
 		<button id="create-lobby-button">Create</button>
 		<hr>
-		<p>Lobby List <button id="update-lobby-button">Refresh</button></p>
+		<p>Lobby List <button id="update-lobby-button">Refresh</button> <button id="leave-button">Leave Current Lobby</button> <button id="destroy-button">Close Current Lobby</button></p>
 		<table style="width: 100%;">
 			<tr style="text-align: left">
 				<th>ID</th>
 				<th>Name</th>
 				<th>Number of players</th>
 				<th>Join</th>
-				<th>Leave</th>
 				<th>Refresh</th>
 			</tr>
 			<tbody id="lobby-list">

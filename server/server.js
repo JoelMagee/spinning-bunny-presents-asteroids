@@ -17,12 +17,12 @@ var redis          = require('redis');
 var SocketHandler  = require('./src/sockethandler')(redis);
 var GlobalChat     = require('./src/globalchat')(redis);
 var SessionManager = require('./src/session-manager')();
-var LobbyManager   = require('./src/lobby')(redis);
-var GameManager    = require('./src/game-manager')(redis);
+var LobbyManager   = require('./src/lobby/lobby-manager')(redis);
+var GameManager    = require('./src/game/game-manager')(redis);
 
-var Login          = require('./src/login')(redis);
-var Logout         = require('./src/logout')(redis);
-var Register       = require('./src/register')(redis);
+var Login          = require('./src/auth/login')(redis);
+var Logout         = require('./src/auth/logout')(redis);
+var Register       = require('./src/auth/register')(redis);
 
 // Parse provided arguments
 program
