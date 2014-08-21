@@ -26,6 +26,7 @@ if (!String.prototype.format) {
 			var messageButton = $("#message-send");
 			var globalMessageText = $("#message-global");
 			var globalMessageButton = $("#message-send-global");
+			var globalMessageOutput = $("#global-text-chat");
 
 			var loginButton = $("#login-button");
 			var loginUsername = $("#login-username");
@@ -53,7 +54,6 @@ if (!String.prototype.format) {
 			var lobbyListContainer = $("#lobby-list");
 
 			var connection = undefined;
-
 
 			connectButton.on('click', function(){
 				console.log("Connect button clicked");
@@ -202,6 +202,10 @@ if (!String.prototype.format) {
 				socket.on('global message', function(e) {
 					console.log("Global message from client");
 					console.log(e);
+
+					if (!e.hasOwnProperty('success')) {
+						globalMessageOutput.val(globalMessageOutput.val() + e.message + "\n");
+					}
 				});
 
 				socket.on('register', function(e) {
@@ -298,6 +302,9 @@ if (!String.prototype.format) {
 		<input type="text" id="message">
 		<button id="message-send">Send message</button>
 		<hr>
+		<div>
+			<textarea id="global-text-chat" style="min-width: 40%; min-height: 200px;"></textarea>
+		</div>
 		<input type="text" id="message-global">
 		<button id="message-send-global">Send Global message</button>
 		<hr>
