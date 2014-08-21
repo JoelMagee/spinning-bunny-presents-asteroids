@@ -21,44 +21,35 @@ var GuessingGame = function(id, usernames) {
 	this.finished = false;
 
 	events.EventEmitter.call(this);
-
-	this.init();
 };
 
 util.inherits(GuessingGame, events.EventEmitter);
 
 GuessingGame.prototype.addTurn = function(username, turnData) {
+	this.emit('turn added', username);
 	this.lastTurn.push({username: username, turnData: turnData});
 };
 
 GuessingGame.prototype.startTurn = function() {
+	this.emit('start turn');
 	this.currentTurn++;
 };
 
 GuessingGame.prototype.processTurnResult = function() {
-	var usersWithNoTurn = this.usernames.slice(0);
 
 	var currentlyClosest = undefined;
 
 	for (var i = 0; i < this.lastTurn.length; i++) {
-		if (usersWithNoTurn.indexOf(this.lastTurn[i].username) === -1) {
-			console.error("Somehow received turn result from someone not in the game :|");
-			continue;
-		}
-
-		usersWithNoTurn.splice(usersWithNoTurn.indexOf(this.lastTurn[i].username));
-
 		if ((currentlyClosest === undefined) || (closestTo(this.randomNumber, currentlyClosest.turnData.guess, this.lastTurn[i].turnData.guess) > 0)) {
 			currentlyClosest = this.lastTurn[i];
 		}
 	}
 
-	//Maybe do something with players that had no turn?
-
 	this.turnResults.push({
 		closest: currentlyClosest
 	});
 
+	this.emit('turn result processed');
 
 	if (this.checkFinishConditions()) {
 		this.gameFinished();
@@ -75,7 +66,7 @@ GuessingGame.prototype.checkFinishConditions = function() {
 GuessingGame.prototype.gameFinished = function() {
 	this.finished = true;
 	this.result.winner = this.turnResults[this.turnResults.length - 1].closest;
-
+	this.emit('game finished');
 };
 
 /**
