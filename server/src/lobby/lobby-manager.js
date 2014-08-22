@@ -139,7 +139,7 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 	var onLeave = function() {
 		lobby.removeListener('user join', userJoinLobby);
 		lobby.removeListener('user leave', userLeaveLobby);
-		lobby.removeListener('lobby destroyed', userLeaveLobby);
+		lobby.removeListener('lobby destroyed', lobbyDestroyed);
 		leaveSub.unsubscribe('leave lobby:' + sessionID);
 		leaveSub.unsubscribe('logout:' + sessionID);
 		leaveSub.unsubscribe('disconnect:' + sessionID);
@@ -163,19 +163,28 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 	leaveSub.subscribe('disconnect:' + sessionID);
 	leaveSub.subscribe('join lobby:' + sessionID);
 
+	leaveSub.on('unsubscribe', function(channel, count) {
+		console.log("[Leave Sub] User: " + username + " unsubscribed from " + channel + " there are now: " + count + " listening on that channel");
+	});
+
 	var destroySub = redis.createClient();
+
+	destroySub.on('unsubscribe', function(channel, count) {
+		console.log("[Destroy Sub] User: " + username + " unsubscribed from " + channel + " there are now: " + count + " listening on that channel");
+	});
+
 
 	destroySub.on('message', function(channel, message) {
 		if (lobby.getLeader() === username) {
 			//This user is the lobby leader, they can destroy the lobby
 			lobby.destroy();
-			self._sendResponse(sessionID, "lobby destroy", {
+			self._sendResponse(sessionID, "destroy lobby", {
 				success: true,
 				message: "Lobby successfully closed"
 			});
 		} else {
 			//This user is not the lobby leader, they cannot destroy the lobby
-			self._sendResponse(sessionID, "lobby destroy", {
+			self._sendResponse(sessionID, "destroy lobby", {
 				success: false,
 				message: "You don't have permission to destroy this lobby"
 			});
