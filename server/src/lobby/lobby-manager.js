@@ -36,7 +36,7 @@ var LobbyManager = function(sessionManager, gameManager) {
 	this.infoSub.psubscribe('info lobby:*');
 }
 
-LobbyManager.prototype.createLobby = function(lobbyName, username) {
+LobbyManager.prototype.createLobby = function(lobbyName) {
 	var newLobby = new Lobby(this.lobbyIDGenerator.generateID(), lobbyName);
 	var self = this;
 
@@ -82,7 +82,17 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 
 	var lobbyID = messageObj.data.id;
 	var username = this.sessionManager.getSessionProperty(sessionID, 'username');
-	var lobby = this.lobbiesMap[lobbyID];
+
+	if (!this.lobbyExists(lobbyID)) {
+		self._sendResponse(sessionID, "join lobby", {
+			id: lobbyID,
+			success: false,
+			message: "Lobby doesn't exist"
+		});	
+		return;
+	}
+	
+	var lobby = this.getLobby(lobbyID);
 
 	lobby.join(username);
 
@@ -110,10 +120,18 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 		onLeave();
 	};
 
+	var gameStart = function(game) {
+		gameManager.joinGame(sessionID, username, game);
+		self._sendResponse(sessionID, "game loading", {
+			id: lobbyID,
+			success: true,
+			message: "Game start is loading"
+		});	
+	};
+
 	lobby.on('user join', userJoinLobby);
 	lobby.on('user leave', userLeaveLobby);
 	lobby.on('lobby destroyed', lobbyDestroyed);
-
 
 	//Process listeners to listen for reasons to leave this lobby
 	var leaveSub = redis.createClient();
@@ -165,6 +183,29 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 	});
 
 	destroySub.subscribe('destroy lobby:' + sessionID);
+
+	var startGameSub = redis.createClient();
+
+	startGameSub.on('message', function(channel, message) {
+		if (lobby.getLeader() === username) {
+
+			var game = gameManager.createGame(lobby.getUsers());
+			lobby.startGame(game);
+
+			self._sendResponse(sessionID, "game start", {
+				success: true,
+				message: "Game starting"
+			});
+		} else {
+			//This user is not the lobby leader, they cannot destroy the lobby
+			self._sendResponse(sessionID, "lobby destroy", {
+				success: false,
+				message: "You don't have permission to start this game"
+			});
+		}
+	});
+
+	startGameSub.subscribe('start game:' + sessionID);
 }
 
 LobbyManager.prototype._infoMessageReceived = function(channelPattern, actualPattern, message) {
@@ -197,7 +238,6 @@ LobbyManager.prototype._infoMessageReceived = function(channelPattern, actualPat
 
 	} else {
 		//Request for info about all lobbies
-
 		self._sendResponse(sessionID, "info lobby", {
 			success: true,
 			message: "Lobby data retrieval successful",
@@ -215,6 +255,18 @@ LobbyManager.prototype.removeLobby = function(lobby) {
 	this.lobbies.splice(this.lobbies.indexOf(lobby), 1);
 	delete this.lobbiesMap[lobby.id];
 	lobby.removeAllListeners();
+};
+
+LobbyManager.prototype.getLobby = function(id) {
+	if (this.lobbyExists(id)) {
+		return this.lobbiesMap[id];
+	}
+
+	return null;
+};
+
+LobbyManager.prototype.lobbyExists = function(id) {
+	return this.lobbiesMap.hasOwnProperty(id);
 };
 
 module.exports = function(_redis) {
