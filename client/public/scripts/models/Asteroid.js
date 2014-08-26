@@ -16,21 +16,13 @@ define([
 	
     Asteroid.prototype = {
 		draw: function () {	
+			this.graphics.clear();
 			this.graphics.beginFill(this.color);
 			this.graphics.drawCircle(this.midX, this.midY, this.width/2);
 			this.graphics.endFill();
 		},
-		rotateToPoint: function(x, y) {
-			var deltaY = y - this.midY;
-			var deltaX = x - this.midX;
-			var angle = Math.atan2(deltaY, deltaX);
-			this.graphics.rotation = angle;
-		},
 		destroy: function () {
-				//ship gets destroyed
-				// this.graphics.beginFill(0xFFFF00);
-				// this.graphics.drawCircle(0, 0, this.width/3);
-				// this.graphics.endFill();
+				// asteroid gets destroyed
 				
 				var self = this;
 				var interval = setInterval(function () {

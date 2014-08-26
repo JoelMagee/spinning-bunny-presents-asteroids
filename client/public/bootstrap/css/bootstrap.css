@@ -6217,6 +6217,42 @@ canvas {
 	z-index: -1;
 }
 
+#panLeftButton { 
+	position: absolute;
+	top: 0;
+	right: 320px;
+}
+
+#panUpButton { 
+	position: absolute;
+	top: 0;
+	right: 280px;
+}
+
+#panDownButton { 
+	position: absolute;
+	top: 0;
+	right: 240px;
+}
+
+#panRightButton { 
+	position: absolute;
+	top: 0;
+	right: 200px;
+}
+
+#zoomInButton { 
+	position: absolute;
+	top: 0;
+	right: 160px;
+}
+
+#zoomOutButton { 
+	position: absolute;
+	top: 0;
+	right: 120px;
+}
+
 #endGameButton { 
 	position: absolute;
 	top: 0;

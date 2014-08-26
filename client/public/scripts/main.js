@@ -20,7 +20,7 @@ define([
 	var loginVM = new LoginVM(socket);
 	var lobbyListVM = new LobbyListVM(socket);
 	var lobbyVM = new LobbyVM(socket);
-	var gameVM = new GameVM();
+	var gameVM = new GameVM(socket);
 	
 	lobbyListVM.on('lobby-select', function(lobby) {
 		lobbyVM.displayLobby(lobby);

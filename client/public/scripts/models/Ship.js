@@ -15,6 +15,7 @@ define([
 	
     Ship.prototype = {
 		draw: function () {	
+			this.graphics.clear();
 			this.graphics.beginFill(this.color);
 			this.graphics.moveTo(0-this.width/4, 0);
 			this.graphics.lineTo(0-this.width/2, 0-this.width/2);
