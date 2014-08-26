@@ -78,7 +78,7 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 	};
 
 	var allTurnsSubmitted = function() {
-		game.processTurnResult();
+		//game.processTurnResult();
 	};
 
 	game.on('start turn', startTurn);
