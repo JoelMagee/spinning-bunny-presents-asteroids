@@ -30,12 +30,6 @@ GameManager.prototype.createGame = function(usernames) {
 		self._removeGame(game);
 	});
 
-	game.on('all players joined', function() { console.log("H1"); });
-	game.on('start turn', function() { console.log("H2"); });
-	game.on('turn result processed', function() { console.log("H3"); });
-	game.on('game end', function() { console.log("H4"); });
-	game.on('player leave', function() { console.log("H5"); });
-
 	return game;
 };
 
@@ -79,6 +73,7 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 
 	var allTurnsSubmitted = function() {
 		//game.processTurnResult();
+		//So do we need to do anything here? Maybe send a 'result being calculated message'
 	};
 
 	game.on('start turn', startTurn);
@@ -95,9 +90,10 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 		console.log("Processing game turn");
 
 		var messageObj = JSON.parse(message);
-
-		game.addTurn(username, messageObj.data);
+		
 		self._sendResponse(sessionID, "turn added", { success: true, message: "Your turn has been added" });
+		
+		game.addTurn(username, messageObj.data);
 	});
 
 

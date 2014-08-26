@@ -58,6 +58,9 @@ if (!String.prototype.format) {
 			var turnGameIDText = $("#game-id");
 			var turnGuessText = $("#turn-guess");
 
+			var turnResults = $("#turn-results");
+			var gameHistory = $("#game-history");
+
 			var connection = undefined;
 
 			connectButton.on('click', function(){
@@ -337,8 +340,8 @@ if (!String.prototype.format) {
 		</script>
 	</head>
 	<body>
-		<h1>Socks JS test</h1>
-		<p>Socket makes connection on localhost:6400/echo</p>
+		<h1>Socket.io JS test</h1>
+		<p>Socket makes connection on localhost:5000/echo</p>
 		<hr>
 		<button id="connect">Connect</button>
 		<p id="connect-message"></p>
@@ -349,7 +352,7 @@ if (!String.prototype.format) {
 		<button id="message-send">Send message</button>
 		<hr>
 		<div>
-			<textarea id="global-text-chat" style="min-width: 40%; min-height: 200px;"></textarea>
+			<textarea id="global-text-chat" style="min-width: 99%; min-height: 150px;"></textarea>
 		</div>
 		<input type="text" id="message-global">
 		<button id="message-send-global">Send Global message</button>
@@ -392,5 +395,17 @@ if (!String.prototype.format) {
 		<hr>
 		<p id="game-finish-text"></p>
 		<hr>
+		<div style="width: 50%; float: left;">
+			<p>Game Turn Results</p>
+			<div id="turn-results">
+				
+			</div>
+		</div>
+		<div style="width: 50%; float: left;">
+			<p>Game Result history</p>
+			<div id="game-history">
+				
+			</div>
+		</div>
 	</body>
 </html>

@@ -16,7 +16,6 @@ var GuessingGame = function(id, expectedPlayers) {
 	this.turnsSubmitted = [];
 
 	this.currentTurn = 0;
-	this.totalTurns = 1;
 
 	this.result = {};
 	this.finished = false;
@@ -43,27 +42,6 @@ GuessingGame.prototype.removePlayer = function(username) {
 	console.log("[Guessing Game] Removing player from game: " + username);
 	this.players.splice(this.players.indexOf(username), 1);
 	this.emit("player leave", username);
-}
-
-GuessingGame.prototype.addTurn = function(username, data) {
-	console.log("[Guessing Game] Adding turn");
-	if (this.turnsSubmitted.indexOf(username) !== -1) {
-		//Error, already a turn for this user
-		return;
-	}
-
-	this.turnsSubmitted.push(username);
-
-	this.lastTurn.push({username: username, guess: data.guess});
-	this.emit('turn added', username);
-
-	if (this.turnsSubmitted.length >= this.players.length) {
-		console.log("[Guessing Game] All turns submitted");
-		this.processTurnResult();
-		this.emit('all results submitted');
-	} else {
-		console.log("[Guessing Game] Not all turn results submitted");
-	}
 };
 
 GuessingGame.prototype.startTurn = function() {
@@ -74,9 +52,32 @@ GuessingGame.prototype.startTurn = function() {
 
 	//Clear list of users who have submitted turns
 	this.turnsSubmitted = [];
+	this.turnHistory[this.currentTurn] = [];
 
 	//Let listeners know the turn has started
 	this.emit('start turn', this.currentTurn);
+};
+
+GuessingGame.prototype.addTurn = function(username, data) {
+	console.log("[Guessing Game] Adding turn");
+	if (this.turnsSubmitted.indexOf(username) !== -1) {
+		//Error, already a turn for this user
+		return;
+	}
+
+	this.turnsSubmitted.push(username);
+	this.turnHistory[this.currentTurn].push({username: username, guess: data.guess});
+
+	this.lastTurn.push({username: username, guess: parseInt(data.guess)});
+	this.emit('turn added', username);
+
+	if (this.turnsSubmitted.length >= this.players.length) {
+		console.log("[Guessing Game] All turns submitted");
+		this.processTurnResult();
+		this.emit('all results submitted');
+	} else {
+		console.log("[Guessing Game] Not all turn results submitted");
+	}
 };
 
 GuessingGame.prototype.processTurnResult = function() {
@@ -93,7 +94,13 @@ GuessingGame.prototype.processTurnResult = function() {
 		closest: currentlyClosest
 	});
 
-	this.emit('turn result processed', this.turnResults[this.turnResults.length - 1]);
+	this.emit('turn result processed', 
+		{
+			turnNumber: this.currentTurn,
+			turnData: this.turnHistory[this.currentTurn],
+			closest: currentlyClosest 
+		}
+	);
 
 	if (!this.checkFinishConditions()) {
 		//Game not finished? Start next turn
@@ -109,14 +116,10 @@ GuessingGame.prototype.checkFinishConditions = function() {
 		return true;
 	};
 
-	if (this.currentTurn >= this.totalTurns) {
-		this.gameFinished("Total turns submitted");
-		return true;
-	};
-
-	console.log("[Guessing Game] Current turn: " + this.currentTurn + ", Total turns: " + this.totalTurns);
+	console.log("[Guessing Game] Current turn: " + this.currentTurn);
 
 	if (this.turnResults.length > 0) {
+		console.dir(this.turnResults[this.turnResults.length - 1]);
 		if (this.turnResults[this.turnResults.length - 1].closest.guess === this.randomNumber) {
 			this.gameFinished("Random number guessed correctly");
 			return true;
@@ -143,7 +146,6 @@ GuessingGame.prototype.getInfo = function() {
 		turnHistory: this.turnHistory,
 		turnResults: this.turnResults,
 		currentTurn: this.currentTurn,
-		totalTurns: this.totalTurns,
 		result: this.result,
 		finished: this.finished
 	};
