@@ -38,8 +38,8 @@ Lobby.prototype.info = function() {
 };
 
 Lobby.prototype.destroy = function() {
-	this.emit('lobby destroyed');
 	this.name = "[Destroyed] " + this.name;
+	this.emit('lobby destroyed');
 };
 
 Lobby.prototype.getLeader = function() {
@@ -48,7 +48,13 @@ Lobby.prototype.getLeader = function() {
 	}
 
 	return null;
-}
+};
+
+Lobby.prototype.startGame = function(game) {
+	console.log(game);
+	this.emit('game start', game);
+	this.name = "[Started] " + this.name;
+};
 
 module.exports = function() {
 	return Lobby;

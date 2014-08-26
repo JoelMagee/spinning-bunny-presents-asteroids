@@ -44,7 +44,6 @@ if (!String.prototype.format) {
 
 			var leaveButton = $("#leave-button");
 			var destroyButton = $("#destroy-button");
-			var startButton = $("#start-button");
 
 			var createLobbyButton = $("#create-lobby-button");
 			var createLobbyName = $("#create-lobby-name");
@@ -52,6 +51,12 @@ if (!String.prototype.format) {
 			var updateLobbyButton = $("#update-lobby-button");
 
 			var lobbyListContainer = $("#lobby-list");
+
+			var startGameButton = $("#start-game-button");
+			var gameStartedText = $("#game-start-text");
+			var submitTurnButton = $("#submit-turn");
+			var turnGameIDText = $("#game-id");
+			var turnGuessText = $("#turn-guess");
 
 			var connection = undefined;
 
@@ -136,6 +141,23 @@ if (!String.prototype.format) {
 				destroyButton.on('click', function() {
 					console.log("Destroy button clicked");
 					socket.emit('destroy lobby', {});
+				});
+
+				startGameButton.on('click', function() {
+					console.log("Start button clicked");
+					socket.emit('start game', {});
+				});
+
+				submitTurnButton.on('click', function() {
+					console.log("Submit turn button clicked");
+					var game = turnGameIDText.val(); //Not sure you need this tbh
+					var guess = turnGuessText.val();
+
+					var turnData = {};
+					turnData.guess = guess;
+					turnData.id = game;
+
+					socket.emit('game turn', turnData);
 				});
 
 				$("body").on('click', '.lobby-join-button', function(e) {
@@ -284,6 +306,30 @@ if (!String.prototype.format) {
 					}
 				});
 
+				socket.on('game loading', function(e) {
+					console.log("Game loading message recieved");
+				});
+
+				socket.on('start game', function(e) {
+					console.log("Game starting message recieved");
+					if (e.success) {
+						console.log(e.message);
+						gameStartedText.html("Game has started with id: " + e.id);
+					} else {
+						console.log("Starting game failed: " + e.message);
+					}
+				});
+
+				socket.on('turn result processed', function(e) {
+					console.log("Turn result recieved");
+					console.log(e);
+				});
+
+				socket.on('game end', function(e) {
+					console.log("Game end message recieved");
+					console.log(e);
+				});
+
 			});
 
 
@@ -321,7 +367,12 @@ if (!String.prototype.format) {
 		<input type="text" id="create-lobby-name">
 		<button id="create-lobby-button">Create</button>
 		<hr>
-		<p>Lobby List <button id="update-lobby-button">Refresh</button> <button id="leave-button">Leave Current Lobby</button> <button id="destroy-button">Close Current Lobby</button></p>
+		<p>Lobby List
+			<button id="update-lobby-button">Refresh</button>
+			<button id="leave-button">Leave Current Lobby</button>
+			<button id="destroy-button">Close Current Lobby</button>
+			<button id="start-game-button">Start Game</button>
+		</p>
 		<table style="width: 100%;">
 			<tr style="text-align: left">
 				<th>ID</th>
@@ -336,6 +387,7 @@ if (!String.prototype.format) {
 		</table>
 		<hr>
 		<p>Submit turn</p>
+		<p id="game-start-text">Game not started..</p>
 		<input type="text" placeholder="game ID" id="game-id"><input type="text" placeholder="Guess" id="turn-guess"><button id="submit-turn">Submit</button>
 		<hr>
 		<p id="game-finish-text"></p>

@@ -14,78 +14,135 @@ GameIDGenerator.prototype.generateID = function() {
 var GameManager = function(sessionManager) {
 	this.sessionManager = sessionManager;
 	this.gameIDGenerator = new GameIDGenerator();
-
 	this.gameIDMap = {};
 
-
-	this.init();
+	this.outputPub = redis.createClient();
 };
 
-GameManager.prototype.init = function() {
-	var gameTurnSub = redis.createClient();
-	var playerLeaveSub = redis.createClient();
-
-	this.gamePub = redis.createClient();
-
-	gameTurnSub.on('pmessage', function(channelPattern, actualChannel, message) {
-		console.log("GAME TURN");
-	});
-
-	gameTurnSub.psubscribe("game turn:*");
-
-	playerLeaveSub.on('pmessage', function(channelPattern, actualChannel, message) {
-		console.log("PLAYER LEAVE");
-		var messageObj = JSON.parse(message);
-		var sessionID = messageObj.sessionID;
-	});
-
-	playerLeaveSub.psubscribe("player leave:*");
-};
-
-// GameManager.prototype.addPlayer = function(game, sessionID, player) {
-
-// }
-
-GameManager.prototype.createGame = function(players, cb) {
-	console.log("Players:");
-	console.log(players);
-	var usernames = players.map(function(e, i) { return e.username; });
-	var sessionIDs = players.map(function(e, i) { return e.sessionID; });
-
-	var newGame = new Game(this.gameIDGenerator.generateID());
-	
-	this.gameIDMap[newGame.id] = newGame;
-
+GameManager.prototype.createGame = function(usernames) {
+	console.log("Game manager creating game with users: " + usernames.join(", "));
+	var game = new Game(this.gameIDGenerator.generateID(), usernames);
 	var self = this;
 
-	newGame.on('game-end', function(game) {
-		console.log("Game end in game manager");
-		delete this.gameIDMap[game.id];
+	this._addGame(game);
+
+	game.on('game end', function() {
+		self._removeGame(game);
 	});
 
-	newGame.on('turn-begin', function(game) {
-		console.log("Turn begin in game manager");
+	game.on('all players joined', function() { console.log("H1"); });
+	game.on('start turn', function() { console.log("H2"); });
+	game.on('turn result processed', function() { console.log("H3"); });
+	game.on('game end', function() { console.log("H4"); });
+	game.on('player leave', function() { console.log("H5"); });
 
-		var response = {};
-		response.data = {};
-		response.data.currentTurn = game.currentTurn;
-
-		for (var i = 0; i < sessionIDs.length; i++) {
-			response.sessionID = sessionIDs[i];
-			//self.gamePub.publish('output message:' + sessionIDs[i], 'turn begin',)
-		}
-	});
-
-	newGame.on('turn-end', function() {
-		console.log("Turn end called in game manager");
-	});
-
-	newGame.on('player-leave', function() {
-		console.log("Player leave called in game manager");
-	});
-
-	cb(newGame);
+	return game;
 };
+
+GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
+	var sessionID = _sessionID;
+	var username = _username;
+	var game = _game;
+	var self = this;
+
+
+	//Start game procedure once all expected clients have joined
+	var startGame = function() {
+		self._sendResponse(sessionID, "start game", {
+			success: true,
+			message: "Game starting",
+			id: game.id
+		});
+	};
+
+	game.once('all players joined', startGame);
+
+
+	//General game events
+	var startTurn = function(turnNumber) {
+		self._sendResponse(sessionID, "start turn", { turnNumber: turnNumber });
+	};
+
+	var turnResultProcessed = function(turnResult) {
+		self._sendResponse(sessionID, "turn result processed", { turnResult: turnResult });
+	};
+
+	var gameEnd = function() {
+		self._sendResponse(sessionID, "game end", { gameInfo: game.getInfo() });
+		removeListeners();
+		self._removeGame(game);
+	};
+
+	var playerLeave = function() {
+		self._sendResponse(sessionID, "player leave", { username: username });
+	};
+
+	var allTurnsSubmitted = function() {
+		game.processTurnResult();
+	};
+
+	game.on('start turn', startTurn);
+	game.on('turn result processed', turnResultProcessed);
+	game.on('game end', gameEnd);
+	game.on('player leave', playerLeave);
+	game.on('all results submitted', allTurnsSubmitted);
+
+	var turnSub = redis.createClient();
+
+	turnSub.subscribe('game turn:' + sessionID);
+
+	turnSub.on('message', function(channel, message) {
+		console.log("Processing game turn");
+
+		var messageObj = JSON.parse(message);
+
+		console.dir(messageObj);
+
+		game.addTurn(username, messageObj.data);
+	});
+
+
+	var leaveSub = redis.createClient();
+
+	leaveSub.subscribe('leave game:' + sessionID);
+	leaveSub.subscribe('logout:' + sessionID);
+	leaveSub.subscribe('disconnect:' + sessionID);
+
+	leaveSub.on('message', function(channel, message) {
+		removeListeners();
+		game.removePlayer(username);
+		self._sendResponse(sessionID, "leave game", { success: true, message: "You have left the game" });
+	});
+
+	var removeListeners = function() {
+		leaveSub.unsubscribe('leave game:' + sessionID);
+		leaveSub.unsubscribe('logout:' + sessionID);
+		leaveSub.unsubscribe('disconnect:' + sessionID);
+		game.removeListener('start turn', startTurn);
+		game.removeListener('turn result processed', turnResultProcessed);
+		game.removeListener('game end', gameEnd);
+		game.removeListener('player leave', playerLeave);
+	};
+
+	game.addPlayer(username);
+};
+
+GameManager.prototype._addGame = function(game) {
+	this.gameIDMap[game.id] = game;
+};
+
+GameManager.prototype._removeGame = function(game) {
+	game.removeAllListeners();
+	delete this.gameIDMap[game.id];
+}
+
+GameManager.prototype._sendResponse = function(sessionID, channel, data) {
+	var response = {};
+	response.sessionID = sessionID;
+	response.channel = channel;
+	response.data = data;
+	this.outputPub.publish('output message:' + sessionID, JSON.stringify(response));
+}
 
 
 module.exports = function(_redis) {

@@ -1,6 +1,7 @@
 /*jslint white: true node: true */
 
 var Lobby = require('./lobby')();
+var LobbyMessages = require('./lobby-messages');
 
 var redis;
 
@@ -66,11 +67,7 @@ LobbyManager.prototype._createMessageReceived = function(channelPattern, actualP
 
 	var newLobby = this.createLobby(lobbyName, username);
 
-	this._sendResponse(sessionID, "create lobby", {
-		success: true,
-		message: "Lobby created",
-		id: newLobby.id
-	});
+	this._sendResponse(sessionID, "create lobby", LobbyMessages.createLobbySuccessful(newLobby.id));
 };
 
 LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPattern, message) {
@@ -121,17 +118,18 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 	};
 
 	var gameStart = function(game) {
-		gameManager.joinGame(sessionID, username, game);
+		self.gameManager.joinGame(sessionID, username, game);
 		self._sendResponse(sessionID, "game loading", {
 			id: lobbyID,
 			success: true,
-			message: "Game start is loading"
+			message: "Game is loading"
 		});	
 	};
 
 	lobby.on('user join', userJoinLobby);
 	lobby.on('user leave', userLeaveLobby);
 	lobby.on('lobby destroyed', lobbyDestroyed);
+	lobby.on('game start', gameStart);
 
 	//Process listeners to listen for reasons to leave this lobby
 	var leaveSub = redis.createClient();
@@ -140,6 +138,7 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 		lobby.removeListener('user join', userJoinLobby);
 		lobby.removeListener('user leave', userLeaveLobby);
 		lobby.removeListener('lobby destroyed', lobbyDestroyed);
+		lobby.removeListener('game start', gameStart);
 		leaveSub.unsubscribe('leave lobby:' + sessionID);
 		leaveSub.unsubscribe('logout:' + sessionID);
 		leaveSub.unsubscribe('disconnect:' + sessionID);
@@ -163,16 +162,7 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 	leaveSub.subscribe('disconnect:' + sessionID);
 	leaveSub.subscribe('join lobby:' + sessionID);
 
-	leaveSub.on('unsubscribe', function(channel, count) {
-		console.log("[Leave Sub] User: " + username + " unsubscribed from " + channel + " there are now: " + count + " listening on that channel");
-	});
-
 	var destroySub = redis.createClient();
-
-	destroySub.on('unsubscribe', function(channel, count) {
-		console.log("[Destroy Sub] User: " + username + " unsubscribed from " + channel + " there are now: " + count + " listening on that channel");
-	});
-
 
 	destroySub.on('message', function(channel, message) {
 		if (lobby.getLeader() === username) {
@@ -198,16 +188,12 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 	startGameSub.on('message', function(channel, message) {
 		if (lobby.getLeader() === username) {
 
-			var game = gameManager.createGame(lobby.getUsers());
+			var game = self.gameManager.createGame(lobby.getUsers());
 			lobby.startGame(game);
-
-			self._sendResponse(sessionID, "game start", {
-				success: true,
-				message: "Game starting"
-			});
+			lobby.destroy();
 		} else {
 			//This user is not the lobby leader, they cannot destroy the lobby
-			self._sendResponse(sessionID, "lobby destroy", {
+			self._sendResponse(sessionID, "start game", {
 				success: false,
 				message: "You don't have permission to start this game"
 			});

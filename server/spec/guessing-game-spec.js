@@ -8,8 +8,8 @@ describe("game initiation", function() {
 	var usernames = ["sam", "joel"];
 
 	var guessingGame = new GuessingGame(id, usernames);
-	it("should initate a new game with the correct users", function() {
-		expect(guessingGame.usernames.length).toBe(2);
+	it("should initate a new game with the correct expected users", function() {
+		expect(guessingGame.expectedPlayers.length).toBe(2);
 	});
 	
 	it("should have the correct ID", function() {
@@ -80,12 +80,12 @@ describe("game end", function() {
 	it("should pick the winner closest to the randomValue", function() {
 		guessingGame.randomNumber = 8;
 		guessingGame.startTurn();
-		guessingGame.addTurn("joel", {guess: 3});
-		guessingGame.addTurn("sam", {guess: 5});
+		guessingGame.addTurn("joel", 9);
+		guessingGame.addTurn("sam", 5);
 		guessingGame.processTurnResult();
 
 		expect(guessingGame.result.winner).toNotBe(undefined);
 
-		expect(guessingGame.result.winner.username).toBe("sam");
+		expect(guessingGame.result.winner.username).toBe("joel");
 	});
 });
