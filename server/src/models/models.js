@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var UserModel = require('./usermodel')(mongoose);
 
-mongoose.connect('mongodb://localhost/spinningbunny2');
+mongoose.connect('mongodb://localhost/spinningbunny');
 
 var db = mongoose.connection;
 

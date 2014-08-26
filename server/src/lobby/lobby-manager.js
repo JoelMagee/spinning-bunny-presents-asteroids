@@ -118,12 +118,12 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 	};
 
 	var gameStart = function(game) {
-		self.gameManager.joinGame(sessionID, username, game);
 		self._sendResponse(sessionID, "game loading", {
 			id: lobbyID,
 			success: true,
 			message: "Game is loading"
-		});	
+		});
+		self.gameManager.joinGame(sessionID, username, game);	
 	};
 
 	lobby.on('user join', userJoinLobby);

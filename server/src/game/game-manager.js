@@ -57,9 +57,9 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 
 	game.once('all players joined', startGame);
 
-
 	//General game events
 	var startTurn = function(turnNumber) {
+		console.log("[Game Manager] Turn started");
 		self._sendResponse(sessionID, "start turn", { turnNumber: turnNumber });
 	};
 
@@ -96,9 +96,8 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 
 		var messageObj = JSON.parse(message);
 
-		console.dir(messageObj);
-
 		game.addTurn(username, messageObj.data);
+		self._sendResponse(sessionID, "turn added", { success: true, message: "Your turn has been added" });
 	});
 
 
@@ -118,6 +117,7 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 		leaveSub.unsubscribe('leave game:' + sessionID);
 		leaveSub.unsubscribe('logout:' + sessionID);
 		leaveSub.unsubscribe('disconnect:' + sessionID);
+		turnSub.unsubscribe('game turn:' + sessionID);
 		game.removeListener('start turn', startTurn);
 		game.removeListener('turn result processed', turnResultProcessed);
 		game.removeListener('game end', gameEnd);

@@ -31,18 +31,22 @@ GuessingGame.prototype.addPlayer = function(username) {
 	this.expectedPlayers.splice(this.expectedPlayers.indexOf(username), 1);
 
 	if (this.expectedPlayers.length === 0) {
+		console.log("[Guessing Game] All players joined");
 		this.emit('all players joined');
+		this.startTurn();
+	} else {
+		console.log("[Guessing Game] Not all players joined yet");
 	}
 };
 
 GuessingGame.prototype.removePlayer = function(username) {
-	console.log("Removing player from game: " + username);
+	console.log("[Guessing Game] Removing player from game: " + username);
 	this.players.splice(this.players.indexOf(username), 1);
 	this.emit("player leave", username);
 }
 
 GuessingGame.prototype.addTurn = function(username, data) {
-	console.log("Adding turn");
+	console.log("[Guessing Game] Adding turn");
 	if (this.turnsSubmitted.indexOf(username) !== -1) {
 		//Error, already a turn for this user
 		return;
@@ -54,16 +58,16 @@ GuessingGame.prototype.addTurn = function(username, data) {
 	this.emit('turn added', username);
 
 	if (this.turnsSubmitted.length >= this.players.length) {
-		console.log("All turns submitted");
+		console.log("[Guessing Game] All turns submitted");
+		this.processTurnResult();
 		this.emit('all results submitted');
 	} else {
-		console.log("Not all turn results submitted");
-		console.log(this.turnsSubmitted.length + " - " + this.players.length);
+		console.log("[Guessing Game] Not all turn results submitted");
 	}
 };
 
 GuessingGame.prototype.startTurn = function() {
-	console.log("Starting turn");
+	console.log("[Guessing Game] Starting turn");
 
 	//Increment turn number
 	this.currentTurn++;
@@ -73,11 +77,10 @@ GuessingGame.prototype.startTurn = function() {
 
 	//Let listeners know the turn has started
 	this.emit('start turn', this.currentTurn);
-	
 };
 
 GuessingGame.prototype.processTurnResult = function() {
-	console.log("Processing game turn result");
+	console.log("[Guessing Game] Processing game turn result");
 	var currentlyClosest = undefined;
 
 	for (var i = 0; i < this.lastTurn.length; i++) {
@@ -90,16 +93,17 @@ GuessingGame.prototype.processTurnResult = function() {
 		closest: currentlyClosest
 	});
 
-	this.emit('turn result processed', {closest: currentlyClosest});
+	this.emit('turn result processed', this.turnResults[this.turnResults.length - 1]);
 
 	if (!this.checkFinishConditions()) {
+		//Game not finished? Start next turn
 		this.startTurn();
 	}
 };
 
 
 GuessingGame.prototype.checkFinishConditions = function() {
-	console.log("Checking finish conditions");
+	console.log("[Guessing Game] Checking finish conditions");
 	if (this.players.length < 2) {
 		this.gameFinished("Less than 2 players connected");
 		return true;
@@ -110,6 +114,8 @@ GuessingGame.prototype.checkFinishConditions = function() {
 		return true;
 	};
 
+	console.log("[Guessing Game] Current turn: " + this.currentTurn + ", Total turns: " + this.totalTurns);
+
 	if (this.turnResults.length > 0) {
 		if (this.turnResults[this.turnResults.length - 1].closest.guess === this.randomNumber) {
 			this.gameFinished("Random number guessed correctly");
@@ -117,11 +123,14 @@ GuessingGame.prototype.checkFinishConditions = function() {
 		}
 	}
 
+	console.log("[Guessing Game] Closest guess: " + this.turnResults[this.turnResults.length - 1].closest.guess + " random number: " + this.randomNumber);
+
 	return false;
 }
 
 GuessingGame.prototype.gameFinished = function(reason) {
-	console.log("Game finished: " + reason);
+	console.log(this.finished);
+	console.log("[Guessing Game] Game finished: " + reason);
 	this.finished = true;
 	this.result.winner = this.turnResults[this.turnResults.length - 1].closest;
 	this.emit('game end');

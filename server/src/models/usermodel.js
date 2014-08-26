@@ -1,4 +1,4 @@
-/*jslint white: true */
+/*jslint white: true node: true */
 
 var bcrypt = require('bcrypt');
 var SALT_WORK_FACTOR = 10;
@@ -32,10 +32,10 @@ module.exports = function(_mongoose) {
 		}
 
 		bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
-			if (err) return next(err);
+			if (err) { return next(err); }
 
 			bcrypt.hash(user.password, salt, function(err, hash) {
-				if (err) return next(err);
+				if (err) { return next(err); }
 
 				user.password = hash;
 				next();
@@ -45,7 +45,7 @@ module.exports = function(_mongoose) {
 
 	UserSchema.methods.comparePassword = function(candidatePassword, callback) {
 		bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
-			if (err) return callback(err);
+			if (err) { return callback(err); }
 			callback(null, isMatch);
 		});
 	};
@@ -53,4 +53,4 @@ module.exports = function(_mongoose) {
 	var User = mongoose.model('User', UserSchema);
 
 	return User;
-}
+};
