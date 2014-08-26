@@ -76,16 +76,14 @@
 					<h1>Game lobbies</h1>
 				</div>
 				<div class="col-md-2 col-md-offset-5">
-					<button type="button" class="btn btn-default" data-bind="click: logout">Logout</button>
+					<button type="button" class="btn btn-default spaced" data-bind="click: logout">Logout</button>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-2 col-md-offset-1">
-					<button class="btn btn-default" data-bind="click: refreshLobbies">Refresh Lobby List</button>
-					<br/>
-					<button class="btn btn-default" data-bind="click: createLobby">Create Lobby</button>
-					<br/>
-					<input data-bind="value: lobbyName">
+					<button class="btn btn-default spaced" data-bind="click: refreshLobbies">Refresh Lobby List</button>
+					<button class="btn btn-default spaced" data-bind="click: createLobby">Create Lobby</button>
+					<input class="spaced" data-bind="value: lobbyName">
 				</div>
 				<div class="col-md-6">
 					<div class="panel panel-default">
@@ -98,11 +96,18 @@
 									<th>Players</th>
 								</tr>
 							</thead>
+							<!-- ko if: lobbies().length -->
 							<tbody data-bind="foreach: lobbies">
 								<tr data-bind="click: function () {$parent.joinLobby($data)}"> <!-- didn't work otherwise -->
 									<td data-bind="text: id "></td>
 									<td data-bind="text: name"></td>
-									<td data-bind="text: players"></td>
+									<td data-bind="text: totPlayers"></td>
+								</tr>
+							</tbody>
+							<!-- /ko -->
+							<tbody data-bind="if: lobbies().length === 0">
+								<tr >
+									<td colspan="3" style="text-align:center">No lobbies</td>
 								</tr>
 							</tbody>
 						</table>
@@ -137,26 +142,25 @@
 							<div class="col-md-5 col-md-offset-1">
 								<div class="panel panel-default">
 									<div class="panel-heading">Chat</div>
-										<ul id="chatbody" class="list-group scrollable" data-bind="foreach: messages">
-											<li class="list-group-item" data-bind="text: $data"></li>
-										</ul>
-										<form role="form">
-											<div class="input-group">
-											  <input type="text" class="form-control square" placeholder="..." data-bind="value: message">
-											  <span class="input-group-btn">
-												<button class="btn btn-default square" type="submit" data-bind="click: sendMessage"><span class="glyphicon glyphicon-comment"></span></button>
-											  </span>
-											</div>
-										</form>
+									<ul id="chatbody" class="list-group scrollable" data-bind="foreach: messages">
+										<li class="list-group-item" data-bind="text: $data"></li>
+									</ul>
+									<form role="form">
+										<div class="input-group">
+											<input type="text" class="form-control square" placeholder="..." data-bind="value: message">
+												<span class="input-group-btn">
+													<button class="btn btn-default square" type="submit" data-bind="click: sendMessage"><span class="glyphicon glyphicon-comment"></span></button>
+												</span>
+										</div>
+									</form>
 								</div>
 							</div>
 						</div>
 						<div class="row">
-							<div class="col-md-1 col-md-offset-1">
-								<button type="button" class="btn btn-success" data-bind="click: startLobby">Start</button>								
-							</div>
-							<div class="col-md-1">
-								<button class="btn btn-danger" data-bind="click: leaveLobby">Leave</button>
+							<div class="col-md-5 col-md-offset-1">
+								<button type="button" class="btn btn-success" data-bind="click: startLobby">Start</button>
+								<button class="btn btn-warning" data-bind="click: leaveLobby">Leave</button>
+								<button class="btn btn-danger" data-bind="click: closeLobby">Close lobby</button>
 							</div>
 						</div>
 						<br/>
@@ -166,7 +170,7 @@
 		</div>
 		<div id="gameScreen" class="screen">
 			<button id="endGameButton" class="btn btn-danger" data-bind="click: endGame">Leave game</button>
-			<h1>Guess an integer between 1-100</h1>
+			<!--<h1>Guess an integer between 1-100</h1>
 			<div class="col-md-3">
 				<p>Guess a number: <input data-bind="value: guess"></p>
 				<button data-bind="click: _sendGuessToServer">Send guess</button>
@@ -177,7 +181,7 @@
 			</div>
 			<div class="col-md-3">
 				<p>Opponent guessed: <span data-bind="text: opponentGuess"></span></p>
-			</div>
+			</div>-->
 		</div>
 	</body>
 </html>

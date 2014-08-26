@@ -53,16 +53,12 @@ define([
 	
     LoginVM.prototype = {
 		_validateInput: function(username, password) {
-			if (username === undefined || username === "") {
-				this.errorMessage("You must enter a username");
-				this.showError(true);
-			} else if (password === undefined  || password === ""){
-				this.errorMessage("You must enter a password");
-				this.showError(true);
-			} else {
+			if (username && password) {
 				this.showError(false);
 				return true;
-			}
+			} 
+			this.errorMessage("You must enter a username and a password");
+			this.showError(true);
 			return false;
 		},
 		login: function () {

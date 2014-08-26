@@ -9,11 +9,7 @@ define([
 	
     var LobbyListVM = function LobbyListVM(socket) {
 	
-		// this.prototype = new events.EventEmitter;
-	
 		var self = this;
-		
-		// this.lobbyVM = new LobbyVM();
 		
 		this.lobbies = ko.observableArray();
 		this.users = ko.observableArray();
@@ -51,8 +47,9 @@ define([
 						self.lobbies.push(lobby);
 					}
 				} else {
-					//Just the one sir
-					Console.log("Information for a single lobby recieved");
+					
+					// ignore		
+					
 				}
 
 			} else {
@@ -72,9 +69,13 @@ define([
 			}
 		});
 		
-		this.socket.on('join lobby', function(e) {
-			console.log("Join lobby message recieved");
-			console.dir(e);
+		this.socket.on('join lobby', function(response) {
+		
+			if (!response.success) {
+				alert(response.message);
+				self.lobbies.remove(function(item) { return item.id === response.id });
+			}
+			
 		});
 		
     };
@@ -87,17 +88,6 @@ define([
 		},
         _loadData: function () {
 			var self = this;
-            // $.ajax({
-				// url: '/ladder/rest/players',
-				// success: function (data) {
-					// data = [{"id":"1","name":"Awesome lobby!","players":1},{"id":"2","name":"Full","players":6}];
-					// for(var i = 0; i<data.length; i++) {
-						// var lobby = new Lobby(data[i].id, data[i].name, data[i].players);
-						// self.lobbies.push(lobby);
-					// }
-					// console.log("loadedLobbies");
-				// }
-			// });
 			$.ajax({
 				// url: '/ladder/rest/players',
 				success: function (data) {
@@ -114,26 +104,18 @@ define([
 			this.socket.emit('info lobby', {});
 		},
 		createLobby: function () {
-			if (this.lobbyName() !== undefined && this.lobbyName() !== "") {
+			if (this.lobbyName()) {
 				this.socket.emit("create lobby", { "name": this.lobbyName()});	
 			}
 		},
 		joinLobby: function (lobby) {
-			// var lobbyVM = new LobbyVM();
-			// ko.cleanNode($('#lobbyScreen')[0]);
-			// ko.applyBindings(lobbyVM, $('#lobbyScreen')[0]);
+			
+			this.socket.emit('join lobby', { id: lobby.id });
 			
 			for (var i = 0; i < this.lobbySelectEvents.length; i++) {
 				this.lobbySelectEvents[i](lobby);
 			}
-			// this.emit("join lobby", lobby);
 			
-			this.socket.emit('join lobby', { id: lobby.id });
-			
-			lobby.players(lobby.players()+1);
-			console.log("joined lobby #" + lobby.id);
-			$('#lobbyListScreen').hide();
-			$('#lobbyScreen').show();
 		},
 		logout: function () {
 			this.socket.emit('logout', {});

@@ -2,8 +2,9 @@ define([
     'knockout',
     'jquery',
 	'pixi',
-    'models/Ship'
-], function (ko, $, PIXI, Ship) {
+    'models/Ship',
+	'models/Asteroid'
+], function (ko, $, PIXI, Ship, Asteroid) {
     'use strict';
     
     var GameVM = function GameVM() {
@@ -11,7 +12,7 @@ define([
 		// this.players = ko.observableArray();
 		// this.chat = new Chat(this);
 				
-		// this.test();
+		this.test();
 		
 		// this.noughtsAndCrosses();
 		
@@ -70,58 +71,172 @@ define([
 			blueShip.draw();
 			console.log(blueShip);
 			
+			var drawCurve = true;
+			var moving = false;
 			
-			// blueShip.graphics.rotation += 1*Math.PI;
+			function B1(t) { return (1-t)*(1-t); }
+			function B2(t) { return 2*t*(1-t); }
+			function B3(t) { return t*t; }
+			
+			function getBezier(percent,C1,C2,C3) {
+				var x = C1.x*B1(percent) + C2.x*B2(percent) + C3.x*B3(percent);
+				var y = C1.y*B1(percent) + C2.y*B2(percent) + C3.y*B3(percent);
+				return new PIXI.Point(x, y);
+			}
 			
 			stage.mousedown = function () {
-				blueShip.rotateToPoint(stage.getMousePosition().x, stage.getMousePosition().y);
-				blueShip.destroy();				
+				// blueShip.rotateToPoint(stage.getMousePosition().x, stage.getMousePosition().y);
+				// blueShip.destroy();	
+				
+				if (!moving) {
+				
+					moving = true;
+
+					var percent = 0;
+					var startPoint = new PIXI.Point(blueShip.midX, blueShip.midY);
+					var endPoint = new PIXI.Point(stage.getMousePosition().x, stage.getMousePosition().y);
+					var newPos;
+					
+					var interval = setInterval(function () {
+						
+						if (percent <= 1) {
+							percent += 0.01;
+							drawCurve = false;
+							blueShip.graphics.clear();
+							newPos = getBezier(percent, startPoint, blueShip.dest, endPoint);
+							blueShip.rotateToPoint(newPos.x, newPos.y);
+							blueShip.midX = newPos.x;
+							blueShip.midY = newPos.y;
+							blueShip.draw();
+							
+						} else if (percent <= 1.01) {
+							percent = 1.3;
+							blueShip.dest = getBezier(percent, startPoint, blueShip.dest, endPoint);
+						} else {
+							clearInterval(interval);
+							drawCurve = true;
+							moving = false;
+						}
+					}, 15);
+					line.clear();
+				
+				}
+
 			};		
 
-			
 			bunny.mousedown = function () {
 				console.log("pressed bunny");
 			};
 						
-			
 			// draw a box around the ship
-			var graphics = new PIXI.Graphics();
-			graphics.lineStyle(1, 0x000000, 1);
-				graphics.moveTo(430-20, 460-20);
-				graphics.lineTo(430-20, 460+20);
-				graphics.lineTo(430+20, 460+20);
-				graphics.lineTo(430+20, 460-20);
-				graphics.lineTo(430-20, 460-20);
-				stage.addChild(graphics);
+			var grid = new PIXI.Graphics();
+			grid.lineStyle(1, 0x000000, 1);
+			grid.moveTo(430-20, 460-20);
+			grid.lineTo(430-20, 460+20);
+			grid.lineTo(430+20, 460+20);
+			grid.lineTo(430+20, 460-20);
+			grid.lineTo(430-20, 460-20);
+			stage.addChild(grid);
+			
+			var line = new PIXI.Graphics();
+			stage.addChild(line);
+			
+			//calculates the distance between 2 points
+			function dist(p1, p2)
+			{
+				var xs = 0;
+				var ys = 0;
+
+				xs = p2.x - p1.x;
+				xs = xs * xs;
+
+				ys = p2.y - p1.y;
+				ys = ys * ys;
+
+				return Math.sqrt( xs + ys );
+			}
+			
+			var pass = false;
+			var asteroids = [];  // the array of asteroids
+			var asteroid;
+			
+			for (var j = 0; j < 30; j++) {
+				// randomly generates an asteroid x and y with relation to the screen size
+				var asteroidX = Math.floor(Math.random() * $(document).width());
+				var asteroidY = Math.floor(Math.random() * $(document).height());
+				
+				if (j === 0) {
+					// for the first asteroid place it anywhere
+					asteroid = new Asteroid(asteroidX, asteroidY);
+					asteroid.draw();
+					stage.addChild(asteroid.graphics);
+					asteroids[j] = asteroid;
+				} else {	
+					// for the following asteroids check whether it passes the check
+					while (!pass) {
+						asteroidX = Math.floor(Math.random() * $(document).width());
+						asteroidY = Math.floor(Math.random() * $(document).height());
+						// loop through the asteroids in the array
+						for (var k = j-1; k >= 0; k--) {
+							// check whether the distance between the generated points is large enough
+							if (dist(new PIXI.Point(asteroidX, asteroidY), new PIXI.Point(asteroids[k].midX, asteroids[k].midY)) > 60) {
+								pass = true;
+							} else {
+								//break this for loop and start again with another randomly generated x and y
+								pass = false;
+								break;
+							}
+						}
+					}
+					
+					// when the check is passed then create an asteroid at that point
+					asteroid = new Asteroid(asteroidX, asteroidY);
+					asteroid.draw();
+					stage.addChild(asteroid.graphics);
+					asteroids[j] = asteroid;
+				}
+				
+				// set check back to not passed
+				pass = false;
+				
+			}
 			 
 			// add it the stage so we see it on our screens..
 			stage.addChild(yellowShip.graphics);
 			stage.addChild(blueShip.graphics);
 			
+			
 			function animate() {
-
 				requestAnimFrame( animate );
 
 				// just for fun, lets rotate mr rabbit a little
 				bunny.rotation += 0.1;
 				
-				yellowShip.graphics.clear();
-				yellowShip.midX += 10;
-				yellowShip.draw();
+				if (yellowShip.midX < SCREEN_WIDTH) {
+					yellowShip.graphics.clear();
+					yellowShip.midX += 10;
+					yellowShip.draw();
+				}
 				
-				// blueShip.graphics.clear();
-				// blueShip.draw();
-
-				// graphics.moveTo(0,0);
-				// graphics.lineTo(400, 100);
-				//graphics.lineTo(stage.getMousePosition().x, stage.getMousePosition().y);
-				//graphics.moveTo(0,0);
-				//graphics.bezierCurveTo(100, 200, 100, 200, stage.getMousePosition().x, stage.getMousePosition().y);
+				if (drawCurve) {
+					line.clear();
+					line.lineStyle(2, 0x000000, 1);
+					line.moveTo(blueShip.midX, blueShip.midY);
+					line.quadraticCurveTo(blueShip.dest.x, blueShip.dest.y, stage.getMousePosition().x, stage.getMousePosition().y);
+					// line.bezierCurveTo(blueShip.dest.x, blueShip.dest.y, blueShip.dest.x, blueShip.dest.y, stage.getMousePosition().x, stage.getMousePosition().y);
+					
+					line.drawCircle(blueShip.dest.x, blueShip.dest.y, 1);
+					
+				} else {
+					line.clear();
+				}
 				
 				
 				// render the stage   
 				renderer.render(stage);
-			}
+			} 
+			
+			// renderer.render(stage);
 			
 		},
 		_sendGuessToServer: function () {

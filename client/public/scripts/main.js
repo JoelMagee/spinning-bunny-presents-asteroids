@@ -25,17 +25,6 @@ define([
 	lobbyListVM.on('lobby-select', function(lobby) {
 		lobbyVM.displayLobby(lobby);
 	});
-	
-	// var viewModel = {
-	
-		// loginVM : loginVM,
-		// lobbyListVM : lobbyListVM,
-		// lobbyVM : lobbyVM,
-		// gameVM : gameVM
-	
-	// };
-	
-	// ko.applyBindings(viewModel);
 
     ko.applyBindings(loginVM, $('#loginScreen')[0]);
 	ko.applyBindings(lobbyListVM, $('#lobbyListScreen')[0]);

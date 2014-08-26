@@ -3,27 +3,22 @@ define([
 ], function (PIXI) {
     'use strict';
 
-    var Ship = function Ship(midX, midY, width, color) {
+    var Asteroid = function Asteroid(midX, midY) {
         this.midX = midX;
         this.midY = midY;
-		this.width = width;
-		this.color = color;
+		var maxWidth = 60;
+		var minWidth = 20;
+		this.color = 0x000000;
+		this.width = Math.floor(Math.random() * (maxWidth-minWidth)) + minWidth;
 		this.graphics = new PIXI.Graphics();
-		this.dest = new PIXI.Point(this.midX+40, this.midY); // +40 from original
 		
     };
 	
-    Ship.prototype = {
+    Asteroid.prototype = {
 		draw: function () {	
 			this.graphics.beginFill(this.color);
-			this.graphics.moveTo(0-this.width/4, 0);
-			this.graphics.lineTo(0-this.width/2, 0-this.width/2);
-			this.graphics.lineTo(0+this.width/2, 0);
-			this.graphics.lineTo(0-this.width/2, 0+this.width/2);
+			this.graphics.drawCircle(this.midX, this.midY, this.width/2);
 			this.graphics.endFill();
-						
-			this.graphics.x = this.midX;
-			this.graphics.y = this.midY;
 		},
 		rotateToPoint: function(x, y) {
 			var deltaY = y - this.midY;
@@ -33,6 +28,9 @@ define([
 		},
 		destroy: function () {
 				//ship gets destroyed
+				// this.graphics.beginFill(0xFFFF00);
+				// this.graphics.drawCircle(0, 0, this.width/3);
+				// this.graphics.endFill();
 				
 				var self = this;
 				var interval = setInterval(function () {
@@ -46,5 +44,5 @@ define([
 		}
     };
 
-    return Ship;
+    return Asteroid;
 });
