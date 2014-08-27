@@ -21,7 +21,7 @@ define([
 		this.world.pannedAmountY = 0;
 		this.world.scaledAmount = 1;
 				
-		// this.test();
+		this.test();
 		
 		// this.noughtsAndCrosses();
 		
@@ -74,8 +74,11 @@ define([
 			this.guess("");
 			this.closest("");
 		},
+		endTurn: function () {
+			console.log("turn ended");
+		},
 		zoomIn: function () {
-			if (this.world.scaledAmount < 8) {
+			if (this.world.scaledAmount < 2) {
 			
 				console.log("zooming in");
 				this.world.scale.x *= 2;
@@ -85,88 +88,42 @@ define([
 			}
 		},
 		zoomOut: function () {
-			if (this.world.scaledAmount > 1/8) {
+			if (this.world.scaledAmount > 1/2) {
 			
-				console.log("zooming in");
-				this.world.scale.x *= 1/2;
-				this.world.scale.y *= 1/2;
-				this.world.scaledAmount *= 1/2;
+				console.log("zooming out");
+				this.world.scale.x /= 2;
+				this.world.scale.y /= 2;
+				this.world.scaledAmount /= 2;
 			
 			}		
 		},
 		panLeft: function () {
 		
-			console.log("panning world 50px left");
-		
-			// var ships = this.worldObects.ships;
-			// var asteroids = this.worldObects.asteroids;
-			
-			// var count = 0;
-			// for (count; count < ships.length; count++) {
-				// ships[count].midX -= 50;
-				// ships[count].dest.x -=50;
-				// ships[count].draw();
-			// }
-			
-			// count = 0;
-			// for (count; count < asteroids.length; count++) {
-				// asteroids[count].midX -= 50;
-				// asteroids[count].draw();
-			// }
-			
-			this.world.x -= 50;
-			this.world.pannedAmountX -= 50;
+			console.log("panning world 50px left");	
+			this.world.x += 50;
+			this.world.pannedAmountX += 50;
 		
 		},
 		panUp: function () {
 		
 			console.log("panning world 50px up");
-			this.world.y -= 50;
-			this.world.pannedAmountY -= 50;
+			this.world.y += 50;
+			this.world.pannedAmountY += 50;
 		
 		},
 		panDown: function () {
 		
 			console.log("panning world 50px down");
-			this.world.y += 50;
-			this.world.pannedAmountY += 50;
+			this.world.y -= 50;
+			this.world.pannedAmountY -= 50;
 		
 		},
 		panRight: function () {
 		
 			console.log("panning world 50px right");			
-			this.world.x += 50;
-			this.world.pannedAmountX += 50;
+			this.world.x -= 50;
+			this.world.pannedAmountX -= 50;
 		
-		},
-		_sendGuessToServer: function () {
-		
-			var ourGuess = {"id": "me", "guess": ((this.guess() >= 1 && this.guess() <= 100) ? this.guess() : 0)};
-		
-			var theirGuess = {"id": "opponent", "guess": 26};
-			
-			var random = Math.floor(Math.random() * (100-1)) + 1;
-			
-			var bestDif =  Math.abs(random-ourGuess.guess);
-			
-			var winner = ourGuess.id;
-			
-			if (bestDif>Math.abs(random-theirGuess.guess)) {
-				bestDif = Math.abs(random-theirGuess.guess);
-				winner = theirGuess.id;
-			}
-			
-			var gameState = {"number":random, "winner":winner,"opponentGuess": theirGuess.guess};
-			
-			this._processRecieved(gameState);
-			
-		},
-		_processRecieved: function (gameState) {
-
-			this.opponentGuess(gameState.opponentGuess);
-			this.number(gameState.number);
-			this.winner(gameState.winner);
-
 		},
 		sendGuess: function () {
 			this.socket.emit('game turn', {"guess": ((this.guess() >= 1 && this.guess() <= 100) ? this.guess() : 0)});
@@ -238,9 +195,6 @@ define([
 			}
 			
 			stage.mousedown = function () {
-				// blueShip.rotateToPoint(stage.getMousePosition().x, stage.getMousePosition().y);
-				// blueShip.destroy();	
-				
 				
 				if (!moving) {
 				
@@ -380,7 +334,6 @@ define([
 					line.lineStyle(2, 0x000000, 1);
 					line.moveTo(blueShip.midX, blueShip.midY);
 					line.quadraticCurveTo(blueShip.dest.x, blueShip.dest.y, mouse.x(), mouse.y());
-					// line.bezierCurveTo(blueShip.dest.x, blueShip.dest.y, blueShip.dest.x, blueShip.dest.y, stage.getMousePosition().x, stage.getMousePosition().y);
 					
 					line.drawCircle(blueShip.dest.x, blueShip.dest.y, 1);
 					
@@ -388,12 +341,9 @@ define([
 					line.clear();
 				}
 				
-				
 				// render the stage   
 				renderer.render(stage);
 			} 
-			
-			// renderer.render(stage);
 			
 		},
 		noughtsAndCrosses: function () {
@@ -476,7 +426,6 @@ define([
 				graphics.lineTo(300+(jump*2), 100+(jump*2));
 				
 				
-					
 				stage.addChild(graphics);	
 				
 				noughtBut.mousedown = function () {
@@ -767,7 +716,6 @@ define([
 			function animate() {
 
 				requestAnimFrame( animate );
-				
 				
 				// render the stage   
 				renderer.render(stage);
