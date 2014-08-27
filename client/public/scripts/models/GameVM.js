@@ -17,14 +17,11 @@ define([
 		
 		this.world = new PIXI.DisplayObjectContainer();
 		
-		// this.world.interactive = true;	
 		this.world.pannedAmountX = 0;
 		this.world.pannedAmountY = 0;
 		this.world.scaledAmount = 1;
-		
-		console.log(this.world);
 				
-		this.test();
+		// this.test();
 		
 		// this.noughtsAndCrosses();
 		
@@ -33,6 +30,7 @@ define([
 		this.number = ko.observable();
 		this.winner = ko.observable();	
 		this.waiting = ko.observable(false);
+		this.closest = ko.observable();
 		
 		this.socket.on('game loading', function(response) {
 			console.log(response.message);
@@ -40,6 +38,8 @@ define([
 		
 		this.socket.on('turn result processed', function(response) {
 			console.log(response);
+			self.closest(response.turnResult.closest.username + " with " + response.turnResult.closest.guess);
+			self.guess("");
 			self.waiting(false);
 		});
 		
@@ -72,6 +72,7 @@ define([
 			this.winner("");
 			this.winnerGuess("");
 			this.guess("");
+			this.closest("");
 		},
 		zoomIn: function () {
 			if (this.world.scaledAmount < 8) {
@@ -187,7 +188,6 @@ define([
 			};			
 			
 			var mouse = createMouse(this.world, stage);
-			console.log(mouse);
 
 			// create a renderer instance.
 			var renderer = PIXI.autoDetectRenderer(SCREEN_WIDTH, SCREEN_HEIGHT);
