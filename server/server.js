@@ -14,8 +14,15 @@ var methodOverride = require('method-override');
 
 var redis          = require('redis');
 
-var SocketHandler = require('./src/sockethandler')(redis);
-var GlobalChat    = require('./src/globalchat')(redis);
+var SocketHandler  = require('./src/sockethandler')(redis);
+var GlobalChat     = require('./src/globalchat')(redis);
+var SessionManager = require('./src/session-manager')();
+var LobbyManager   = require('./src/lobby/lobby-manager')(redis);
+var GameManager    = require('./src/game/game-manager')(redis);
+
+var Login          = require('./src/auth/login')(redis);
+var Logout         = require('./src/auth/logout')(redis);
+var Register       = require('./src/auth/register')(redis);
 
 // Parse provided arguments
 program
@@ -30,21 +37,30 @@ if (program.dev) {
 
 	//Static directory for test files
 	console.log("Using __dirname/public as static file directory");
-	app.use(express.static(__dirname + '/public')); 	
+	app.use(express.static(__dirname + '/public'));
+
+	// Set up morgan for logging
+	app.use(morgan('dev'));
+	app.use(bodyParser.json());
+	app.use(methodOverride());
 } else {
 	console.log(clc.green("Running production"));
 }
 
-// Set up morgan for logging
-app.use(morgan('dev'));
-app.use(bodyParser.json());
-app.use(methodOverride());
-
+var models = require('./src/models/models');
 
 // Load main internal modules
+var sessionManager = new SessionManager();
+var socketHandler = new SocketHandler(io, sessionManager);
+var globalChat = new GlobalChat(sessionManager);
 
-var socketHandler = new SocketHandler(io);
-var globalChat = new GlobalChat();
+var gameManager = new GameManager(sessionManager);
+var lobbyManager = new LobbyManager(sessionManager, gameManager);
+
+
+var login = new Login(sessionManager, models.UserModel);
+var logout = new Logout(sessionManager);
+var register = new Register(models.UserModel);
 
 
 // Listen on required port

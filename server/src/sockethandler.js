@@ -1,60 +1,16 @@
+/*jslint white: true */
+
 //Module dependencies
 var redis;
 
-var SocketHandler = function(io) {
-	var self = this;
-
+var SocketHandler = function(io, sessionManager) {
 	this.io = io;
-	this.sessionGenerator = new SessionGenerator();
+	this.sessionManager = sessionManager;
 
-	this.connectionMap = {};
-
-	//Redis queue Pub and Sub (different queues)
+	//Redis message queue publisher
 	this.inputPublisher = redis.createClient();
-	//this.outputSubscriber = redis.createClient();
 
 	io.on('connection', this.clientConnected.bind(this));
-
-	//This deals with our outgoing messages
-	//this.outputSubscriber.subscribe('output message');
-
-	//Message is a stringified JSON object with the properties 'sessionID', 'channel' and 'data' and optionally 'broadcast'
-	// this.outputSubscriber.on('message', function(channel, message) {
-	// 	console.log("Message '" + message + "' on channel '" + channel + "' arrived!");
-	// 	var messageObj = JSON.parse(message);
-
-	// 	var socketClient = self._getFromConnectionMap(messageObj.sessionID);
-
-	// 	if (socketClient === undefined) {
-	// 		console.error("WARN: Trying to send message to session ID without a connection: " + messageObj.sessionID);
-	// 	} else {
-	// 		if (messageObj.broadcast) {
-	// 			socketClient.connection.broadcast.emit(messageObj.channel, messageObj.data);
-	// 		}
-	// 		socketClient.connection.emit(messageObj.channel, messageObj.data);
-	// 	}	
-	// });
-
-	// var chatSubscriber = redis.createClient();
-	// var chatPublisher = redis.createClient();
-
-	// chatSubscriber.psubscribe('global message:*');
-
-	// chatSubscriber.on('pmessage', function(channel, message) {
-	// 	console.log("Global chat message from redis queue");
-
-	// 	var sessionID = channel.substring(channel.indexOf(":") + 1);
-
-	// 	console.log("Global chat session: " + sessionID);
-
-	// 	chatPublisher.publish('output message', JSON.stringify(
-	// 		{
-	// 			sessionID: sessionID,
-	// 			channel: "global message",
-	// 			broadcast: true,
-	// 			data: message
-	// 		}));
-	// });
 
 };
 
@@ -64,7 +20,17 @@ SocketHandler.prototype.clientConnected = function(connection) {
 	console.log("Client connected");
 	var sessionID;
 
+	//Create subscriber for output messages
+	var outputSubscriber = redis.createClient();
+
 	connection.on('session', function(data) {
+
+		if (sessionID !== undefined) {
+			//Client requesting a new session but they already have one, don't allow it
+			//TODO: Error message to client
+			
+			return;
+		}
 
 		if (data.sessionID) {
 			console.log("Client requesting old session");
@@ -73,18 +39,25 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		} else {
 			console.log("Client requesting new session");
 			//Create new session ID
-			sessionID = self.sessionGenerator.generateSessionID();
-			console.log("Given client session ID " + sessionID);
+			sessionID = self.sessionManager.createSession();
+			console.log("Created new session for client with ID: " + sessionID);
 		}
 
 		var socketClient = new SocketClient(sessionID, connection);
-		self._addToConnectionMap(socketClient);
 
-		//Create subscriber for output messages
-		var outputSubscriber = redis.createClient();
-		outputSubscriber.psubscribe(['output message', 'output message:' + sessionID]);
+		
+		outputSubscriber.psubscribe('output message:' + sessionID);
+		outputSubscriber.subscribe('output message');
 
-		outputSubscriber.on('pmessage', function(channel, message) {
+		outputSubscriber.on('pmessage', function(channelPattern, actualChannel, message) {
+			//console.log("PMessage to output for session " + sessionID + " found");
+			data = JSON.parse(message);
+			connection.emit(data.channel, data.data);
+		});
+
+		outputSubscriber.on('message', function(actualChannel, message) {
+			//console.log("Message to output for session " + sessionID + " found - " + message);
+			console.dir(message);
 			data = JSON.parse(message);
 			connection.emit(data.channel, data.data);
 		});
@@ -96,11 +69,12 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
-		console.log("Client disconnected - " + sessionID);
+		var queueData = { sessionID: sessionID }
 
-		//Remove them from the session-connection map
-		//TODO: Make not remove, just change so sessions can be regained
-		self._removeFromConnectionMap(sessionID);
+		outputSubscriber.punsubscribe('output message:' + sessionID);
+		outputSubscriber.unsubscribe('output message');
+
+		self.inputPublisher.publish('disconnect:' + sessionID, JSON.stringify(queueData));
 	});
 
 
@@ -139,8 +113,6 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			data: data
 		}
 
-		console.log(queueData);
-
 		self.inputPublisher.publish('global message:' + sessionID, JSON.stringify(queueData));
 	});
 
@@ -150,6 +122,8 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			self.sendNoSessionError(connection);
 			return;
 		}
+
+		console.log("Login message recieved");
 
 		var queueData = {
 			sessionID: sessionID,
@@ -166,6 +140,15 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
+		console.log("Logout message received");
+		console.log(sessionID);
+
 		var queueData = {
 			sessionID: sessionID,
 			data: data
@@ -181,10 +164,14 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
+		console.log("Registration request recieved");
+
 		var queueData = {
 			sessionID: sessionID,
 			data: data
 		}
+
+		console.log(queueData);
 
 		self.inputPublisher.publish('register:' + sessionID, JSON.stringify(queueData));
 	});
@@ -196,6 +183,14 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
+		console.log("Create lobby request recieved");
+
 		var queueData = {
 			sessionID: sessionID,
 			data: data
@@ -205,12 +200,43 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		self.inputPublisher.publish('create lobby:' + sessionID, JSON.stringify(queueData));
 	});
 
+	connection.on('destroy lobby', function(data) {
+		if (sessionID === undefined) {
+			//Nothing happens, they never requested a session
+			self.sendNoSessionError(connection);
+			return;
+		}
+
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
+		console.log("Destroy lobby request recieved");
+
+		var queueData = {
+			sessionID: sessionID,
+			data: data
+		}
+
+		self.inputPublisher.publish('destroy lobby:' + sessionID, JSON.stringify(queueData));
+	});
+
 	connection.on('join lobby', function(data) {
 		if (sessionID === undefined) {
 			//Nothing happens, they never requested a session
 			self.sendNoSessionError(connection);
 			return;
 		}
+
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
+		console.log("Join lobby request recieved");
 
 		var queueData = {
 			sessionID: sessionID,
@@ -220,10 +246,54 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		self.inputPublisher.publish('join lobby:' + sessionID, JSON.stringify(queueData));
 	});
 
+	connection.on('leave lobby', function(data) {
+		if (sessionID === undefined) {
+			//Nothing happens, they never requested a session
+			self.sendNoSessionError(connection);
+			return;
+		}
+
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
+		var queueData = {
+			sessionID: sessionID,
+			data: data
+		}
+
+		self.inputPublisher.publish('leave lobby:' + sessionID, JSON.stringify(queueData));
+	});
+
+	connection.on('info lobby', function(data) {
+		if (sessionID === undefined) {
+			//Nothing happens, they never requested a session
+			self.sendNoSessionError(connection);
+			return;
+		}
+
+		console.log("Lobby info request recieved");
+
+		var queueData = {
+			sessionID: sessionID,
+			data: data
+		}
+
+		self.inputPublisher.publish('info lobby:' + sessionID, JSON.stringify(queueData));
+	});
+
 	connection.on('start game', function(data) {
 		if (sessionID === undefined) {
 			//Nothing happens, they never requested a session
 			self.sendNoSessionError(connection);
+			return;
+		}
+
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
 			return;
 		}
 
@@ -242,6 +312,12 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
+		if (!self.sessionManager.loggedIn(sessionID)) {
+			//User not logged in
+			self.sendNotLoggedInError(connection);
+			return;
+		}
+
 		var queueData = {
 			sessionID: sessionID,
 			data: data
@@ -252,25 +328,12 @@ SocketHandler.prototype.clientConnected = function(connection) {
 };
 
 SocketHandler.prototype.sendNoSessionError = function(connection) {
-	console.log("Sending error to client");
-	connection('message', "You have not created a session, send a SocketIO message on the channel 'session'");
+	connection.emit('error-message', "You have not created a session, send a SocketIO message on the channel 'session'");
 };
 
-SocketHandler.prototype._addToConnectionMap = function(socketClient) {
-	this.connectionMap[socketClient.sessionID] = socketClient;
+SocketHandler.prototype.sendNotLoggedInError = function(connection) {
+	connection.emit('error-message', "You have not logged in, please log in before continuing");
 };
-
-SocketHandler.prototype._removeFromConnectionMap = function(sessionID) {
-	delete this.connectionMap[sessionID];
-};
-
-SocketHandler.prototype._getFromConnectionMap = function(sessionID) {
-	if (this.connectionMap.hasOwnProperty(sessionID)) {
-		return this.connectionMap[sessionID];
-	}
-
-	return undefined;
-}
 
 var SocketClient = function(sessionID, connection) {
 	this.sessionID = sessionID;
@@ -280,13 +343,6 @@ var SocketClient = function(sessionID, connection) {
 	connection.emit('session', { sessionID: sessionID });
 };
 
-var SessionGenerator = function() {
-	this.sessionNumber = 0;
-}
-
-SessionGenerator.prototype.generateSessionID = function() {
-	return this.sessionNumber++;
-}
 
 
 module.exports = function(_redis) {

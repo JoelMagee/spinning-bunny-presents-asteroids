@@ -1,10 +1,24 @@
 <!doctype html>
 <html>
 	<head>
+		<title>Sockets Test for Spinning Bunny</title>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 		<script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
 		<script>
+
+		var lobbyTemplate = "<tr class='lobby-row' data-lobby-id='{0}'><td class='lobby-id'>{0}</td><td class='lobby-name'>{1}</td><td class='lobby-count'>{2}</td><td class='lobby-join'><button class='lobby-join-button'>Join</button></td><td class='lobby-refresh'><button class='lobby-refresh-button'>Refresh</button></td></tr>";
+
+if (!String.prototype.format) {
+	String.prototype.format = function() {
+		var args = arguments;
+		return this.replace(/{(\d+)}/g, function(match, number) { 
+			return typeof args[number] != 'undefined' ? args[number] : match;
+		});
+	};
+}
+
 		$(document).ready(function() {
+
 			var connectButton = $("#connect");
 			var connectText = $("#connect-message");
 
@@ -12,16 +26,52 @@
 			var messageButton = $("#message-send");
 			var globalMessageText = $("#message-global");
 			var globalMessageButton = $("#message-send-global");
+			var globalMessageOutput = $("#global-text-chat");
+
+			var loginButton = $("#login-button");
+			var loginUsername = $("#login-username");
+			var loginPassword = $("#login-password");
+
+			var logoutButton = $("#logout-button");
+
+			var registerButton = $("#register-button");
+			var registerUsername = $("#register-username");
+			var registerPassword = $("#register-password");
 
 			var joinButton = $("#join");
 			var endButton = $("#end");
 			var turnText = $("#turn-text");
 
+			var leaveButton = $("#leave-button");
+			var destroyButton = $("#destroy-button");
+
+			var createLobbyButton = $("#create-lobby-button");
+			var createLobbyName = $("#create-lobby-name");
+
+			var updateLobbyButton = $("#update-lobby-button");
+
+			var lobbyListContainer = $("#lobby-list");
+
+			var startGameButton = $("#start-game-button");
+			var gameStartedText = $("#game-start-text");
+			var submitTurnButton = $("#submit-turn");
+			var turnGameIDText = $("#game-id");
+			var turnGuessText = $("#turn-guess");
+
+			var turnResults = $("#turn-results");
+			var gameHistory = $("#game-history");
+
 			var connection = undefined;
 
 			connectButton.on('click', function(){
+				console.log("Connect button clicked");
+
 				var socket = io();
 				//socket.connect(); 
+
+				var updateLobby = function() {
+					socket.emit('info lobby', {});
+				};
 
 				joinButton.on('click', function() {
 					socket.emit('session', {});
@@ -41,6 +91,94 @@
 					socket.emit('global message', { message: globalMessageText.val() });
 					globalMessageText.val("");
 				});
+
+				registerButton.on('click', function() {
+					console.log("Register button clicked");
+
+					var username = registerUsername.val();
+					var password = registerPassword.val();
+
+					socket.emit('register', {
+						username: username,
+						password: password
+					});
+				});
+
+				loginButton.on('click', function() {
+					console.log("Login button clicked");
+
+					var username = loginUsername.val();
+					var password = loginPassword.val();
+
+					socket.emit('login', {
+						username: username,
+						password: password
+					});
+				})
+
+				logoutButton.on('click', function() {
+					console.log("Logout button clicked");
+
+					socket.emit('logout', {});
+				});
+
+				createLobbyButton.on('click', function() {
+					console.log("Create lobby button clicked");
+
+					var name = createLobbyName.val();
+					createLobbyName.val("");
+
+					socket.emit("create lobby", { name: name });
+				});
+
+				updateLobbyButton.on('click', function() {
+					console.log("Update button clicked");
+					updateLobby();
+				});
+
+				leaveButton.on('click', function() {
+					console.log("Leave button clicked");
+					socket.emit('leave lobby', {});
+				});
+
+				destroyButton.on('click', function() {
+					console.log("Destroy button clicked");
+					socket.emit('destroy lobby', {});
+				});
+
+				startGameButton.on('click', function() {
+					console.log("Start button clicked");
+					socket.emit('start game', {});
+				});
+
+				submitTurnButton.on('click', function() {
+					console.log("Submit turn button clicked");
+					var game = turnGameIDText.val(); //Not sure you need this tbh
+					var guess = turnGuessText.val();
+
+					var turnData = {};
+					turnData.guess = guess;
+					turnData.id = game;
+
+					socket.emit('game turn', turnData);
+				});
+
+				$("body").on('click', '.lobby-join-button', function(e) {
+					console.log("Lobby join button clicked");
+
+					var lobbyID = $(e.target).parent().parent().attr('data-lobby-id');
+
+					socket.emit('join lobby', { id: lobbyID });
+				});
+
+				$("body").on('click', '.lobby-refresh-button', function(e) {
+					console.log("Lobby refresh button clicked");
+
+					var lobbyID = $(e.target).parent().parent().attr('data-lobby-id');
+
+					socket.emit('info lobby', { id: lobbyID });
+				});
+
 
 				socket.on('connect', function() {
 					connectText.html("Connected...");
@@ -89,6 +227,110 @@
 				socket.on('global message', function(e) {
 					console.log("Global message from client");
 					console.log(e);
+
+					if (!e.hasOwnProperty('success')) {
+						globalMessageOutput.val(globalMessageOutput.val() + e.message + "\n");
+					}
+				});
+
+				socket.on('register', function(e) {
+					if (e.success) {
+						console.log("Registration successful");
+					} else {
+						console.log("Registration failed: " + e.message);
+					}
+				});
+
+				socket.on('login', function(e) {
+					if (e.success) {
+						console.log("Login successful");
+					} else {
+						console.log("Login failed: " + e.message);
+					}
+				});
+
+				socket.on('logout', function(e) {
+					if (e.success) {
+						console.log("Logout successful");
+					} else {
+						console.log("Logout failed (WTF?)");
+					}
+				});
+
+				socket.on('create lobby', function(e) {
+					if (e.success) {
+						console.log("Creation of lobby was successful");
+						updateLobby();
+					} else {
+						console.log("Creation of lobby failed - " + e.message);
+
+					}
+				});
+
+				socket.on('info lobby', function(e) {
+					if (e.success) {
+
+						if (e.lobbyData instanceof Array) {
+							console.log("Info for all lobbies received");
+							console.dir(e);
+							//We've recieved a list of results
+							//Empty the list
+							lobbyListContainer.html("");
+
+							for (var i = 0; i < e.lobbyData.length; i++) {
+								lobbyListContainer.append(lobbyTemplate.format(e.lobbyData[i].id, e.lobbyData[i].name, e.lobbyData[i].usernames.length + "(" + e.lobbyData[i].usernames.join(", ") + ")"));
+							}
+						} else {
+							//Just the one sir
+							console.log("Information for a single lobby recieved");
+						}
+
+					} else {
+						console.error("Loading lobby list failed somehow");
+					}
+				});
+
+				socket.on('join lobby', function(e) {
+					console.log("Join lobby message recieved");
+					if (e.success) {
+						updateLobby();
+					} else {
+						console.log("Join lobby failed");
+					}
+
+				});
+
+				socket.on('leave lobby', function(e) {
+					console.log("Leave lobby message recieved");
+					if (e.success) {
+						updateLobby();
+					} else {
+						console.log("Leave lobby failed");
+					}
+				});
+
+				socket.on('game loading', function(e) {
+					console.log("Game loading message recieved");
+				});
+
+				socket.on('start game', function(e) {
+					console.log("Game starting message recieved");
+					if (e.success) {
+						console.log(e.message);
+						gameStartedText.html("Game has started with id: " + e.id);
+					} else {
+						console.log("Starting game failed: " + e.message);
+					}
+				});
+
+				socket.on('turn result processed', function(e) {
+					console.log("Turn result recieved");
+					console.log(e);
+				});
+
+				socket.on('game end', function(e) {
+					console.log("Game end message recieved");
+					console.log(e);
 				});
 
 			});
@@ -98,24 +340,72 @@
 		</script>
 	</head>
 	<body>
-		<h1>Socks JS test</h1>
-		<p>Socket makes connection on localhost:6400/echo</p>
+		<h1>Socket.io JS test</h1>
+		<p>Socket makes connection on localhost:5000/echo</p>
 		<hr>
 		<button id="connect">Connect</button>
 		<p id="connect-message"></p>
 		<hr>
-		<button id="join">Join</button>
-		<hr>
-		<input type="text" id="turn-text">
-		<button id="end">End Turn</button>
-		<hr>
-		<p>Turn Result:</p>
-		<p></p>
+		<button id="join">Get Sesson</button>
 		<hr>
 		<input type="text" id="message">
 		<button id="message-send">Send message</button>
 		<hr>
+		<div>
+			<textarea id="global-text-chat" style="min-width: 99%; min-height: 150px;"></textarea>
+		</div>
 		<input type="text" id="message-global">
 		<button id="message-send-global">Send Global message</button>
+		<hr>
+		<input type="text" id="register-username" placeholder="Username">
+		<input type="text" id="register-password" placeholder="Password">
+		<button id="register-button">Register</button>
+		<hr>
+		<input type="text" id="login-username" placeholder="Username">
+		<input type="text" id="login-password" placeholder="Password">
+		<button id="login-button">Login</button>
+		<button id="logout-button">Logout</button>
+		<hr>
+		<p>Create a lobby</p>
+		<input type="text" id="create-lobby-name">
+		<button id="create-lobby-button">Create</button>
+		<hr>
+		<p>Lobby List
+			<button id="update-lobby-button">Refresh</button>
+			<button id="leave-button">Leave Current Lobby</button>
+			<button id="destroy-button">Close Current Lobby</button>
+			<button id="start-game-button">Start Game</button>
+		</p>
+		<table style="width: 100%;">
+			<tr style="text-align: left">
+				<th>ID</th>
+				<th>Name</th>
+				<th>Number of players</th>
+				<th>Join</th>
+				<th>Refresh</th>
+			</tr>
+			<tbody id="lobby-list">
+				
+			</tbody>
+		</table>
+		<hr>
+		<p>Submit turn</p>
+		<p id="game-start-text">Game not started..</p>
+		<input type="text" placeholder="game ID" id="game-id"><input type="text" placeholder="Guess" id="turn-guess"><button id="submit-turn">Submit</button>
+		<hr>
+		<p id="game-finish-text"></p>
+		<hr>
+		<div style="width: 50%; float: left;">
+			<p>Game Turn Results</p>
+			<div id="turn-results">
+				
+			</div>
+		</div>
+		<div style="width: 50%; float: left;">
+			<p>Game Result history</p>
+			<div id="game-history">
+				
+			</div>
+		</div>
 	</body>
 </html>
