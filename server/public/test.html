@@ -11,7 +11,7 @@
 
 			var username;
 
-			var joinCount = 0;
+			var joinCount = 1;
 
 			$(document).ready(function() {
 				$joelButton = $('#joel');
@@ -151,7 +151,7 @@
 					}
 				});
 
-				socket1.on('game loading', function(e) {
+				socket1.on('loading game', function(e) {
 					updateStatus("game loading message recieved");
 				});
 

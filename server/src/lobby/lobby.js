@@ -53,6 +53,7 @@ Lobby.prototype.getLeader = function() {
 Lobby.prototype.startGame = function(game) {
 	this.emit('game start', game);
 	this.name = "[Started] " + this.name;
+	this.destroy();
 };
 
 module.exports = function() {

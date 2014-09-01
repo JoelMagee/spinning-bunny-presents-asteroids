@@ -39,11 +39,11 @@ describe("Asteroids logic initialistation", function() {
 		var playerPositions = asteroidsLogic.getPlayerPositions();
 		expect(playerPositions).toNotBe(undefined);
 		expect(playerPositions["sam"]).toNotBe(undefined);
-		expect(playerPositions["sam"].x).toNotBe(undefined);
-		expect(playerPositions["sam"].y).toNotBe(undefined);
+		expect(playerPositions["sam"].position.x).toNotBe(undefined);
+		expect(playerPositions["sam"].position.y).toNotBe(undefined);
 		expect(playerPositions["joel"]).toNotBe(undefined);
-		expect(playerPositions["joel"].x).toNotBe(undefined);
-		expect(playerPositions["joel"].y).toNotBe(undefined);
+		expect(playerPositions["joel"].position.x).toNotBe(undefined);
+		expect(playerPositions["joel"].position.y).toNotBe(undefined);
 	});
 
 });
