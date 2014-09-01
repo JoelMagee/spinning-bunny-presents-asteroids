@@ -10,7 +10,7 @@ var AsteroidsLogic;
 
 var defaultOptions = {
 	world: {},
-	turnLimit: 0
+	turnLimit: 10
 }
 
 
@@ -27,7 +27,7 @@ var AsteroidsGame = function(id, expectedPlayers, opts) {
 	this.currentTurn = 0;
 	this.turnData = {};
 
-	this.asteroidsLogic = new AsteroidsLogic(this.players, this.world);
+	this.asteroidsLogic = undefined;
 
 	events.EventEmitter.call(this);
 };
@@ -100,7 +100,8 @@ AsteroidsGame.prototype.getPlayer = function(username) {
 };
 
 AsteroidsGame.prototype.startGame = function() {
-	this.emit('game start', this.getOptions());
+	this.asteroidsLogic = new AsteroidsLogic(this.players, this.world);
+	this.emit('game loaded', this.getOptions());
 
 	//Check finish conditions to check the game isn't already over
 	if (this.checkFinishConditions()) {
@@ -137,6 +138,11 @@ AsteroidsGame.prototype.checkFinishConditions = function() {
 		return true;
 	}
 
+	if ((this.options.turnLimit > 0) && (this.currentTurn >= this.options.turnLimit)) {
+		this.gameEnd("Maximum number of turns exceeded");
+		return true;
+	}
+
 	//No finish conditions were met
 	return false;
 };
@@ -167,9 +173,10 @@ AsteroidsGame.prototype.checkTurnEnd = function() {
 
 AsteroidsGame.prototype.turnEnd = function() {
 	//Process turn result
-	this.emit('turn result');
 
 	this.asteroidsLogic.processTurnResult(this.turnData);
+	this.emit('turn result', this.asteroidsLogic.getTurnResultData());
+
 	this.turnData = {};
 
 	//Check finish conditions to check the game isn't already over
@@ -181,9 +188,17 @@ AsteroidsGame.prototype.turnEnd = function() {
 	this.startTurn();
 };
 
+AsteroidsGame.prototype.getStartData = function() {
+	return this.asteroidsLogic.getPlayerPositions();
+};
+
 AsteroidsGame.prototype.gameEnd = function(reason) {
 	this.emit('game end', reason);
 };
+
+AsteroidsGame.prototype.getInfo = function() {
+	return {};
+}
 
 module.exports = function(_AsteroidsLogic) {
 	AsteroidsLogic = _AsteroidsLogic;

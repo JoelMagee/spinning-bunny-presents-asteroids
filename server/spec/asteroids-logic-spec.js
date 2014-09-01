@@ -35,6 +35,17 @@ describe("Asteroids logic initialistation", function() {
 		expect(playerOne.position.x).toBeLessThan(10001);
 	});
 
+	it("should have a get player position function which returns the starting position of all players", function() {
+		var playerPositions = asteroidsLogic.getPlayerPositions();
+		expect(playerPositions).toNotBe(undefined);
+		expect(playerPositions["sam"]).toNotBe(undefined);
+		expect(playerPositions["sam"].x).toNotBe(undefined);
+		expect(playerPositions["sam"].y).toNotBe(undefined);
+		expect(playerPositions["joel"]).toNotBe(undefined);
+		expect(playerPositions["joel"].x).toNotBe(undefined);
+		expect(playerPositions["joel"].y).toNotBe(undefined);
+	});
+
 });
 
 describe("Asteroids turn calculations", function() {

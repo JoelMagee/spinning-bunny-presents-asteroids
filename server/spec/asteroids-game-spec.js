@@ -529,3 +529,91 @@ describe("Getting turn results", function() {
 		expect(game.currentTurn).toBe(3);
 	});
 });
+
+
+describe("Turn limit option", function() {
+	var id = 0;
+	var expectedPlayers;
+	var game;
+
+	var gameStart;
+	var turnStart;
+	var gameEnd;
+	var turnResult;
+	var returnedSettings;
+
+	var gameStartEvent = function(settings) {
+		gameStart = true;
+		returnedSettings = settings;
+	};
+
+	var turnStartEvent = function() {
+		turnStart = true;
+	};
+
+	var gameEndEvent = function() {
+		gameEnd = true;
+	};
+
+	var turnResultEvent = function() {
+		turnResult = true;
+		turnStart = false;
+	};
+
+	beforeEach(function() {
+		expectedPlayers = ["sam", "joel", "jake"];
+		game = new AsteroidsGame(id, expectedPlayers, { turnLimit: 3 });
+		gameStart = false;
+		turnStart = false;
+		gameEnd = false;
+
+		game.on('game start', gameStartEvent);
+		game.on('turn start', turnStartEvent);
+		game.on('game end', gameEndEvent);
+		game.on('turn result', turnResultEvent);
+
+		game.addPlayer("sam");
+		game.addPlayer("joel");
+		game.addPlayer("jake");	
+	});
+
+	it("should return the correct settings on game start", function() {
+		waitsFor(function() {
+			return gameStart;
+		}, 'wait for the game to start', 1000);
+
+		runs(function() {
+			expect(returnedSettings.turnLimit).toBe(3);
+		});
+	});
+
+	it("should end the game after three turns", function() {
+		expect(game.currentTurn).toBe(1);
+		expect(gameEnd).toBe(false);
+
+		game.addTurn("joel", {});
+		game.addTurn("sam", {});
+		game.addTurn("jake", {});
+		game.checkTurnEnd();
+
+		expect(game.currentTurn).toBe(2);
+		expect(gameEnd).toBe(false);
+
+		game.addTurn("joel", {});
+		game.addTurn("sam", {});
+		game.addTurn("jake", {});
+		game.checkTurnEnd();
+
+		expect(game.currentTurn).toBe(3);
+		expect(gameEnd).toBe(false);
+
+		game.addTurn("joel", {});
+		game.addTurn("sam", {});
+		game.addTurn("jake", {});
+		game.checkTurnEnd();
+
+		expect(game.currentTurn).toBe(3); //Next turn isn't started to turn number is still the same
+		expect(gameEnd).toBe(true);
+
+	});
+});

@@ -8,11 +8,10 @@ var AsteroidsLogic = function(players, world) {
 };
 
 AsteroidsLogic.prototype.initState = function() {
-
 	//Give each player a starting position
 	for (var i = 0; i < this.players.length; i++) {
 		var position = this.generateStartingPosition();
-		this.players.position = {};
+		this.players[i].position = {};
 		this.players[i].position.x = position.x;
 		this.players[i].position.y = position.y;
 	}
@@ -38,7 +37,40 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData) {
 			//Player has no turn data for this round.. what do?
 		}
 	}
+};
 
+AsteroidsLogic.prototype.getTurnResultData = function() {
+	var turnResultData = {};
+
+	turnResultData.moves = [];
+
+	for (var i = 0; i < this.players.length; i++) {
+		turnResultData.moves.push(
+		{
+			username: this.players[i].username,
+			position: {
+				x: this.players[i].position.x,
+				y: this.players[i].position.y
+			}
+		});
+	}
+
+	return turnResultData;
+};
+
+AsteroidsLogic.prototype.getPlayerPositions = function() {
+	var playerPositions = {};
+
+	for (var i = 0; i < this.players.length; i++) {
+		playerPositions[this.players[i].username] = {
+			position: {
+				x: this.players[i].position.x,
+				y: this.players[i].position.y
+			}
+		}
+	}
+
+	return playerPositions;
 };
 
 module.exports = function() {

@@ -148,7 +148,7 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 			id: lobbyID,
 			message: "You have left the lobby",
 			success: true
-		});		
+		});
 	}
 
 	leaveSub.on('message', function(channel, message) {
@@ -189,18 +189,22 @@ LobbyManager.prototype._joinMessageReceived = function(channelPattern, actualPat
 		if (lobby.getLeader() === username) {
 
 			var game = self.gameManager.createGame(lobby.getUsers());
+			self._sendResponse(sessionID, "launch game", {
+				success: true,
+				message: "Game is launching"
+			});
 			lobby.startGame(game);
 			lobby.destroy();
 		} else {
 			//This user is not the lobby leader, they cannot destroy the lobby
-			self._sendResponse(sessionID, "start game", {
+			self._sendResponse(sessionID, "launch game", {
 				success: false,
 				message: "You don't have permission to start this game"
 			});
 		}
 	});
 
-	startGameSub.subscribe('start game:' + sessionID);
+	startGameSub.subscribe('launch game:' + sessionID);
 }
 
 LobbyManager.prototype._infoMessageReceived = function(channelPattern, actualPattern, message) {
