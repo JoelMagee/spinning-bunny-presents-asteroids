@@ -73,7 +73,7 @@ define([
 		
 			if (!response.success) {
 				alert(response.message);
-				self.lobbies.remove(function(item) { return item.id === response.id });
+				self.lobbies.remove(function(item) { return item.id === response.id; });
 			}
 			
 		});

@@ -9,6 +9,8 @@ define([
     var LobbyVM = function LobbyVM(socket) {
 	
 		var self = this;
+		
+		var started = false;
 	
 		this.name = ko.observable("Lobby name");
 		this.players = ko.observableArray();
@@ -26,7 +28,7 @@ define([
 					//ignore
 					
 				} else {
-				
+			
 					//Just the one sir
 					console.log("Information for a single lobby received");
 					console.log(response.lobbyData);
@@ -40,6 +42,7 @@ define([
 			
 					$('#lobbyListScreen').hide();
 					$('#lobbyScreen').show();
+					
 				}
 
 			} else {
@@ -49,14 +52,19 @@ define([
 		
 		this.socket.on('leave lobby', function(response) {
 		
-			console.log(response);
-		
-			console.log(response.message);
+			if (!started) {
 			
-			$('#lobbyScreen').hide();
-			$('#lobbyListScreen').show();
+				console.log(response);
 			
-			self.socket.emit('info lobby', {});
+				console.log(response.message);
+				
+				$('#lobbyScreen').hide();
+				$('#lobbyListScreen').show();
+				
+				self.socket.emit('info lobby', {});
+			
+			}
+			started = false;
 				
 		});
 		
@@ -86,13 +94,12 @@ define([
 			}
 		});
 		
-		this.socket.on('start game' , function(response) {
+		this.socket.on('start game' , function(response) { // change to 'launch game' on next update
 			if (response.success) {
-				console.log(response.message);
 				$('#lobbyScreen').hide();
-				$('#lobbyListScreen').hide(); //hopefully won't be needed
+				console.log(response.message);
 				$('#gameScreen').show();
-				console.log("here");
+				started = true;
 			} else {
 				console.log(response.message);
 			}
@@ -118,7 +125,7 @@ define([
 			}
 		},
 		startLobby: function () {
-			this.socket.emit('start game', {});
+			this.socket.emit('start game', {}); // change to 'launch game' on next update
 		},
 		leaveLobby: function () {
 			this.socket.emit('leave lobby', {});

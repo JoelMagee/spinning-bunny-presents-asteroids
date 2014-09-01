@@ -168,28 +168,26 @@
 				</div>
 			</div>
 		</div>
-		<div id="gameScreen" class="screen">
-			<button id="endTurnButton" class="btn btn-danger" data-bind="click: endTurn">End Turn</button>
-			<button id="panLeftButton" class="btn btn-default" data-bind="click: panLeft"><span class="glyphicon glyphicon-arrow-left"></span></button>
-			<button id="panUpButton" class="btn btn-default" data-bind="click: panUp"><span class="glyphicon glyphicon-arrow-up"></span></button>
-			<button id="panDownButton" class="btn btn-default" data-bind="click: panDown"><span class="glyphicon glyphicon-arrow-down"></span></button>
-			<button id="panRightButton" class="btn btn-default" data-bind="click: panRight"><span class="glyphicon glyphicon-arrow-right"></span></button>
-			<button id="zoomInButton" class="btn btn-default" data-bind="click: zoomIn"><span class="glyphicon glyphicon-zoom-in"></span></button>
-			<button id="zoomOutButton" class="btn btn-default" data-bind="click: zoomOut"><span class="glyphicon glyphicon-zoom-out"></span></button>
-			<button id="endGameButton" class="btn btn-danger" data-bind="click: endGame">Leave game</button>
-			<!--<h1>Guess an integer between 1-100</h1>
-			<div class="col-md-3">
-				<p>Guess a number: <input data-bind="value: guess"></p>
-				<button data-bind="click: sendGuess">Send guess</button>
-				<p data-bind="visible: waiting">----------- Waiting for all guesses -----------</p>
+		<div id="gameScreen" class="screen" oncontextmenu="return false;">
+			<div id="asteroidsUI">
+				<button id="endTurnButton" class="btn btn-danger" data-bind="click: endTurn">End Turn</button>
+				<button id="endGameButton" class="btn btn-danger" data-bind="click: endGame">Leave game</button>
 			</div>
-			<div class="col-md-3">
-				<p>The number was: <span data-bind="text: number"></span></p>
-				<p>The winner was: <span data-bind="text: winner"></span></p>
-				<p>The current closest is: <span data-bind="text: closest"></span></p>
-			</div>
-			<div class="col-md-3">
-				<p>Winner guessed: <span data-bind="text: winnerGuess"></span></p>
+			<!--<div id="guessingGame">
+				<h1>Guess an integer between 1-100</h1>
+				<div class="col-md-3">
+					<p>Guess a number: <input data-bind="value: guess"></p>
+					<button data-bind="click: sendGuess">Send guess</button>
+					<p data-bind="visible: waiting">----------- Waiting for all guesses -----------</p>
+				</div>
+				<div class="col-md-3">
+					<p>The number was: <span data-bind="text: number"></span></p>
+					<p>The winner was: <span data-bind="text: winner"></span></p>
+					<p>The current closest is: <span data-bind="text: closest"></span></p>
+				</div>
+				<div class="col-md-3">
+					<p>Winner guessed: <span data-bind="text: winnerGuess"></span></p>
+				</div>
 			</div>-->
 		</div>
 	</body>
