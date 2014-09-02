@@ -60,7 +60,7 @@
 				var lobbyID;
 
 				//Create connection - 1
-				var socket1 = io('localhost:5000', { 'force new connection': true });
+				var socket1 = io();
 				updateStatus("Connection 1 created");
 
 				//Send session message - 1

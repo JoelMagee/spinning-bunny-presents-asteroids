@@ -3,7 +3,7 @@
 var bezierT = 1.3;
 
 var calculateBezierPoint = function(v0, v1, v2, t) {
-	return 2 * (1 - t) * (v1 - v0) + 2 * (1 - t) * t * v1 + (t * t * v2);
+	return (1 - t) * (1 - t) * v0 + 2 * (1 - t) * t * v1 + (t * t * v2)
 };
 
 var Player = function(username) {
@@ -34,8 +34,8 @@ Player.prototype.moveTo = function(destinationX, destinationY) {
 	this.position.x = destinationX;
 	this.position.y = destinationY;
 
-	this.prediction.x = calculateBezierPoint(this.oldPosition.x, this.oldPrediction.x, destinationX);
-	this.prediction.y = calculateBezierPoint(this.oldPosition.y, this.oldPrediction.y, destinationY);
+	this.prediction.x = calculateBezierPoint(this.oldPosition.x, this.oldPrediction.x, destinationX, bezierT);
+	this.prediction.y = calculateBezierPoint(this.oldPosition.y, this.oldPrediction.y, destinationY, bezierT);
 };
 
 Player.prototype.updatePrediction = function() {

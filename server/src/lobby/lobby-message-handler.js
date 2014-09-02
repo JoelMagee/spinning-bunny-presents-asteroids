@@ -137,7 +137,7 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 	leaveSub.on('message', function(channel, message) {
 		lobby.leave(username);
 		removeListeners();
-		this.sendResponse(sessionID, "leave lobby", { id: lobbyID, message: "You have left the lobby", success: true });
+		self.sendResponse(sessionID, "leave lobby", { id: lobby.id, message: "You have left the lobby", success: true });
 	});
 
 	destroySub.on('message', function(channel, message) {
