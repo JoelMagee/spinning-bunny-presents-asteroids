@@ -177,6 +177,8 @@ AsteroidsGame.prototype.turnEnd = function() {
 	this.asteroidsLogic.processTurnResult(this.turnData);
 	this.emit('turn result', this.asteroidsLogic.getTurnResultData());
 
+	this.asteroidsLogic.endTurnCleanup();
+
 	this.turnData = {};
 
 	//Check finish conditions to check the game isn't already over

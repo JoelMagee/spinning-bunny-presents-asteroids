@@ -58,6 +58,12 @@ AsteroidsLogic.prototype.getPlayerPositions = function() {
 	return playerPositions;
 };
 
+AsteroidsLogic.prototype.endTurnCleanup = function() {
+	for (var i = 0; i < this.players.length; i++) {
+		this.players[i].updatePrediction();
+	}
+}
+
 module.exports = function() {
 	return AsteroidsLogic;
 }
