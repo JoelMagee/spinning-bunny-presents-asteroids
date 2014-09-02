@@ -63,9 +63,12 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 		self._sendResponse(sessionID, "turn result", { turnResult: turnResult });
 	};
 
-	var gameEnd = function() {
+	var gameEnd = function(reason) {
 		console.log("[Game Manager] Game ended");
-		self._sendResponse(sessionID, "game end", { gameInfo: game.getInfo() });
+		self._sendResponse(sessionID, "game end", { 
+			gameInfo: game.getInfo(),
+			reason: reason 
+		});
 		removeListeners();
 		self._removeGame(game);
 	};

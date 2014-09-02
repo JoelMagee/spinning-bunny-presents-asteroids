@@ -344,8 +344,6 @@ var SocketClient = function(sessionID, connection) {
 	connection.emit('session', { sessionID: sessionID, success: true });
 };
 
-
-
 module.exports = function(_redis) {
 	redis = _redis;
 

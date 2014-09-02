@@ -11,9 +11,7 @@ AsteroidsLogic.prototype.initState = function() {
 	//Give each player a starting position
 	for (var i = 0; i < this.players.length; i++) {
 		var position = this.generateStartingPosition();
-		this.players[i].position = {};
-		this.players[i].position.x = position.x;
-		this.players[i].position.y = position.y;
+		this.players[i].setInitialPosisiton(position.x, position.y);
 	}
 };
 
@@ -31,8 +29,7 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData) {
 		
 		if (turnData.hasOwnProperty(p.username)) {
 			//This player has turn data for this round
-			p.position.x = turnData[p.username].destination.x;
-			p.position.y = turnData[p.username].destination.y;
+			p.moveTo(turnData[p.username].destination.x, turnData[p.username].destination.y);
 		} else {
 			//Player has no turn data for this round.. what do?
 		}
@@ -45,14 +42,7 @@ AsteroidsLogic.prototype.getTurnResultData = function() {
 	turnResultData.moves = [];
 
 	for (var i = 0; i < this.players.length; i++) {
-		turnResultData.moves.push(
-		{
-			username: this.players[i].username,
-			position: {
-				x: this.players[i].position.x,
-				y: this.players[i].position.y
-			}
-		});
+		turnResultData.moves.push(this.players[i].getPlayerData());
 	}
 
 	return turnResultData;
@@ -62,12 +52,7 @@ AsteroidsLogic.prototype.getPlayerPositions = function() {
 	var playerPositions = {};
 
 	for (var i = 0; i < this.players.length; i++) {
-		playerPositions[this.players[i].username] = {
-			position: {
-				x: this.players[i].position.x,
-				y: this.players[i].position.y
-			}
-		}
+		playerPositions[this.players[i].username] = this.players[i].getPlayerPosition();
 	}
 
 	return playerPositions;

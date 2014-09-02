@@ -83,18 +83,35 @@
 
 		stage.addChild(line);
 
+		var c1 = new PIXI.Graphics();
+		c1.lineStyle (2, 0xFF0000, 1);
+		c1.beginFill(this.colour);
+		c1.drawCircle(linePoints[0].x, linePoints[0].y, 3);
+		var c2 = new PIXI.Graphics();
+		c2.lineStyle (2, 0xFF0000, 1);
+		c2.beginFill(this.colour);
+		c2.drawCircle(linePoints[1].x, linePoints[1].y, 3);
+		var c3 = new PIXI.Graphics();
+		c3.lineStyle (2, 0xFF0000, 1);
+		c3.beginFill(this.colour);
+		c3.drawCircle(linePoints[2].x, linePoints[2].y, 3);
+
+		stage.addChild(c1);
+		stage.addChild(c2);
+		stage.addChild(c3);
+
 		if (addText) {
 			var p1Text = new PIXI.Text(linePoints[0].x + ", " + linePoints[0].y, { font: "10px Arial", fill: "#999999", align: "center", stroke: "#FFFFFF" });
-				p1Text.position.x = linePoints[0].x;
-				p1Text.position.y = linePoints[0].y - 20;
+				p1Text.position.x = linePoints[0].x + 10;
+				p1Text.position.y = linePoints[0].y + 10;
 
 			var p2Text = new PIXI.Text(linePoints[1].x + ", " + linePoints[1].y, { font: "10px Arial", fill: "#999999", align: "center", stroke: "#FFFFFF" });
-				p2Text.position.x = linePoints[1].x;
-				p2Text.position.y = linePoints[1].y - 20;
+				p2Text.position.x = linePoints[1].x + 10;
+				p2Text.position.y = linePoints[1].y + 10;
 
 			var p3Text = new PIXI.Text(linePoints[2].x + ", " + linePoints[2].y, { font: "10px Arial", fill: "#999999", align: "center", stroke: "#FFFFFF" });
-				p3Text.position.x = linePoints[2].x;
-				p3Text.position.y = linePoints[2].y - 20;
+				p3Text.position.x = linePoints[2].x + 10;
+				p3Text.position.y = linePoints[2].y + 10;
 
 			stage.addChild(p1Text);
 			stage.addChild(p2Text);
