@@ -1,11 +1,16 @@
 /*jslint white: true */
 
+var crypto = require('crypto');
+
 var SessionGenerator = function() {
 	this.sessionNumber = 0;
 };
 
 SessionGenerator.prototype.generateSessionID = function() {
-	return this.sessionNumber++ + "" + new Date().getTime();
+	var md5hash = crypto.createHash('md5');
+	md5hash.update(Math.random() + "");
+	var time = new Date().getTime();
+	return this.sessionNumber++ + "" + time + md5hash.digest('hex');
 };
 
 var SessionManager = function(SessionStorage) {
