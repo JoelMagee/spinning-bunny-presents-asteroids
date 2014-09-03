@@ -5,121 +5,50 @@ var SessionGenerator = function() {
 };
 
 SessionGenerator.prototype.generateSessionID = function() {
-	return this.sessionNumber++;
+	return this.sessionNumber++ + "" + new Date().getTime();
 };
 
-var SessionManager = function() {
-	this.sessions = {};
+var SessionManager = function(SessionStorage) {
+	this.sessionStorage = new SessionStorage();
+	this.sessionStorage.connect();
+	//this.sessions = {};
 	this.sessionGenerator = new SessionGenerator();
 };
 
-SessionManager.prototype.loginUser = function(sessionID, username) {
-	this._setSessionProperty(sessionID, 'loggedIn', true);
-	this._setSessionProperty(sessionID, 'username', username);
-};
+SessionManager.prototype.create = function() {
+	var sessionID = this.sessionGenerator.generateSessionID();
 
-SessionManager.prototype.logoutUser = function(sessionID) {
-	this._clearSession(sessionID);
-};
-
-SessionManager.prototype.loggedIn = function(sessionID) {
-	if (this._sessionExists(sessionID)) {
-		if (this.sessions[sessionID].hasOwnProperty('loggedIn')) {
-			return this.sessions[sessionID]['loggedIn'];
-		}
-	}
-
-	return false;
-}
-
-SessionManager.prototype.getLoggedInUser = function(sessionID) {
-	if (this._sessionExists(sessionID)) {
-		if (this.sessions[sessionID].hasOwnProperty('loggedIn')) {
-			if (this.sessions[sessionID].hasOwnProperty('username')) {
-				return this.sessions[sessionID]['username'];
-			} else {
-				console.error("User logged in but no username is set in the session");
-			}
-		}
-	}
-
-	return false;
-}
-
-SessionManager.prototype.getSession = function(sessionID) {
-	return this._getSession(sessionID);
-};
-
-SessionManager.prototype._createSession = function(sessionID) {
-	if (this.sessions.hasOwnProperty(sessionID)) {
-		//Error, we should not be creating a session if it already exists
-		return false;
-	}
-
-	this.sessions[sessionID] = {};
+	this.sessionStorage.create(sessionID);
 	return sessionID;
 };
 
-SessionManager.prototype.createSession = function() {
-	var sessionID = this.sessionGenerator.generateSessionID();
-	return this._createSession(sessionID);
+SessionManager.prototype.login = function(sessionID, username) {
+	this.sessionStorage.setProperty(sessionID, 'username', username);
 };
 
-SessionManager.prototype.getSessionProperty = function(sessionID, property) {
-	return this._getSessionProperty(sessionID, property)
+SessionManager.prototype.logout = function(sessionID) {
+	this.sessionStorage.clear(sessionID);
 };
 
-SessionManager.prototype.setSessionProperty = function(sessionID, property, value) {
-	return this._setSessionProperty(sessionID, property, value);
+SessionManager.prototype.clear = function(sessionID) {
+	this.sessionStorage.clear(sessionID);
 };
 
-SessionManager.prototype._setSessionProperty = function(sessionID, property, val) {
-	if (this.sessions.hasOwnProperty(sessionID)) {
-		this.sessions[sessionID][property] = val;
-		return true;
-	} else {
-		return false;
-	}
+SessionManager.prototype.hasProperty = function(sessionID, property, cb) {
+	this.sessionStorage.getProperty(sessionID, property, cb);
 }
 
-SessionManager.prototype._getSessionProperty = function(sessionID, property) {
-	if (this.sessions.hasOwnProperty(sessionID)) {
-		if (this.sessions[sessionID].hasOwnProperty(property)) {
-			return this.sessions[sessionID][property];
-		} 
-	}
-
-	return null;
+SessionManager.prototype.getProperty = function(sessionID, property, cb) {
+	this.sessionStorage.getProperty(sessionID, property, cb);
 };
 
-SessionManager.prototype._deleteSessionProperty = function(sessionID, property) {
-	if (this.sessions[sessionID].hasOwnProperty(property)) {
-		delete this.sessions[sessionID][property];
-		return true;
-	}
-
-	return false;
-}
-
-SessionManager.prototype._storeSession = function(sessionID, sessionData) {
-	this.sessions[sessionID] = sessionData;
+SessionManager.prototype.setProperty = function(sessionID, property, value) {
+	this.sessionStorage.setProperty(sessionID, property, value);
 };
 
-SessionManager.prototype._getSession = function(sessionID) {
-	if (this.sessions.hasOwnProperty(sessionID)) {
-		return sessions[sessionID];
-	}
-
-	return {};
+SessionManager.prototype.get = function(sessionID, cb) {
+	this.sessionStorage.get(sessionID, cb);
 };
-
-SessionManager.prototype._clearSession = function(sessionID) {
-	this.sessions[sessionID] = {};
-}
-
-SessionManager.prototype._sessionExists = function(sessionID) {
-	return this.sessions.hasOwnProperty(sessionID);
-}
 
 module.exports = function() {
 	return SessionManager;

@@ -39,7 +39,7 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		} else {
 			console.log("Client requesting new session");
 			//Create new session ID
-			sessionID = self.sessionManager.createSession();
+			sessionID = self.sessionManager.create();
 			console.log("Created new session for client with ID: " + sessionID);
 		}
 
@@ -141,21 +141,22 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
-		if (!self.sessionManager.loggedIn(sessionID)) {
-			//User not logged in
-			self.sendNotLoggedInError(connection);
-			return;
-		}
+		self.sessionManager.hasProperty(sessionID, 'username', function(err, exists) {
+			if (err) {
+				return self.sendGenericError(connection);
+			}
 
-		console.log("Logout message received");
-		console.log(sessionID);
+			if (!exists) {
+				return self.sendNotLoggedInError(connection);
+			}
 
-		var queueData = {
-			sessionID: sessionID,
-			data: data
-		}
+			var queueData = {
+				sessionID: sessionID,
+				data: data
+			}
 
-		self.inputPublisher.publish('logout:' + sessionID, JSON.stringify(queueData));
+			self.inputPublisher.publish('logout:' + sessionID, JSON.stringify(queueData));
+		});
 	});
 
 	connection.on('register', function(data) {
@@ -184,21 +185,22 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
-		if (!self.sessionManager.loggedIn(sessionID)) {
-			//User not logged in
-			self.sendNotLoggedInError(connection);
-			return;
-		}
+		self.sessionManager.hasProperty(sessionID, 'username', function(err, exists) {
+			if (err) {
+				return self.sendGenericError(connection);
+			}
 
-		console.log("Create lobby request recieved");
+			if (!exists) {
+				return self.sendNotLoggedInError(connection);
+			}
 
-		var queueData = {
-			sessionID: sessionID,
-			data: data
-		}
+			var queueData = {
+				sessionID: sessionID,
+				data: data
+			}
 
-		//Channel becomes 'create lobby:12'
-		self.inputPublisher.publish('create lobby:' + sessionID, JSON.stringify(queueData));
+			self.inputPublisher.publish('create lobby:' + sessionID, JSON.stringify(queueData));
+		});
 	});
 
 	connection.on('destroy lobby', function(data) {
@@ -208,20 +210,22 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
-		if (!self.sessionManager.loggedIn(sessionID)) {
-			//User not logged in
-			self.sendNotLoggedInError(connection);
-			return;
-		}
+		self.sessionManager.hasProperty(sessionID, 'username', function(err, exists) {
+			if (err) {
+				return self.sendGenericError(connection);
+			}
 
-		console.log("Destroy lobby request recieved");
+			if (!exists) {
+				return self.sendNotLoggedInError(connection);
+			}
 
-		var queueData = {
-			sessionID: sessionID,
-			data: data
-		}
+			var queueData = {
+				sessionID: sessionID,
+				data: data
+			}
 
-		self.inputPublisher.publish('destroy lobby:' + sessionID, JSON.stringify(queueData));
+			self.inputPublisher.publish('destroy lobby:' + sessionID, JSON.stringify(queueData));
+		});
 	});
 
 	connection.on('join lobby', function(data) {
@@ -231,20 +235,22 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
-		if (!self.sessionManager.loggedIn(sessionID)) {
-			//User not logged in
-			self.sendNotLoggedInError(connection);
-			return;
-		}
+		self.sessionManager.hasProperty(sessionID, 'username', function(err, exists) {
+			if (err) {
+				return self.sendGenericError(connection);
+			}
 
-		console.log("Join lobby request recieved");
+			if (!exists) {
+				return self.sendNotLoggedInError(connection);
+			}
 
-		var queueData = {
-			sessionID: sessionID,
-			data: data
-		}
+			var queueData = {
+				sessionID: sessionID,
+				data: data
+			}
 
-		self.inputPublisher.publish('join lobby:' + sessionID, JSON.stringify(queueData));
+			self.inputPublisher.publish('join lobby:' + sessionID, JSON.stringify(queueData));
+		});
 	});
 
 	connection.on('leave lobby', function(data) {
@@ -254,18 +260,22 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
-		if (!self.sessionManager.loggedIn(sessionID)) {
-			//User not logged in
-			self.sendNotLoggedInError(connection);
-			return;
-		}
+		self.sessionManager.hasProperty(sessionID, 'username', function(err, exists) {
+			if (err) {
+				return self.sendGenericError(connection);
+			}
 
-		var queueData = {
-			sessionID: sessionID,
-			data: data
-		}
+			if (!exists) {
+				return self.sendNotLoggedInError(connection);
+			}
 
-		self.inputPublisher.publish('leave lobby:' + sessionID, JSON.stringify(queueData));
+			var queueData = {
+				sessionID: sessionID,
+				data: data
+			}
+
+			self.inputPublisher.publish('leave lobby:' + sessionID, JSON.stringify(queueData));
+		});
 	});
 
 	connection.on('info lobby', function(data) {
@@ -292,18 +302,22 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
-		if (!self.sessionManager.loggedIn(sessionID)) {
-			//User not logged in
-			self.sendNotLoggedInError(connection);
-			return;
-		}
+		self.sessionManager.hasProperty(sessionID, 'username', function(err, exists) {
+			if (err) {
+				return self.sendGenericError(connection);
+			}
 
-		var queueData = {
-			sessionID: sessionID,
-			data: data
-		}
+			if (!exists) {
+				return self.sendNotLoggedInError(connection);
+			}
 
-		self.inputPublisher.publish('launch game:' + sessionID, JSON.stringify(queueData));
+			var queueData = {
+				sessionID: sessionID,
+				data: data
+			}
+
+			self.inputPublisher.publish('launch game:' + sessionID, JSON.stringify(queueData));
+		});
 	});
 
 	connection.on('game turn', function(data) {
@@ -313,18 +327,22 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			return;
 		}
 
-		if (!self.sessionManager.loggedIn(sessionID)) {
-			//User not logged in
-			self.sendNotLoggedInError(connection);
-			return;
-		}
+		self.sessionManager.hasProperty(sessionID, 'username', function(err, exists) {
+			if (err) {
+				return self.sendGenericError(connection);
+			}
 
-		var queueData = {
-			sessionID: sessionID,
-			data: data
-		}
+			if (!exists) {
+				return self.sendNotLoggedInError(connection);
+			}
 
-		self.inputPublisher.publish('game turn:' + sessionID, JSON.stringify(queueData));
+			var queueData = {
+				sessionID: sessionID,
+				data: data
+			}
+
+			self.inputPublisher.publish('game turn:' + sessionID, JSON.stringify(queueData));
+		});
 	});
 };
 
@@ -335,6 +353,10 @@ SocketHandler.prototype.sendNoSessionError = function(connection) {
 SocketHandler.prototype.sendNotLoggedInError = function(connection) {
 	connection.emit('error-message', "You have not logged in, please log in before continuing");
 };
+
+SocketHandler.prototype.sendGenericError = function(connection) {
+	connection.emit('error-message', "Unknown error occured!");
+}
 
 var SocketClient = function(sessionID, connection) {
 	this.sessionID = sessionID;

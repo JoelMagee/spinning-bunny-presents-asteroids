@@ -23,7 +23,7 @@ var Login = function(sessionManager, User) {
 		response.sessionID = sessionID;
 		response.data = {};
 
-		User.find({username: username}, function(err, users) {
+		User.find({ username: username }, function(err, users) {
 			if (err) {
 				response.data.message = "Error when attempting to log in";
 				response.data.success = false;
@@ -43,7 +43,7 @@ var Login = function(sessionManager, User) {
 						response.data.success = true;
 						response.data.message = "Successfully logged in";
 						loginPub.publish('output message:' + sessionID, JSON.stringify(response));
-						sessionManager.loginUser(sessionID, username);
+						sessionManager.login(sessionID, username);
 					} else{
 						response.data.success = false;
 						response.data.message = "Invalid password";

@@ -57,26 +57,39 @@ LobbyMessageHandler.prototype.createMessageReceived = function(sessionID, messag
 };
 
 LobbyMessageHandler.prototype.joinMessageReceived = function(sessionID, messageData) {
+	var self = this;
+
 	if (!messageData.hasOwnProperty('id')) {
 		return this.sendResponse(sessionID, 'join lobby', { success: false, message: 'No lobby with this ID'});
 	}
 
-	var username = this.sessionManager.getSessionProperty(sessionID, 'username');
+	this.sessionManager.getProperty(sessionID, 'username', function(err, username) {
 
-	if (!this.lobbyManager.lobbyExists(messageData.id)) {
-		return this.sendResponse(sessionID, 'join lobby', { success: false, message: 'No lobby with this ID'});
-	}
+		if (err) {
+			return self.sendResponse(sessionID, "join lobby", {
+				id: messageData.id,
+				success: false,
+				message: "Session error"
+			});	
+		}
 
-	var lobby = this.lobbyManager.getLobby(messageData.id);
-	lobby.join(username);
+		if (!self.lobbyManager.lobbyExists(messageData.id)) {
+			return self.sendResponse(sessionID, 'join lobby', { success: false, message: 'No lobby with this ID'});
+		}
 
-	this.sendResponse(sessionID, "join lobby", {
-		id: messageData.id,
-		success: true,
-		message: "Successfully joined lobby"
-	});	
+		var lobby = self.lobbyManager.getLobby(messageData.id);
+		lobby.join(username);
 
-	this.setUpLobbyListeners(sessionID, username, lobby);
+		self.sendResponse(sessionID, "join lobby", {
+			id: messageData.id,
+			success: true,
+			message: "Successfully joined lobby"
+		});	
+
+		self.setUpLobbyListeners(sessionID, username, lobby);	
+	});
+
+
 };
 
 LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username, lobby) {

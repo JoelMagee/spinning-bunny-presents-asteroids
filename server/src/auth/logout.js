@@ -21,7 +21,7 @@ var Logout = function(sessionManager) {
 		response.sessionID = sessionID;
 		response.data = {};
 
-		sessionManager.logoutUser(sessionID);
+		sessionManager.logout(sessionID);
 
 		response.data.success = true;
 		response.data.message = "Successfully logged out";

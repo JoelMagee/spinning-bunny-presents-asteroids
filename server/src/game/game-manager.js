@@ -12,8 +12,7 @@ GameIDGenerator.prototype.generateID = function() {
 	return this.currentID++;
 };
 
-var GameManager = function(sessionManager) {
-	this.sessionManager = sessionManager;
+var GameManager = function() {
 	this.gameIDGenerator = new GameIDGenerator();
 	this.gameIDMap = {};
 

@@ -16,6 +16,7 @@ var redis          = require('redis');
 
 var SocketHandler  = require('./src/sockethandler')(redis);
 var GlobalChat     = require('./src/globalchat')(redis);
+var SessionStorage = require('./src/session-storage')(redis);
 var SessionManager = require('./src/session-manager')();
 var LobbyManager   = require('./src/lobby/lobby-manager')();
 var GameManager    = require('./src/game/game-manager')(redis);
@@ -52,7 +53,7 @@ if (program.dev) {
 var models = require('./src/models/models');
 
 // Load main internal modules
-var sessionManager = new SessionManager();
+var sessionManager = new SessionManager(SessionStorage);
 var socketHandler = new SocketHandler(io, sessionManager);
 var globalChat = new GlobalChat(sessionManager);
 
