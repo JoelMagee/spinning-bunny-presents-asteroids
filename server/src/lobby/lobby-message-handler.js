@@ -64,14 +64,11 @@ LobbyMessageHandler.prototype.joinMessageReceived = function(sessionID, messageD
 	var username = this.sessionManager.getSessionProperty(sessionID, 'username');
 
 	if (!this.lobbyManager.lobbyExists(messageData.id)) {
-		this.sendResponse(sessionID, 'join lobby', { success: false, message: 'No lobby with this ID'});
+		return this.sendResponse(sessionID, 'join lobby', { success: false, message: 'No lobby with this ID'});
 	}
 
 	var lobby = this.lobbyManager.getLobby(messageData.id);
 	lobby.join(username);
-
-	console.log("LOBBY");
-	console.log(lobby);
 
 	this.sendResponse(sessionID, "join lobby", {
 		id: messageData.id,
@@ -95,23 +92,30 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 	var startGameSub = redis.createClient();
 	startGameSub.subscribe('launch game:' + sessionID);
 
+	var self = this;
+
 	var userJoin = function(username) {
-		this.sendResponse(sessionID, "user join lobby", { id: lobby.id, username: username });
+		self.sendResponse(sessionID, "user join lobby", { id: lobby.id, username: username });
 	};
 
 	var userLeave = function(username) {
-		this.sendResponse(sessionID, "user leave lobby", { id: lobby.id, username: username });
+		self.sendResponse(sessionID, "user leave lobby", { id: lobby.id, username: username });
 	};
 
 	var destroy = function() {
 		removeListeners();
-		this.sendResponse(sessionID, "leave lobby", { id: lobby.id, success: true, message: "The lobby has been destroyed so you have left" });
+		self.sendResponse(sessionID, "leave lobby", { id: lobby.id, success: true, message: "The lobby has been destroyed so you have left" });
 	};
 
 	var start = function(game) {
-		this.sendResponse(sessionID, "loading game", { id: lobby.id, success: true, message: "Game is loading" });
-		this.emit('loading game', sessionID, username, game)	
+		self.sendResponse(sessionID, "loading game", { id: lobby.id, success: true, message: "Game is loading" });
+		self.emit('loading game', sessionID, username, game)	
 	};
+
+	lobby.on('user join', userJoin);
+	lobby.on('user leave', userLeave);
+	lobby.on('lobby destroyed', destroy);
+	lobby.on('game start', start);
 
 	var removeListeners = function() {
 		lobby.removeListener('user join', userJoin);
@@ -125,14 +129,6 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 		destroySub.unsubscribe('destroy lobby:' + sessionID);
 		startGameSub.unsubscribe('launch game:' + sessionID);
 	};
-
-	lobby.on('user join', userJoin.bind(this));
-	lobby.on('user leave', userLeave.bind(this));
-	lobby.on('lobby destroyed', destroy.bind(this));
-	lobby.on('game start', start.bind(this));
-
-
-	var self = this;
 
 	leaveSub.on('message', function(channel, message) {
 		lobby.leave(username);
@@ -150,7 +146,6 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 		self.sendResponse(sessionID, "destroy lobby", { success: true, message: "Lobby successfully closed" });
 	});
 
-
 	startGameSub.on('message', function(channel, message) {
 		if (!lobby.getLeader() === username) {
 			//This user is not the lobby leader, they cannot destroy the lobby
@@ -160,7 +155,6 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 			self.emit('launch game', lobby);
 		}
 	});
-
 };
 
 LobbyMessageHandler.prototype.infoMessageReceived = function(sessionID, messageData) {
