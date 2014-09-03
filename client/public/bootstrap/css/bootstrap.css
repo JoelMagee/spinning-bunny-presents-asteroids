@@ -6229,6 +6229,12 @@ canvas {
 	left: 0;
 }
 
+#undoButton { 
+	position: absolute;
+	top: 0;
+	left:100px;
+}
+
 .screen {
 	display: none;
 }

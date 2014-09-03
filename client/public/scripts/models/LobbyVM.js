@@ -1,9 +1,8 @@
 define([
     'knockout',
     'jquery',
-	'models/Lobby',
-	'models/User'
-], function (ko, $, Lobby, User) {
+	'models/Lobby'
+], function (ko, $, Lobby) {
     'use strict';
 	
     var LobbyVM = function LobbyVM(socket) {
@@ -82,7 +81,7 @@ define([
 
 		this.socket.on('user leave lobby', function(response) {
 			console.log("Player left: " + response.username);
-			self.players.remove(function(item) { return item.name === response.username });
+			self.players.remove(function(item) { return item.name === response.username; });
 		});
 		
 		this.socket.on('destroy lobby', function(response) {
@@ -94,7 +93,7 @@ define([
 			}
 		});
 		
-		this.socket.on('start game' , function(response) { // change to 'launch game' on next update
+		this.socket.on('start game' , function(response) {
 			if (response.success) {
 				$('#lobbyScreen').hide();
 				console.log(response.message);
@@ -125,7 +124,7 @@ define([
 			}
 		},
 		startLobby: function () {
-			this.socket.emit('start game', {}); // change to 'launch game' on next update
+			this.socket.emit('launch game', {});
 		},
 		leaveLobby: function () {
 			this.socket.emit('leave lobby', {});

@@ -35,6 +35,19 @@ define([
 		this.socket.on('game loading', function(response) {
 			console.log(response.message);
 		});
+		 
+		this.socket.on('start game' , function(response) {
+			console.log(response);
+			self.started = true;
+			for (var user in response.data) {
+				if (response.data.hasOwnProperty(user)) {
+				var x = (response.data[user].position.x/10000)*self.SCREEN_WIDTH;
+				var y = (response.data[user].position.y/10000)*self.SCREEN_HEIGHT;
+				self._drawShip(x, y, user);
+				}
+				
+			}
+		});
 		
 		this.socket.on('turn result processed', function(response) {
 			console.log(response);
@@ -223,7 +236,6 @@ define([
 				
 				if (data.originalEvent.which === 3) {
 					console.log("right click");
-					console.log(self.world);
 					self.dragging = true;
 					self.firstDrag = true;
 				} else if (!moving) {
@@ -267,7 +279,7 @@ define([
 			
 			stage.mousemove = (function() {
 				var prevX;
-				var prevY
+				var prevY;
 			
 				return function (data) {
 					if (self.dragging) {

@@ -2,9 +2,8 @@ define([
 	'models/LobbyVM',
     'knockout',
     'jquery',
-	'models/Lobby',
-	'models/User'
-], function (LobbyVM, ko, $, Lobby, User) {
+	'models/Lobby'
+], function (LobbyVM, ko, $, Lobby) {
     'use strict';
 	
     var LobbyListVM = function LobbyListVM(socket) {
@@ -93,8 +92,8 @@ define([
 				success: function (data) {
 					data = [{"name":"User 1"},{"name":"User 2"}];
 					for(var i = 0; i<data.length; i++) {
-						var user = new User(data[i].name);
-						self.users.push(user);
+						// var user = new User(data[i].name);
+						self.users.push(data[i]);
 					}
 					console.log("loadedUsers");
 				}

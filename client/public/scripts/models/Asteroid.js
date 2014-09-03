@@ -6,8 +6,8 @@ define([
     var Asteroid = function Asteroid(midX, midY) {
         this.midX = midX;
         this.midY = midY;
-		var maxWidth = 60;
-		var minWidth = 20;
+		var maxWidth = 300;
+		var minWidth = 100;
 		this.color = 0x000000;
 		this.width = Math.floor(Math.random() * (maxWidth-minWidth)) + minWidth;
 		this.graphics = new PIXI.Graphics();
