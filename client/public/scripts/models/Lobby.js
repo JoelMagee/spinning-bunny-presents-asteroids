@@ -3,10 +3,11 @@ define([
 ], function (ko) {
     'use strict';
 
-    var Lobby = function Lobby(id, name, players) {
+    var Lobby = function Lobby(id, name, totPlayers) {
         this.id = id;
         this.name = name;
-		this.players = ko.observable(players);
+		this.totPlayers = ko.observable(totPlayers);
+		this.players = ko.observableArray();
     };
 	
     Lobby.prototype = {

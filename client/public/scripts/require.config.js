@@ -26,7 +26,7 @@ var require = {
 			deps: ['jquery']
 		},
 		'socketio': {
-		  exports: 'io'
+			exports: 'io'
 		}
     }
 };

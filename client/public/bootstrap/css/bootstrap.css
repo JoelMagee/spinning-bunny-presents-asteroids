@@ -6203,7 +6203,8 @@ button.close {
 /*# sourceMappingURL=bootstrap.css.map */
 
 .scrollable {
-    max-height: 246px;
+    min-height: 246px;
+	max-height: 246px;
     overflow-y: scroll;
 }
 
@@ -6216,10 +6217,58 @@ canvas {
 	z-index: -1;
 }
 
+#panLeftButton { 
+	position: absolute;
+	top: 0;
+	right: 320px;
+}
+
+#panUpButton { 
+	position: absolute;
+	top: 0;
+	right: 280px;
+}
+
+#panDownButton { 
+	position: absolute;
+	top: 0;
+	right: 240px;
+}
+
+#panRightButton { 
+	position: absolute;
+	top: 0;
+	right: 200px;
+}
+
+#zoomInButton { 
+	position: absolute;
+	top: 0;
+	right: 160px;
+}
+
+#zoomOutButton { 
+	position: absolute;
+	top: 0;
+	right: 120px;
+}
+
 #endGameButton { 
 	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+#endTurnButton { 
+	position: absolute;
+	top: 0;
+	left: 0;
 }
 
 .screen {
 	display: none;
+}
+
+.spaced {
+	margin: 10px 10px 0px;
 }

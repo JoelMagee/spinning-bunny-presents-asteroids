@@ -24,7 +24,7 @@
 							<form role="form" data-bind="submit: login">
 								<div class="form-group">
 									<label for="usernameInput">Username</label>
-									<input type="text" class="form-control" id="usernameInput" placeholder="Username" data-bind="value: username">
+									<input type="text" class="form-control" id="usernameInput" placeholder="Username" data-bind="value: username" autofocus>
 								</div>
 								<div class="form-group">
 									<label for="passwordInput">Password</label>
@@ -72,15 +72,20 @@
 		</div>
 		<div id="lobbyListScreen" class="screen container-fluid">
 			<div class="row">
-				<div class="col-md-2 col-md-offset-1">
+				<div class="col-md-4 col-md-offset-1">
 					<h1>Game lobbies</h1>
 				</div>
-				<div class="col-md-2 col-md-offset-7">
-					<button type="button" class="btn btn-default" data-bind="click: logout">Logout</button>
+				<div class="col-md-2 col-md-offset-5">
+					<button type="button" class="btn btn-default spaced" data-bind="click: logout">Logout</button>
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-md-6 col-md-offset-2">
+				<div class="col-md-2 col-md-offset-1">
+					<button class="btn btn-default spaced" data-bind="click: refreshLobbies">Refresh Lobby List</button>
+					<button class="btn btn-default spaced" data-bind="click: createLobby">Create Lobby</button>
+					<input class="spaced" data-bind="value: lobbyName">
+				</div>
+				<div class="col-md-6">
 					<div class="panel panel-default">
 						<div class="panel-heading">Open Lobbies</div>
 						<table class="table table-hover">
@@ -91,17 +96,24 @@
 									<th>Players</th>
 								</tr>
 							</thead>
+							<!-- ko if: lobbies().length -->
 							<tbody data-bind="foreach: lobbies">
-								<tr data-bind="click: $parent.joinLobby">
+								<tr data-bind="click: function () {$parent.joinLobby($data)}"> <!-- didn't work otherwise -->
 									<td data-bind="text: id "></td>
 									<td data-bind="text: name"></td>
-									<td data-bind="text: players"></td>
+									<td data-bind="text: totPlayers"></td>
+								</tr>
+							</tbody>
+							<!-- /ko -->
+							<tbody data-bind="if: lobbies().length === 0">
+								<tr >
+									<td colspan="3" style="text-align:center">No lobbies</td>
 								</tr>
 							</tbody>
 						</table>
 					</div>
 				</div>
-				<div class="col-md-2 col-md-offset-1">
+				<div class="col-md-2">
 					<div class="panel panel-default">
 						<div class="panel-heading">Users Online</div>
 						<ul class="list-group" data-bind="foreach: users">
@@ -116,7 +128,7 @@
 				<br/>
 				<div class="col-md-6 col-md-offset-3">
 					<div class="panel panel-default">
-						<div class="panel-heading">Lobby name</div>
+						<div class="panel-heading" data-bind="text: name">Lobby name</div>
 						<br/>
 						<div class="row">
 							<div class="  col-md-4 col-md-offset-1">
@@ -130,24 +142,25 @@
 							<div class="col-md-5 col-md-offset-1">
 								<div class="panel panel-default">
 									<div class="panel-heading">Chat</div>
-										<ul class="list-group scrollable" data-bind="foreach: messages">
-											<li class="list-group-item" data-bind="text: $data"></li>
-										</ul>
+									<ul id="chatbody" class="list-group scrollable" data-bind="foreach: messages">
+										<li class="list-group-item" data-bind="text: $data"></li>
+									</ul>
+									<form role="form">
 										<div class="input-group">
-										  <input type="text" class="form-control square" placeholder="..." data-bind="value: message">
-										  <span class="input-group-btn">
-											<button class="btn btn-default square" type="button" data-bind="click: sendMessage"><span class="glyphicon glyphicon-comment"></span></button>
-										  </span>
+											<input type="text" class="form-control square" placeholder="..." data-bind="value: message">
+												<span class="input-group-btn">
+													<button class="btn btn-default square" type="submit" data-bind="click: sendMessage"><span class="glyphicon glyphicon-comment"></span></button>
+												</span>
 										</div>
+									</form>
 								</div>
 							</div>
 						</div>
 						<div class="row">
-							<div class="col-md-1 col-md-offset-1">
-								<button type="button" class="btn btn-success" data-bind="click: startLobby">Start</button>								
-							</div>
-							<div class="col-md-1">
-								<button class="btn btn-danger" data-bind="click: leaveLobby">Leave</button>
+							<div class="col-md-5 col-md-offset-1">
+								<button type="button" class="btn btn-success" data-bind="click: startLobby">Start</button>
+								<button class="btn btn-warning" data-bind="click: leaveLobby">Leave</button>
+								<button class="btn btn-danger" data-bind="click: closeLobby">Close lobby</button>
 							</div>
 						</div>
 						<br/>
@@ -156,7 +169,28 @@
 			</div>
 		</div>
 		<div id="gameScreen" class="screen">
+			<button id="endTurnButton" class="btn btn-danger" data-bind="click: endTurn">End Turn</button>
+			<button id="panLeftButton" class="btn btn-default" data-bind="click: panLeft"><span class="glyphicon glyphicon-arrow-left"></span></button>
+			<button id="panUpButton" class="btn btn-default" data-bind="click: panUp"><span class="glyphicon glyphicon-arrow-up"></span></button>
+			<button id="panDownButton" class="btn btn-default" data-bind="click: panDown"><span class="glyphicon glyphicon-arrow-down"></span></button>
+			<button id="panRightButton" class="btn btn-default" data-bind="click: panRight"><span class="glyphicon glyphicon-arrow-right"></span></button>
+			<button id="zoomInButton" class="btn btn-default" data-bind="click: zoomIn"><span class="glyphicon glyphicon-zoom-in"></span></button>
+			<button id="zoomOutButton" class="btn btn-default" data-bind="click: zoomOut"><span class="glyphicon glyphicon-zoom-out"></span></button>
 			<button id="endGameButton" class="btn btn-danger" data-bind="click: endGame">Leave game</button>
+			<!--<h1>Guess an integer between 1-100</h1>
+			<div class="col-md-3">
+				<p>Guess a number: <input data-bind="value: guess"></p>
+				<button data-bind="click: sendGuess">Send guess</button>
+				<p data-bind="visible: waiting">----------- Waiting for all guesses -----------</p>
+			</div>
+			<div class="col-md-3">
+				<p>The number was: <span data-bind="text: number"></span></p>
+				<p>The winner was: <span data-bind="text: winner"></span></p>
+				<p>The current closest is: <span data-bind="text: closest"></span></p>
+			</div>
+			<div class="col-md-3">
+				<p>Winner guessed: <span data-bind="text: winnerGuess"></span></p>
+			</div>-->
 		</div>
 	</body>
 </html>

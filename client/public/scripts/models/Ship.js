@@ -9,11 +9,13 @@ define([
 		this.width = width;
 		this.color = color;
 		this.graphics = new PIXI.Graphics();
+		this.dest = new PIXI.Point(this.midX+40, this.midY); // +40 from original
 		
     };
 	
     Ship.prototype = {
 		draw: function () {	
+			this.graphics.clear();
 			this.graphics.beginFill(this.color);
 			this.graphics.moveTo(0-this.width/4, 0);
 			this.graphics.lineTo(0-this.width/2, 0-this.width/2);
@@ -32,9 +34,16 @@ define([
 		},
 		destroy: function () {
 				//ship gets destroyed
-				this.graphics.beginFill(0xFFFF00);
-				this.graphics.drawCircle(0, 0, this.width/3);
-				this.graphics.endFill();
+				
+				var self = this;
+				var interval = setInterval(function () {
+					if (self.graphics.alpha > 0) {
+						self.graphics.alpha -= 0.25;
+					} else {
+						clearInterval(interval);
+					}
+				}, 500);
+				
 		}
     };
 
