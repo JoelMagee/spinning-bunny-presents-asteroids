@@ -24,7 +24,7 @@
 var events = require('events');
 var util = require("util");
 
-var ChannelUtils = require('../channel-utils')();
+var ChannelUtils = require('./channel-utils')();
 
 var redis;
 

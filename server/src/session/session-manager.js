@@ -16,7 +16,7 @@ SessionGenerator.prototype.generateSessionID = function() {
 var SessionManager = function(SessionStorage) {
 	this.sessionStorage = new SessionStorage();
 	this.sessionStorage.connect();
-	//this.sessions = {};
+	
 	this.sessionGenerator = new SessionGenerator();
 };
 
