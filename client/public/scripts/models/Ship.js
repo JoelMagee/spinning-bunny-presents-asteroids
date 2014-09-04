@@ -1,16 +1,38 @@
 define([
-	'pixi'
-], function (PIXI) {
+	'pixi',
+	'models/Helper'
+], function (PIXI, Helper) {
     'use strict';
 
-    var Ship = function Ship(midX, midY, width, color) {
-        this.midX = midX;
-        this.midY = midY;
-		this.width = width;
-		this.color = color;
-		this.graphics = new PIXI.Graphics();
-		this.dest = new PIXI.Point(this.midX+40, this.midY); // +40 from original
+    var Ship = function Ship(username) {
+	
+		var colors = [0x0000FF, 0xFFFF00, 0xFF0000];
 		
+		this.width = 200;
+		this.color = colors[Math.floor(Math.random()*3)];
+		this.color = colors[0];
+		this.graphics = new PIXI.Graphics();
+		this.ghostGraphics = new PIXI.Graphics();
+		this.lineGraphics = new PIXI.Graphics();
+		this.text = new PIXI.Text(username, {font: '100px Verdana'});
+		this.username = username;
+		this.text.anchor.x = 0.5;
+		this.text.anchor.y = 0.5;
+		this.ghostAlpha = 0.5;
+		this.rotation = 0;
+		
+		this.startPosition = {}; //Start position for each turn
+		this.position = {}; //Current position
+		this.destination = {}; //Next destination for replay
+		this.previousPrediction = {}; //Prediction point from previous move
+		this.prediction = {}; //Next prediction from ship momentum
+
+		this.currentMove = {};
+		
+		this.replay = false; //Whether the ship is currently animating
+		this.timeElapsed = 0; //Time elapsed in ms in current replay
+		this.replayTime = 2000; 
+
     };
 	
     Ship.prototype = {
@@ -22,15 +44,79 @@ define([
 			this.graphics.lineTo(0+this.width/2, 0);
 			this.graphics.lineTo(0-this.width/2, 0+this.width/2);
 			this.graphics.endFill();
-						
-			this.graphics.x = this.midX;
-			this.graphics.y = this.midY;
+			
+			this.graphics.x = this.position.x;
+			this.graphics.y = this.position.y;
+			
+			this.text.x = this.position.x;
+			this.text.y = this.position.y-this.width;
+			
+			this.graphics.rotation = this.rotation;
+			
 		},
-		rotateToPoint: function(x, y) {
-			var deltaY = y - this.midY;
-			var deltaX = x - this.midX;
-			var angle = Math.atan2(deltaY, deltaX);
-			this.graphics.rotation = angle;
+		update: function (timeDif) {
+			if (!this.replay) {
+				return false;
+			}
+			
+			this.timeElapsed += timeDif;
+			
+			var t = 1;
+			
+			if (this.timeElapsed <= this.replayTime) {
+				t = this.timeElapsed/this.replayTime;
+			}
+			
+			this.position = Helper.getBezier(t, this.startPosition, this.previousPrediction, this.destination);
+			var delta = Helper.getBezier(t+0.01, this.startPosition, this.previousPrediction, this.destination);
+			delta.x = delta.x-this.position.x;
+			delta.y = delta.y-this.position.y;
+			this.rotation = Math.atan2(delta.y, delta.x);
+		},
+		setDestination: function(destination, prediction) {
+			console.log("[Ship] Setting destination to: " + destination.x + ", " + destination.y + " and prediction to: " + prediction.x + ", " + prediction.y);
+			this.startPosition = this.position;
+			this.destination = destination;
+			this.previousPrediction = this.prediction;
+			this.prediction = prediction;
+		},
+		startReplay: function() {
+			this.replay = true;
+			this.timeElapsed = 0;
+		},
+		setInitialPosition: function(position) {
+			console.log("[Ship] Setting initial position: " + position.x + ", " + position.y);
+			this.startPosition = position;
+			this.position = position;
+			this.prediction = position;
+			this.previousPrediction = position;
+		},
+		setCurrentMove: function(x, y) {
+			console.log("[Ship] Setting current move position to: " + x + ", " + y);
+			this.currentMove.x = x;
+			this.currentMove.y = y;
+		},
+		drawGhost: function (x, y) {
+			
+			// var transformX = x - this.position.x;
+			// var transformY = y - this.position.y;
+			
+			this.ghostGraphics.beginFill(this.color, this.ghostAlpha);
+			this.ghostGraphics.moveTo(0-this.width/4, 0);
+			this.ghostGraphics.lineTo(0-this.width/2, 0-this.width/2);
+			this.ghostGraphics.lineTo(0+this.width/2, 0);
+			this.ghostGraphics.lineTo(0-this.width/2, 0+this.width/2);
+			this.ghostGraphics.endFill();
+			
+			this.ghostGraphics.x = x;
+			this.ghostGraphics.y = y;
+			
+			var prevPos = Helper.getBezier(1, this.position, this.prediction, {'x': x, 'y': y});
+			var delta = Helper.getBezier(1+0.01, this.position, this.prediction, {'x': x, 'y': y});
+			delta.x = delta.x-prevPos.x;
+			delta.y = delta.y-prevPos.y;
+			this.ghostGraphics.rotation = Math.atan2(delta.y, delta.x);
+			
 		},
 		destroy: function () {
 				//ship gets destroyed

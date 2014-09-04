@@ -1,12 +1,12 @@
 define([
     'knockout',
     'jquery',
-	'models/User',
+	'models/Session',
 	'bootstrap'
-], function (ko, $, User) {
+], function (ko, $, Session) {
     'use strict';
 	
-    var LoginVM = function LoginVM(socket) {
+    var LoginVM = function LoginVM(socket, session) {
 	
 		var self = this;
 	
@@ -19,12 +19,14 @@ define([
 		this.showError = ko.observable(false);
 	
 		this.socket = socket;
+		this.session = session;
 		
 		this.socket.on('login', function(response) {
 			if (response.success) {
 				self.socket.emit('info lobby', {}); // request the lobbies will logging in
 				self.showError(false);
 				console.log("logged in as " + self.username() + " with password " + self.password());
+				self.session.username = self.username();
 				self.username("");
 				self.password("");
 				$('#loginScreen').hide();

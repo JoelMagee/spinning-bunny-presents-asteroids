@@ -4,9 +4,10 @@ define([
 	'models/LobbyListVM',
 	'models/LobbyVM',
 	'models/LoginVM',
-	'models/GameVM',
+	'models/GameVM2',
+	'models/Session',
 	'socketio'
-], function (ko, $, LobbyListVM, LobbyVM, LoginVM, GameVM, io) {
+], function (ko, $, LobbyListVM, LobbyVM, LoginVM, GameVM, Session, io) {
     'use strict';
 	
 	var socket = io('http://sl-ws-230:8500/');
@@ -16,11 +17,12 @@ define([
 		console.log("Connected to websocket on localhost");
 	});
 	
+	var session = new Session();
 	
-	var loginVM = new LoginVM(socket);
+	var loginVM = new LoginVM(socket, session);
 	var lobbyListVM = new LobbyListVM(socket);
 	var lobbyVM = new LobbyVM(socket);
-	var gameVM = new GameVM(socket);
+	var gameVM = new GameVM(socket, session);
 	
 	lobbyListVM.on('lobby-select', function(lobby) {
 		lobbyVM.displayLobby(lobby);

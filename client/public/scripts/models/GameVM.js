@@ -35,6 +35,19 @@ define([
 		this.socket.on('game loading', function(response) {
 			console.log(response.message);
 		});
+		 
+		this.socket.on('start game' , function(response) {
+			console.log(response);
+			self.started = true;
+			for (var user in response.data) {
+				if (response.data.hasOwnProperty(user)) {
+				var x = (response.data[user].position.x/10000)*self.SCREEN_WIDTH;
+				var y = (response.data[user].position.y/10000)*self.SCREEN_HEIGHT;
+				self._drawShip(x, y, user);
+				}
+				
+			}
+		});
 		
 		this.socket.on('turn result processed', function(response) {
 			console.log(response);
@@ -65,6 +78,9 @@ define([
     GameVM.prototype = {
 		endGame: function () {
 			console.log("game over");
+			
+			this.socket.emit('info lobby', {});
+			
 			$('#gameScreen').hide();
 			$('#lobbyListScreen').show();
 			
@@ -77,62 +93,61 @@ define([
 		endTurn: function () {
 			console.log("turn ended");
 		},
-		zoomIn: function () {
+		_zoomIn: function (mouseX, mouseY) {
 			if (this.world.scaledAmount < 2) {
 			
 				console.log("zooming in");
 				this.world.scale.x *= 2;
 				this.world.scale.y *= 2;
 				this.world.scaledAmount *= 2;
+				
+				var startX = this.world.pannedAmountX;
+				var startY = this.world.pannedAmountY;
+				
+				var changeX = mouseX - startX;
+				var changeY = mouseY - startY;
+				
+				this.world.x -= changeX;
+				this.world.pannedAmountX -= changeX;
+				this.world.y -= changeY;
+				this.world.pannedAmountY -= changeY;
 			
 			}
 		},
-		zoomOut: function () {
+		_zoomOut: function (mouseX, mouseY) {
 			if (this.world.scaledAmount > 1/2) {
 			
 				console.log("zooming out");
 				this.world.scale.x /= 2;
 				this.world.scale.y /= 2;
 				this.world.scaledAmount /= 2;
+				
+				var startX = this.world.pannedAmountX;
+				var startY = this.world.pannedAmountY;
+				
+				var changeX = mouseX - startX;
+				var changeY = mouseY - startY;
+				
+				this.world.x += changeX/2;
+				this.world.pannedAmountX += changeX/2;
+				this.world.y += changeY/2;
+				this.world.pannedAmountY += changeY/2;
 			
 			}		
-		},
-		panLeft: function () {
-		
-			console.log("panning world 50px left");	
-			this.world.x += 50;
-			this.world.pannedAmountX += 50;
-		
-		},
-		panUp: function () {
-		
-			console.log("panning world 50px up");
-			this.world.y += 50;
-			this.world.pannedAmountY += 50;
-		
-		},
-		panDown: function () {
-		
-			console.log("panning world 50px down");
-			this.world.y -= 50;
-			this.world.pannedAmountY -= 50;
-		
-		},
-		panRight: function () {
-		
-			console.log("panning world 50px right");			
-			this.world.x -= 50;
-			this.world.pannedAmountX -= 50;
-		
 		},
 		sendGuess: function () {
 			this.socket.emit('game turn', {"guess": ((this.guess() >= 1 && this.guess() <= 100) ? this.guess() : 0)});
 		},
 		test: function () {
 		
-			var SCREEN_WIDTH = $(document).width();
-			var SCREEN_HEIGHT = $(document).height();
+			var self = this;
 			
+			this.dragging = false;
+			this.firstDrag = false;
+		
+			var SCREEN_WIDTH = $(window).width();
+			var SCREEN_HEIGHT = $(window).height();
+					
 			// create an new instance of a pixi stage
 			var stage = new PIXI.Stage(0x66FF99);
 			
@@ -149,6 +164,29 @@ define([
 			// create a renderer instance.
 			var renderer = PIXI.autoDetectRenderer(SCREEN_WIDTH, SCREEN_HEIGHT);
 
+			// simple resize listener - can be expanded on
+			$(window).resize(resizeRenderer);
+			function resizeRenderer() {
+			
+				console.log("resizing");
+				
+				renderer.resize($(window).width(), $(window).height());
+
+			}
+			
+			// mousewheel event handler for zooming in and out
+			$('#gameScreen').on('mousewheel', function(e) {
+				if(e.originalEvent.wheelDelta < 0) {
+					//scroll down
+					self._zoomOut(e.clientX, e.clientY);
+				} else {
+					//scroll up
+					self._zoomIn(e.clientX, e.clientY);
+				}
+				//prevent page from scrolling
+				return false;
+			});
+			
 			// add the renderer view element to the DOM
 			$('#gameScreen').append(renderer.view);
 
@@ -194,9 +232,13 @@ define([
 				return new PIXI.Point(x, y);
 			}
 			
-			stage.mousedown = function () {
+			stage.mousedown = function (data) {
 				
-				if (!moving) {
+				if (data.originalEvent.which === 3) {
+					console.log("right click");
+					self.dragging = true;
+					self.firstDrag = true;
+				} else if (!moving) {
 				
 					moving = true;
 
@@ -210,7 +252,6 @@ define([
 						if (percent <= 1) {
 							percent += 0.01;
 							drawCurve = false;
-							// blueShip.graphics.clear();
 							newPos = getBezier(percent, startPoint, blueShip.dest, endPoint);
 							blueShip.rotateToPoint(newPos.x, newPos.y);
 							blueShip.midX = newPos.x;
@@ -230,7 +271,46 @@ define([
 				
 				}
 
-			};	
+			};
+			
+			stage.mouseup = function () {
+				self.dragging = false;
+			};
+			
+			stage.mousemove = (function() {
+				var prevX;
+				var prevY;
+			
+				return function (data) {
+					if (self.dragging) {
+						
+						if (self.firstDrag) {
+							prevX = data.global.x;
+							prevY = data.global.y;
+							self.firstDrag = false;
+						}
+						
+						var changeX = data.global.x-prevX;
+						var changeY = data.global.y-prevY;
+						
+						self.world.x += changeX;
+						self.world.pannedAmountX += changeX;
+						self.world.y += changeY;
+						self.world.pannedAmountY += changeY;
+						
+						prevX = data.global.x;
+						prevY = data.global.y;
+						
+						/* 
+							Add a check in here somewhere that means that
+							the world can only be panned a certain distance
+							based on pannedAmountX and pannedAmountY
+						*/
+						
+					}
+				};
+				
+			})();
 
 			bunny.mousedown = function () {
 				console.log("pressed bunny");
@@ -270,8 +350,8 @@ define([
 			
 			for (var j = 0; j < 30; j++) {
 				// randomly generates an asteroid x and y with relation to the screen size
-				var asteroidX = Math.floor(Math.random() * $(document).width());
-				var asteroidY = Math.floor(Math.random() * $(document).height());
+				var asteroidX = Math.floor(Math.random() * $(window).width());
+				var asteroidY = Math.floor(Math.random() * $(window).height());
 				
 				if (j === 0) {
 					// for the first asteroid place it anywhere
@@ -282,12 +362,12 @@ define([
 				} else {	
 					// for the following asteroids check whether it passes the check
 					while (!pass) {
-						asteroidX = Math.floor(Math.random() * $(document).width());
-						asteroidY = Math.floor(Math.random() * $(document).height());
+						asteroidX = Math.floor(Math.random() * $(window).width());
+						asteroidY = Math.floor(Math.random() * $(window).height());
 						// loop through the asteroids in the array
 						for (var k = j-1; k >= 0; k--) {
 							// check whether the distance between the generated points is large enough
-							if (dist(new PIXI.Point(asteroidX, asteroidY), new PIXI.Point(asteroids[k].midX, asteroids[k].midY)) > 60) {
+							if (dist(new PIXI.Point(asteroidX, asteroidY), new PIXI.Point(asteroids[k].midX, asteroids[k].midY)) > 60 && asteroidX > 30 && asteroidX < $(window).width()-30 && asteroidY > 30 && asteroidY < $(window).height()-30) { //additional checks to make sure that the asteroids fit in the screen, just leave in the original dist check if that doesn't matter
 								pass = true;
 							} else {
 								//break this for loop and start again with another randomly generated x and y
