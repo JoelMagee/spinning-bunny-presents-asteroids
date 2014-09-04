@@ -43,9 +43,10 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			console.log("Created new session for client with ID: " + sessionID);
 		}
 
+		//Creation of socketClient also sends session message to client,
+		//should probably move that out of constructor
 		var socketClient = new SocketClient(sessionID, connection);
 
-		
 		outputSubscriber.psubscribe('output message:' + sessionID);
 		outputSubscriber.subscribe('output message');
 
@@ -284,7 +285,7 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		self.inputPublisher.publish('info lobby:' + sessionID, JSON.stringify(queueData));
 	});
 
-	connection.on('start game', function(data) {
+	connection.on('launch game', function(data) {
 		if (sessionID === undefined) {
 			//Nothing happens, they never requested a session
 			self.sendNoSessionError(connection);
@@ -302,7 +303,7 @@ SocketHandler.prototype.clientConnected = function(connection) {
 			data: data
 		}
 
-		self.inputPublisher.publish('start game:' + sessionID, JSON.stringify(queueData));
+		self.inputPublisher.publish('launch game:' + sessionID, JSON.stringify(queueData));
 	});
 
 	connection.on('game turn', function(data) {
@@ -340,10 +341,8 @@ var SocketClient = function(sessionID, connection) {
 	this.connection = connection;
 
 	//Send the client it's session ID so it can be saved
-	connection.emit('session', { sessionID: sessionID });
+	connection.emit('session', { sessionID: sessionID, success: true });
 };
-
-
 
 module.exports = function(_redis) {
 	redis = _redis;

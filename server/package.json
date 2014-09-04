@@ -13,10 +13,9 @@
     "mongoose": "~3.8.x",
     "morgan": "~1.2.x",
     "redis": "0.12.x",
-    "socket.io": "~1.0.x"
+    "socket.io": "~1.0.x",
+    "xtend": "4.0.x"
   },
-  "dev-dependencies": {
-    "jasmine-node": "^1.14.5"
-  },
+  "dev-dependencies": { },
   "main": "server.js"
 }

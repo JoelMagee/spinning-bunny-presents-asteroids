@@ -1,0 +1,227 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Sockets Test for Spinning Bunny</title>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
+		<script>
+
+			var $joelButton;
+			var $samButton;
+
+			var username;
+
+			var joinCount = 1;
+
+			$(document).ready(function() {
+				$joelButton = $('#joel');
+				$samButton = $('#sam');
+				$deanButton = $('#dean');
+
+				$joelButton.on('click', function() {
+					$joelButton.attr('disabled', 'disasbled');
+					$samButton.attr('disabled', 'disasbled');
+					$deanButton.attr('disabled', 'disasbled');
+					username = "joel";
+					start();
+				});
+
+				$samButton.on('click', function() {
+					$joelButton.attr('disabled', 'disasbled');
+					$samButton.attr('disabled', 'disasbled');
+					$deanButton.attr('disabled', 'disasbled');
+					username = "sam";
+					start();
+				});
+
+				$deanButton.on('click', function() {
+					$joelButton.attr('disabled', 'disasbled');
+					$samButton.attr('disabled', 'disasbled');
+					$deanButton.attr('disabled', 'disasbled');
+					username = "dean";
+					start();
+				});
+			});
+
+			var start = function() {
+				var $statusArea = $("#status-area");
+
+				var updateStatus = function(message) {
+					$statusArea.append("<p>" + message + "</p>");
+				};
+
+				var delayTime = 1000;
+
+				var delay = function(fn) {
+					setTimeout(fn,delayTime);
+				}
+
+				//Where we store the lobby ID after connection 1 has created it
+				var lobbyID;
+
+				//Create connection - 1
+				var socket1 = io();
+				updateStatus("Connection 1 created");
+
+				//Send session message - 1
+				socket1.emit('session', {});	
+
+				//Send sign in message - 1
+
+				socket1.on('session', function(e) {
+					if (e.success) {
+						delay(function() {
+							updateStatus("Connection 1 - Session creation successful, logging in");
+							socket1.emit('login', {
+								username: username,
+								password: "123"
+							});
+						});
+					} else {
+						updateStatus("ERROR - session 1 creation failed");
+					}
+				});
+				
+
+				//Send create lobby message - 1
+				socket1.on('login', function(e) {
+					if (e.success) {
+						delay(function() {
+							updateStatus("Connection 1 - Login successful, requesting lobby info");
+							socket1.emit('info lobby', {});
+						});
+					} else {
+						updateStatus("ERROR - session 1 login failed");
+					}
+				});
+
+				socket1.on('info lobby', function(e) {
+					if (e.success) {
+						if (e.lobbyData.length > 0) {
+							updateStatus("Lobby info message recieved, lobby exists, attempting to join");
+							//Lobby is already there, join it
+							lobbyID = e.lobbyData[0].id,
+							socket1.emit("join lobby", { id: lobbyID });
+						} else {
+							//Lobby is not there, this client creates it
+							updateStatus("No lobbys, creating one");
+							socket1.emit("create lobby", { name: "Test lobby" });
+
+							socket1.on('user join lobby', function(e) {
+								delay(function() {
+									joinCount++;
+									if (joinCount === 2) {
+										updateStatus("Another user has joined, starting game");
+										socket1.emit('launch game', {});			
+									}
+								});
+							});
+						}
+					} else {
+						updateStatus("ERROR - Lobby info request failed");
+					}
+				});
+
+				//Send join lobby message - 1
+				socket1.on('create lobby', function(e) {
+					if (e.success) {
+						delay(function() {
+							updateStatus("Lobby creation successful, joining lobby");
+							lobbyID = e.id;
+							socket1.emit('join lobby', { id: lobbyID });
+						});
+					} else {
+						updateStatus("ERROR - session 1 create lobby failed");
+					}
+				});
+
+				socket1.on('join lobby', function(e) {
+					if (e.success) {
+						updateStatus("Joining lobby successful");
+					} else {
+						updateStatus("Joining lobby failed");
+					}
+				});
+
+				socket1.on('launch game', function(e) {
+					if (e.success) {
+						updateStatus("game launch successful");
+					} else {
+						updateStatus("ERROR - session 1 game launch failed");
+					}
+				});
+
+				socket1.on('loading game', function(e) {
+					updateStatus("game loading message recieved");
+				});
+
+				socket1.on('start game', function(e) {
+					updateStatus("game start message recieved");
+					updateStatus("Starting position - " + e.data[username].position.x + ", " + e.data[username].position.y);
+
+					delay(function() {
+						var x = Math.random() * 10000;
+						var y = Math.random() * 10000;
+
+						updateStatus("Adding game turn - " + x + ", " + y);
+
+						socket1.emit('game turn', {
+							destination: {
+								x: x,
+								y: y
+							}
+						});
+					});
+				});
+
+				socket1.on('game turn', function(e) {
+					if (e.success) {
+						updateStatus("Game turn submission successful");
+					} else {
+						updateStatus("Game turn submission failed");
+					}
+				});
+
+				socket1.on('turn result', function(e) {
+					updateStatus("Game turn result recieved");
+					e.turnResult.moves.forEach(function(e, i) {
+						updateStatus(e.username + " - " + e.position.x + ", " + e.position.y);
+					});
+					updateStatus("---");
+
+					delay(function() {
+						var x = Math.random() * 10000;
+						var y = Math.random() * 10000;
+
+						updateStatus("Adding game turn - " + x + ", " + y);
+
+						socket1.emit('game turn', {
+							destination: {
+								x: x,
+								y: y
+							}
+						});
+					});
+				});
+
+
+				socket1.on('game end', function(e) {
+					updateStatus("Game ended");
+				});
+			};
+			
+
+
+
+		</script>
+	</head>
+	<body>
+		<button id="joel">Start as Joel</button>
+		<button id="sam">Start as Sam</button>
+		<button id="dean">Start as Dean</button>
+		<h2>Status</h2>		
+		<div id="status-area">
+			
+		</div>
+	</body>
+</html>

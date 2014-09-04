@@ -1,0 +1,188 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>pixi.js example 1</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 10px;
+			background-color: #fff;
+			font-family: arial, sans-serif;
+		}
+	</style>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="/assets/scripts/pixi.js"></script>
+	
+</head>
+<body>
+	<h2>Quadratic Curve Collision Solver</h2>
+	<p>Mouse x: <span id="m-x"></span> y: <span id="m-y"></span></p>
+<script>
+
+	var mx = $("#m-x");
+	var my = $("#m-y");
+
+	// create an new instance of a pixi stage
+	var stage = new PIXI.Stage(0xffffff);
+
+	// create a renderer instance
+	var renderer = PIXI.autoDetectRenderer(1400, 800, null, false, true);
+	// arguments: width, height, view, transparent, antialias
+	
+	// add the renderer view element to the DOM
+	document.body.appendChild(renderer.view);
+	
+	requestAnimFrame( animate );
+	
+	// create a texture from an image path
+	var texture = PIXI.Texture.fromImage("assets/bunny.png");
+	// create a new Sprite using the texture
+	var bunny = new PIXI.Sprite(texture);
+	
+	// center the sprites anchor point
+	bunny.anchor.x = 0.5;
+	bunny.anchor.y = 0.5;
+	
+	// move the sprite t the center of the screen
+	bunny.position.x = 30;
+	bunny.position.y = 30;
+	
+	stage.addChild(bunny);
+
+	var lastTime = Date.now();
+	var timeSinceLastFrame = 0;
+
+	var lines = [];
+	var dots = [];
+
+	var LineCreator = function() {
+		var currentPoints = [];
+		return function(point) {
+			currentPoints.push(point);
+
+			// if(currentPoints.length === 3) {
+			// 	lines.push(lineDrawer(currentPoints));
+			// 	currentPoints = [];
+			// }
+
+			if(currentPoints.length === 3) {
+
+				lines.push(lineDrawer(currentPoints, 0x000000, true));
+
+
+				currentPoints = [];
+			}
+		};
+	};
+
+	var lineCreator = LineCreator();
+
+	var lineDrawer = function(linePoints, color, addText) {
+
+		var line = new PIXI.Graphics();
+
+		stage.addChild(line);
+
+		var c1 = new PIXI.Graphics();
+		c1.lineStyle (2, 0xFF0000, 1);
+		c1.beginFill(this.colour);
+		c1.drawCircle(linePoints[0].x, linePoints[0].y, 3);
+		var c2 = new PIXI.Graphics();
+		c2.lineStyle (2, 0xFF0000, 1);
+		c2.beginFill(this.colour);
+		c2.drawCircle(linePoints[1].x, linePoints[1].y, 3);
+		var c3 = new PIXI.Graphics();
+		c3.lineStyle (2, 0xFF0000, 1);
+		c3.beginFill(this.colour);
+		c3.drawCircle(linePoints[2].x, linePoints[2].y, 3);
+
+		stage.addChild(c1);
+		stage.addChild(c2);
+		stage.addChild(c3);
+
+		if (addText) {
+			var p1Text = new PIXI.Text(linePoints[0].x + ", " + linePoints[0].y, { font: "10px Arial", fill: "#999999", align: "center", stroke: "#FFFFFF" });
+				p1Text.position.x = linePoints[0].x + 10;
+				p1Text.position.y = linePoints[0].y + 10;
+
+			var p2Text = new PIXI.Text(linePoints[1].x + ", " + linePoints[1].y, { font: "10px Arial", fill: "#999999", align: "center", stroke: "#FFFFFF" });
+				p2Text.position.x = linePoints[1].x + 10;
+				p2Text.position.y = linePoints[1].y + 10;
+
+			var p3Text = new PIXI.Text(linePoints[2].x + ", " + linePoints[2].y, { font: "10px Arial", fill: "#999999", align: "center", stroke: "#FFFFFF" });
+				p3Text.position.x = linePoints[2].x + 10;
+				p3Text.position.y = linePoints[2].y + 10;
+
+			stage.addChild(p1Text);
+			stage.addChild(p2Text);
+			stage.addChild(p3Text);
+		}
+
+		return function() {
+			line.clear();
+			line.lineStyle(2, color, 1);
+			line.moveTo(linePoints[0].x, linePoints[0].y);
+			line.quadraticCurveTo(linePoints[1].x, linePoints[1].y, linePoints[2].x, linePoints[2].y);
+		}
+	};
+
+	lineCreator({ x:100, y:100 });
+	lineCreator({ x:200, y:400 });
+	lineCreator({ x:300, y:100 });
+
+
+	lineCreator({ x:100, y:300 });
+	lineCreator({ x:200, y:0 });
+	lineCreator({ x:300, y:300 });
+
+	var CollisionDetector = function() {
+		this.lines = [];
+		this.collisions = [];
+	};
+
+	CollisionDetector.prototype.addLine = function(line) {
+		this.lines.push(line);
+
+		if (this.lines.length > 2) {
+
+		}
+	};
+
+	CollisionDetector.prototype.checkForCollisions = function() {
+
+	};
+
+	CollisionDetector.prototype.drawCollisions = function() {
+
+	};
+
+	// var addDot(x, y) {
+	// 	dots.push({x: x, y: y});
+	// }
+
+	function animate() {
+	    var now = Date.now();
+		timeSinceLastFrame = now - lastTime;
+		lastTime = now;
+
+	    requestAnimFrame(animate);
+
+	    mx.html(stage.getMousePosition ().x);
+	    my.html(stage.getMousePosition ().y);
+	    
+	    stage.mousedown = function(mouseData) {
+	    	lineCreator({ x: stage.getMousePosition ().x, y: stage.getMousePosition ().y });
+		}
+
+		for (var i = 0; i < lines.length; i++) {
+			lines[i](); //Draw each line in the queue
+		}
+
+		renderer.render(stage);	
+	}
+
+
+
+</script>
+</body>
+</html>

@@ -1,7 +1,8 @@
 /*jslint white: true node: true */
 
 var redis;
-var Game = require('./guessing-game')();
+var GameLogic = require('./asteroids-logic')();
+var Game = require('./asteroids-game')(GameLogic);
 
 var GameIDGenerator = function() {
 	this.currentID = 0;
@@ -39,17 +40,17 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 	var game = _game;
 	var self = this;
 
-
 	//Start game procedure once all expected clients have joined
 	var startGame = function() {
 		self._sendResponse(sessionID, "start game", {
 			success: true,
 			message: "Game starting",
-			id: game.id
+			id: game.id,
+			data: game.getStartData()
 		});
 	};
 
-	game.once('all players joined', startGame);
+	game.once('game loaded', startGame);
 
 	//General game events
 	var startTurn = function(turnNumber) {
@@ -58,11 +59,16 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 	};
 
 	var turnResultProcessed = function(turnResult) {
-		self._sendResponse(sessionID, "turn result processed", { turnResult: turnResult });
+		console.log("[Game Manager] Turn result recieved");
+		self._sendResponse(sessionID, "turn result", { turnResult: turnResult });
 	};
 
-	var gameEnd = function() {
-		self._sendResponse(sessionID, "game end", { gameInfo: game.getInfo() });
+	var gameEnd = function(reason) {
+		console.log("[Game Manager] Game ended");
+		self._sendResponse(sessionID, "game end", { 
+			gameInfo: game.getInfo(),
+			reason: reason 
+		});
 		removeListeners();
 		self._removeGame(game);
 	};
@@ -77,7 +83,7 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 	};
 
 	game.on('start turn', startTurn);
-	game.on('turn result processed', turnResultProcessed);
+	game.on('turn result', turnResultProcessed);
 	game.on('game end', gameEnd);
 	game.on('player leave', playerLeave);
 	game.on('all results submitted', allTurnsSubmitted);
@@ -87,13 +93,14 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 	turnSub.subscribe('game turn:' + sessionID);
 
 	turnSub.on('message', function(channel, message) {
-		console.log("Processing game turn");
-
 		var messageObj = JSON.parse(message);
 		
-		self._sendResponse(sessionID, "turn added", { success: true, message: "Your turn has been added" });
-		
-		game.addTurn(username, messageObj.data);
+		if (game.addTurn(username, messageObj.data)) {
+			self._sendResponse(sessionID, "game turn", { success: true, message: "Your turn has been added" });
+			game.checkTurnEnd();
+		} else {
+			self._sendResponse(sessionID, "game turn", { success: false, message: "Adding game turn failed" });
+		}
 	});
 
 
