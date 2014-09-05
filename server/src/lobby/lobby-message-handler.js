@@ -88,8 +88,6 @@ LobbyMessageHandler.prototype.joinMessageReceived = function(sessionID, messageD
 
 		self.setUpLobbyListeners(sessionID, username, lobby);	
 	});
-
-
 };
 
 LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username, lobby) {

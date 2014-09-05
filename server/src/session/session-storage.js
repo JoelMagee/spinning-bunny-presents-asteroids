@@ -22,6 +22,22 @@ SessionStorage.prototype.get = function(id, cb) {
 	this.store.hgetall("session_" + id, cb);
 };
 
+SessionStorage.prototype.hasProperty = function(id, property, cb) {
+	this.store.hmget("session_" + id, property, function(err, result) {
+		if (err) { return cb(err); }
+
+		if (result === undefined) {
+			return cb(null, false);
+		}
+
+		if (result.length === 0) {
+			return cb(null, false);
+		}
+
+		cb(null, true);
+	});
+};
+
 SessionStorage.prototype.getProperty = function(id, property, cb) {
 	this.store.hmget("session_" + id, property, function(err, result) {
 		if (err) { return cb(err); }
@@ -49,21 +65,6 @@ SessionStorage.prototype.exists = function(id, cb) {
 	});
 };
 
-SessionStorage.prototype.propertyExists = function(id, property, cb) {
-	this.store.hmget("session_" + id, property, function(err, result) {
-		if (err) { return cb(err); }
-
-		if (result === undefined) {
-			return cb(null, false);
-		}
-
-		if (result.length === 0) {
-			return cb(null, false);
-		}
-
-		cb(null, true);
-	});
-};
 
 SessionStorage.prototype.set = function(id, obj) {
 	this.store.hmset("session_" + id, obj);

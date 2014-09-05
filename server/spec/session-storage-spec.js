@@ -1,7 +1,7 @@
 /*jslint white: true node: true */
 
 var redis = require('redis');
-var SessionStorage = require('../src/session-storage')(redis);
+var SessionStorage = require('../src/session/session-storage')(redis);
 
 describe("session creation", function() {
 

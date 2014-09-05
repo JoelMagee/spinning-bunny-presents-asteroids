@@ -14,10 +14,15 @@ var bodyParser           = require('body-parser');
 var methodOverride       = require('method-override');
 var redis                = require('redis');
 
-var SocketHandler        = require('./src/connection/sockethandler')(redis);
-var GlobalChat           = require('./src/chat/globalchat')(redis);
 var SessionStorage       = require('./src/session/session-storage')(redis);
 var SessionManager       = require('./src/session/session-manager')();
+
+var MessageValidator     = require('./src/validation/message-validator')();
+var SessionValidator     = require('./src/validation/session-validator')();
+var ContentValidator     = require('./src/validation/content-validator')();
+
+var SocketHandler        = require('./src/connection/sockethandler')(redis, MessageValidator, SessionValidator, ContentValidator);
+var GlobalChat           = require('./src/chat/globalchat')(redis);
 var LobbyManager         = require('./src/lobby/lobby-manager')();
 var GameManager          = require('./src/game/game-manager')(redis);
 var LobbyTransferManager = require('./src/lobby/lobby-transfer-manager')();
@@ -65,6 +70,7 @@ var login = new Login(sessionManager, models.UserModel);
 var logout = new Logout(sessionManager);
 var register = new Register(models.UserModel);
 
+console.log("Bootstrapping Complete");
 
 // Listen on required port
 http.listen(program.port);

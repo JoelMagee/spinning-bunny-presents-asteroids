@@ -94,7 +94,7 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 	turnSub.on('message', function(channel, message) {
 		var messageObj = JSON.parse(message);
 		
-		if (game.addTurn(username, messageObj.data)) {
+		if (game.addTurn(username, messageObj.message)) {
 			self._sendResponse(sessionID, "game turn", { success: true, message: "Your turn has been added" });
 			game.checkTurnEnd();
 		} else {

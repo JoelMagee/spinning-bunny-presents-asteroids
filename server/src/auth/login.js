@@ -15,8 +15,8 @@ var Login = function(sessionManager, User) {
 		var messageObj = JSON.parse(message);
 		var sessionID = messageObj.sessionID;
 
-		var username = messageObj.data.username;
-		var password = messageObj.data.password;
+		var username = messageObj.message.username;
+		var password = messageObj.message.password;
 
 		var response = {};
 		response.channel = 'login';

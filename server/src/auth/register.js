@@ -8,14 +8,14 @@ var Register = function(_User) {
 	var registrationSub = redis.createClient();
 	var registrationPub = redis.createClient();
 
-	registrationSub.on('pmessage', function(channelPattern, actualChannel, message) {
+	registrationSub.on('pmessage', function(channelPattern, actualChannel, requestString) {
 		console.log("Registration request from queue");
 
-		var messageObj = JSON.parse(message);
+		var request = JSON.parse(requestString);
 
-		var sessionID = messageObj.sessionID;
-		var username = messageObj.data.username;
-		var password = messageObj.data.password;
+		var sessionID = request.sessionID;
+		var username = request.message.username;
+		var password = request.message.password;
 
 		var user = new User({
 			username: username,
