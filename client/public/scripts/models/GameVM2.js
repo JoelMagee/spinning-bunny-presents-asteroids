@@ -2,10 +2,12 @@ define([
     'knockout',
     'jquery',
 	'pixi',
+	'jsBezier',
     'models/Ship',
 	'models/Asteroid',
-	'models/Helper'
-], function (ko, $, PIXI, Ship, Asteroid, Helper) {
+	'models/Helper',
+	'models/UI'
+], function (ko, $, PIXI, jsBezier, Ship, Asteroid, Helper, UI) {
     'use strict';
 	
 	/*jslint browser: true*/
@@ -29,8 +31,6 @@ define([
 		this.firstDrag = false;
 		this.started = false;
 		this.waiting = ko.observable(false);
-		this.finishedMove = false;
-		this.planning = true;
 		
 		this.clientShip = undefined;
 		this.ships = [];
@@ -48,6 +48,14 @@ define([
 		
 			return {"x": mouseX, "y": mouseY};
 		};			
+		
+		var border = new PIXI.Graphics();
+		this.world.addChild(border);
+		
+		// this.UI = new UI();
+		// this.world.addChild(this.UI.movementLine);
+		// this.world.addChild(this.UI.fireDot);
+		// this.world.addChild(this.UI.fireLine);
 		
 		var mouse = createMouse(this.world, stage);
 
@@ -80,34 +88,19 @@ define([
 			return false;
 		});
 
-		requestAnimFrame( animate );
-		
-		
-		var drawing = false;
-		
-				
+		requestAnimFrame( animate );				
 		
 		stage.mousedown = function (data) {
 
 			if (mouse.x() < 0 || mouse.x() > 10000 || mouse.y() < 0 || mouse.y() > 10000) {
 				return false;
-			} else if (data.originalEvent.which === 3) { //Right click
+			} else if (data.originalEvent.which === 3 || data.originalEvent.which === 2) { //Right click
 				self.dragging = true;
 				self.firstDrag = true;
-			} else if (!drawing && !self.finishedMove) {
-			
-				drawing = true;
-				self.planning = false;
-
-				var endPoint = new PIXI.Point(mouse.x(), mouse.y());
+			} else if (data.originalEvent.which === 1) {
 				
-				self.clientShip.drawGhost(endPoint.x, endPoint.y);
-
-				self.clientShip.setCurrentMove(endPoint.x, endPoint.y);
+				self.UI.mouseClick(mouse, self.clientShip);
 				
-				drawing = false;
-				self.finishedMove = true;
-			
 			}
 
 		};
@@ -151,9 +144,6 @@ define([
 			
 		})();
 		
-		var border = new PIXI.Graphics();
-		this.world.addChild(border);
-		
 		// this._drawAsteroids();
 		
 		stage.addChild(this.world);
@@ -169,6 +159,7 @@ define([
 				self.ships.forEach(function(ship) {
 					ship.update(timeDiff);
 				});
+				self.UI.update(mouse);
 			};
 		};
 		
@@ -185,28 +176,8 @@ define([
 				border.clear();
 				border.lineStyle(2/self.world.scale.x, 0x000000, 1);
 				border.drawRect(0, 0, 10000, 10000);
-			
-				if (self.planning) {
-					//draw dynamic line to mouse while planning move
-					var dLine = self.clientShip.lineGraphics;
-					dLine.clear();
-					dLine.lineStyle(2/self.world.scale.x, 0x000000, 1);
-					dLine.moveTo(self.clientShip.position.x, self.clientShip.position.y);
-					dLine.quadraticCurveTo(self.clientShip.prediction.x, self.clientShip.prediction.y, mouse.x(), mouse.y());
-					
-					dLine.drawCircle(self.clientShip.prediction.x, self.clientShip.prediction.y, 1/self.world.scale.x);
-				}
 				
-				if (self.finishedMove) {
-					//draw static line to chosen position 
-					var sLine = self.clientShip.lineGraphics;
-					sLine.clear();
-					sLine.lineStyle(2/self.world.scale.x, 0x000000, 1);
-					sLine.moveTo(self.clientShip.position.x, self.clientShip.position.y);
-					sLine.quadraticCurveTo(self.clientShip.prediction.x, self.clientShip.prediction.y,  self.clientShip.currentMove.x, self.clientShip.currentMove.y);
-					
-					sLine.drawCircle(self.clientShip.prediction.x, self.clientShip.prediction.y, 1/self.world.scale.x);
-				}
+				self.UI.draw(self.clientShip, self.world);
 				
 				self.ships.forEach(function(ship) {
 					ship.draw();
@@ -234,6 +205,13 @@ define([
 				ship.setInitialPosition(position);
 			}
 			
+			self.UI = new UI();
+			self.world.addChild(self.UI.movementLine);
+			self.world.addChild(self.UI.fireDot);
+			self.world.addChild(self.UI.fireLine);
+			
+			console.log(self.world.children);
+			
 		});
 		
 		this.socket.on('start turn', function(response) {
@@ -243,7 +221,7 @@ define([
 		this.socket.on('game turn', function(response) {
 			if (response.success) {
 				console.log("waiting");
-				self.planning = false;
+				// self.UI.  - do something here so that the ui doesnt keep drawing once you have submitted your turn
 				self.waiting(true);
 			} else {
 				console.log("failed");
@@ -252,7 +230,6 @@ define([
 		
 		this.socket.on('turn result', function(response) {
 			console.log(response);
-			self.waiting(false);
 			
 			var moves = response.turnResult.moves;
 						
@@ -273,12 +250,10 @@ define([
 				ship.setDestination(shipResult.position, shipResult.prediction);
 			});
 			
-			// clear the line and the ghost before showing the replay
-			self.clientShip.lineGraphics.clear();
+			// clear the ghost before showing the replay
 			self.clientShip.ghostGraphics.clear();
 			
-			// move has finished 
-			self.finishedMove = false;
+			self.UI.drawingUI = false;
 			
 			self.ships.forEach(function(ship) {
 				ship.startReplay();
@@ -286,9 +261,9 @@ define([
 			
 			// hacky way to wait for the replay to finish before entering planning state
 			setTimeout(function () {
-				self.planning = true;
+				self.waiting(false);
+				self.UI.completeReset();
 			}, 2000);
-
 
 		});
 		
@@ -298,7 +273,8 @@ define([
 			console.log(response);
 			self.socket.emit('info lobby', {});
 			
-			self.world.removeChildren(1); // removes children from index 1 to the end of the list
+			self.started = false;
+			self.world.removeChildren(1); // removes children from index 1 to the end
 			self.ships = [];
 			
 			$('#gameScreen').hide();
@@ -318,7 +294,10 @@ define([
 		
 			if (!this.waiting()) {
 				console.log("turn submitted");
-				
+				if ($.isEmptyObject(self.clientShip.currentMove)) {
+					self.clientShip.currentMove = self.clientShip.position;
+					console.log(self.clientShip);
+				}
 				console.log("sent next values as: " + self.clientShip.currentMove.x + ", " + self.clientShip.currentMove.y);
 				this.socket.emit('game turn', {
 					destination: self.clientShip.currentMove
@@ -327,9 +306,7 @@ define([
 		},
 		undo: function () {
 			if (!this.waiting()) {
-				this.planning = true;
-				this.clientShip.draw();
-				this.finishedMove = false;
+				this.UI.reset();
 				this.clientShip.ghostGraphics.clear();
 			}
 		},

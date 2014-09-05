@@ -90,6 +90,8 @@
                 degree = curve.length - 1, higherDegree = (2 * degree) - 1,
                 numSolutions = _findRoots(w, higherDegree, candidates, 0),
                         v = Vectors.subtract(point, curve[0]), dist = Vectors.square(v), t = 0.0;
+						
+				console.log(numSolutions);
 
             for (var i = 0; i < numSolutions; i++) {
                         v = Vectors.subtract(point, _bezier(curve, degree, candidates[i], null, null));

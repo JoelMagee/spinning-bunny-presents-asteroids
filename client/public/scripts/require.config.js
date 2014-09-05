@@ -7,7 +7,8 @@ var require = {
 		'pixi': 'libs/pixi.dev',
         'text': 'libs/text',
 		'bootstrap': '../bootstrap/js/bootstrap',
-		'socketio': 'https://cdn.socket.io/socket.io-1.0.0'
+		'socketio': 'https://cdn.socket.io/socket.io-1.0.0',
+		'jsBezier': 'libs/jsBezier-0.3'
     },
     map: {
         '*': {
@@ -27,6 +28,9 @@ var require = {
 		},
 		'socketio': {
 			exports: 'io'
+		},
+		'jsBezier': {
+            exports: 'jsBezier'
 		}
     }
 };
