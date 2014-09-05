@@ -10,7 +10,7 @@ SessionGenerator.prototype.generateSessionID = function() {
 	var md5hash = crypto.createHash('md5');
 	md5hash.update(Math.random() + "");
 	var time = new Date().getTime();
-	return this.sessionNumber++ + "" + time + md5hash.digest('hex');
+	return this.sessionNumber++ + "-" + time + md5hash.digest('hex');
 };
 
 var SessionManager = function(SessionStorage) {
