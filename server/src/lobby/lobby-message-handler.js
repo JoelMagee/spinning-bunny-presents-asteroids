@@ -158,7 +158,7 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 	});
 
 	startGameSub.on('message', function(channel, message) {
-		if (!lobby.getLeader() === username) {
+		if (lobby.getLeader() !== username) {
 			//This user is not the lobby leader, they cannot destroy the lobby
 			return self.sendResponse(sessionID, "launch game", { success: false, message: "You don't have permission to start this game" });
 		} else {
