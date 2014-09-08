@@ -97,8 +97,8 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 	leaveSub.subscribe('disconnect:' + sessionID);
 	leaveSub.subscribe('join lobby:' + sessionID);
 
-	var destroySub = redis.createClient();
-	destroySub.subscribe('destroy lobby:' + sessionID);
+	var closeSub = redis.createClient();
+	closeSub.subscribe('close lobby:' + sessionID);
 
 	var startGameSub = redis.createClient();
 	startGameSub.subscribe('launch game:' + sessionID);
@@ -113,9 +113,9 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 		self.sendResponse(sessionID, "user leave lobby", { id: lobby.id, username: username });
 	};
 
-	var destroy = function() {
+	var close = function() {
 		removeListeners();
-		self.sendResponse(sessionID, "leave lobby", { id: lobby.id, success: true, message: "The lobby has been destroyed so you have left" });
+		self.sendResponse(sessionID, "leave lobby", { id: lobby.id, success: true, message: "The lobby has been closed so you have left" });
 	};
 
 	var start = function(game) {
@@ -125,19 +125,19 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 
 	lobby.on('user join', userJoin);
 	lobby.on('user leave', userLeave);
-	lobby.on('lobby destroyed', destroy);
+	lobby.on('lobby closed', close);
 	lobby.on('game start', start);
 
 	var removeListeners = function() {
 		lobby.removeListener('user join', userJoin);
 		lobby.removeListener('user leave', userLeave);
-		lobby.removeListener('lobby destroyed', destroy);
+		lobby.removeListener('lobby closed', close);
 		lobby.removeListener('game start', start);
 		leaveSub.unsubscribe('leave lobby:' + sessionID);
 		leaveSub.unsubscribe('logout:' + sessionID);
 		leaveSub.unsubscribe('disconnect:' + sessionID);
 		leaveSub.unsubscribe('join lobby:' + sessionID);
-		destroySub.unsubscribe('destroy lobby:' + sessionID);
+		closeSub.unsubscribe('close lobby:' + sessionID);
 		startGameSub.unsubscribe('launch game:' + sessionID);
 	};
 
@@ -147,14 +147,14 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 		self.sendResponse(sessionID, "leave lobby", { id: lobby.id, message: "You have left the lobby", success: true });
 	});
 
-	destroySub.on('message', function(channel, message) {
+	closeSub.on('message', function(channel, message) {
 		if (!lobby.getLeader() === username) {
 			//This user is not the lobby leader, they cannot destroy the lobby
-			return self.sendResponse(sessionID, "destroy lobby", { success: false, message: "You don't have permission to destroy this lobby" });
+			return self.sendResponse(sessionID, "close lobby", { success: false, message: "You don't have permission to close this lobby" });
 		}
 		//This user is the lobby leader, they can destroy the lobby
-		lobby.destroy();
-		self.sendResponse(sessionID, "destroy lobby", { success: true, message: "Lobby successfully closed" });
+		lobby.close();
+		self.sendResponse(sessionID, "close lobby", { success: true, message: "Lobby successfully closed" });
 	});
 
 	startGameSub.on('message', function(channel, message) {

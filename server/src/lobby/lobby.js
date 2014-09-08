@@ -37,9 +37,9 @@ Lobby.prototype.info = function() {
 	};
 };
 
-Lobby.prototype.destroy = function() {
-	this.name = "[Destroyed] " + this.name;
-	this.emit('lobby destroyed');
+Lobby.prototype.close = function() {
+	this.name = "[Closed] " + this.name;
+	this.emit('lobby closed');
 };
 
 Lobby.prototype.getLeader = function() {
