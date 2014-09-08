@@ -158,6 +158,10 @@
 				socket1.on('start game', function(e) {
 					updateStatus("game start message recieved");
 					updateStatus("Starting position - " + e.data[username].position.x + ", " + e.data[username].position.y);
+				});
+
+				socket1.on('start turn', function(e) {
+					console.log("Start turn message recieved");
 
 					delay(function() {
 						var x = Math.random() * 10000;
@@ -189,19 +193,7 @@
 					});
 					updateStatus("---");
 
-					delay(function() {
-						var x = Math.random() * 10000;
-						var y = Math.random() * 10000;
-
-						updateStatus("Adding game turn - " + x + ", " + y);
-
-						socket1.emit('game turn', {
-							destination: {
-								x: x,
-								y: y
-							}
-						});
-					});
+					
 				});
 
 

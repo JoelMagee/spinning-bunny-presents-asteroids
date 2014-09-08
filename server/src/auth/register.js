@@ -9,34 +9,37 @@ var Register = function(_User) {
 	var registrationPub = redis.createClient();
 
 	registrationSub.on('pmessage', function(channelPattern, actualChannel, requestString) {
-		console.log("Registration request from queue");
+		try {
+			var request = JSON.parse(requestString);
 
-		var request = JSON.parse(requestString);
+			var sessionID = request.sessionID;
+			var username = request.message.username;
+			var password = request.message.password;
 
-		var sessionID = request.sessionID;
-		var username = request.message.username;
-		var password = request.message.password;
+			var user = new User({
+				username: username,
+				password: password
+			});
 
-		var user = new User({
-			username: username,
-			password: password
-		});
+			var response = {};
+			response.channel = 'register';
+			response.data = {};
 
-		var response = {};
-		response.channel = 'register';
-		response.data = {};
+			user.save(function(err) {
+				if (err) {
+					response.data.success = false;
+					response.data.message = "Error registering user: " + err;
+				} else {
+					response.data.success = true;
+					response.data.message = "Successfully registered user";
+				}
 
-		user.save(function(err) {
-			if (err) {
-				response.data.success = false;
-				response.data.message = "Error registering user: " + err;
-			} else {
-				response.data.success = true;
-				response.data.message = "Successfully registered user";
-			}
+				registrationPub.publish('output message:' + sessionID, JSON.stringify(response));
+			});	
+		} catch (e) {
+			registrationPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'register', data: { success: false, message: "Unknown error upon registration attempt, please try again!"}}));
+		}
 
-			registrationPub.publish('output message:' + sessionID, JSON.stringify(response));
-		});
 	});
 
 	registrationSub.psubscribe('register:*');

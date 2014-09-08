@@ -118,7 +118,7 @@ AsteroidsGame.prototype.startTurn = function() {
 	this.turnsAdded = 0;
 	this.turnData = {};
 
-	this.emit('turn start');
+	this.emit('start turn');
 };
 
 /**

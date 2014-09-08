@@ -142,8 +142,8 @@ if (!String.prototype.format) {
 				});
 
 				destroyButton.on('click', function() {
-					console.log("Destroy button clicked");
-					socket.emit('destroy lobby', {});
+					console.log("Close button clicked");
+					socket.emit('close lobby', {});
 				});
 
 				startGameButton.on('click', function() {
