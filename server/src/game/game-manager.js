@@ -110,8 +110,10 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 	leaveSub.subscribe('disconnect:' + sessionID);
 
 	leaveSub.on('message', function(channel, message) {
+		console.log("[Game Manager] Leave game message recieved");
 		removeListeners();
 		game.removePlayer(username);
+		game.checkTurnEnd();
 		self._sendResponse(sessionID, "leave game", { success: true, message: "You have left the game" });
 	});
 
@@ -121,7 +123,7 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 		leaveSub.unsubscribe('disconnect:' + sessionID);
 		turnSub.unsubscribe('game turn:' + sessionID);
 		game.removeListener('start turn', startTurn);
-		game.removeListener('turn result processed', turnResultProcessed);
+		game.removeListener('turn result', turnResultProcessed);
 		game.removeListener('game end', gameEnd);
 		game.removeListener('player leave', playerLeave);
 	};

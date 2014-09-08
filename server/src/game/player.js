@@ -12,8 +12,22 @@ var Player = function(username) {
 	this.oldPosition = {};
 	this.prediction = {};
 	this.oldPrediction = {};
+	this.destination = {};
 
 	this.lives = 1;
+	this.collisionHistory = [];
+
+	this.currentTurnCollisions = [];
+
+	this.destroyed = false;
+};
+
+Player.prototype.alive = function() {
+	return this.lives > 0;
+};
+
+Player.prototype.destroyed = function() {
+	return this.destroyed;
 };
 
 Player.prototype.setInitialPosisiton = function(x, y) {
@@ -30,20 +44,35 @@ Player.prototype.setInitialPosisiton = function(x, y) {
 	this.oldPrediction.y = y;
 };
 
-Player.prototype.moveTo = function(destinationX, destinationY) {
-	this.position.x = destinationX;
-	this.position.y = destinationY;
+Player.prototype.setDestination = function(destinationX, destinationY) {
+	this.addPrediction(destinationX, destinationY);
 
-	this.prediction.x = calculateBezierPoint(this.oldPosition.x, this.oldPrediction.x, destinationX, bezierT);
-	this.prediction.y = calculateBezierPoint(this.oldPosition.y, this.oldPrediction.y, destinationY, bezierT);
-};
+	this.destination.x = destinationX;
+	this.destination.y = destinationY;
 
-Player.prototype.updatePrediction = function() {
 	this.oldPosition.x = this.position.x;
 	this.oldPosition.y = this.position.y;
 
+	this.currentTurnCollisions = [];
+};
+
+Player.prototype.addPrediction = function(destinationX, destinationY) {
 	this.oldPrediction.x = this.prediction.x;
 	this.oldPrediction.y = this.prediction.y;
+
+	this.prediction.x = calculateBezierPoint(this.oldPosition.x, this.oldPrediction.x, destinationX, bezierT);
+	this.prediction.y = calculateBezierPoint(this.oldPosition.y, this.oldPrediction.y, destinationY, bezierT);	
+};
+
+Player.prototype.moveOnCurrentArc = function(t) {
+	this.position.x = calculateBezierPoint(this.oldPosition.x, this.oldPrediction.x, this.destination.x, t);
+	this.position.y = calculateBezierPoint(this.oldPosition.y, this.oldPrediction.y, this.destination.y, t);	
+};
+
+Player.prototype.addCollision = function(time, collisionObject) {
+	this.lives--;
+	this.currentTurnCollisions.push({t: time, livesLeft: this.lives});
+	this.collisionHistory.push({t: time, livesLeft: this.lives});
 };
 
 Player.prototype.getPlayerData = function() {
@@ -54,6 +83,16 @@ Player.prototype.getPlayerData = function() {
 	}
 };
 
+Player.prototype.getTurnData = function() {
+	return {
+		collisions: this.currentTurnCollisions,
+		oldPosition: this.oldPosition,
+		oldPrediction: this.oldPrediction,
+		position: this.position,
+		prediction: this.prediction	
+	}
+}
+
 Player.prototype.getPlayerPosition = function() {
 	return {
 		position: this.position,
@@ -63,6 +102,11 @@ Player.prototype.getPlayerPosition = function() {
 
 Player.prototype.getUsername = function() {
 	return this.username;
+};
+
+Player.prototype.distanceTo = function(p) {
+	//console.log("Checking collision distance: " + this.username + ", " + p.username);
+	return Math.sqrt(Math.pow(p.position.x - this.position.x, 2) + Math.pow(p.position.y - this.position.y, 2));
 };
 
 module.exports = function() {

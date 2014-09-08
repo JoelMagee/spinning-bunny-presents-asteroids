@@ -10,7 +10,7 @@ var AsteroidsLogic;
 
 var defaultOptions = {
 	world: {},
-	turnLimit: 10
+	turnLimit: 100
 }
 
 
@@ -24,10 +24,13 @@ var AsteroidsGame = function(id, expectedPlayers, opts) {
 	this.world = new World(this.options.world);
 	this.players = [];
 
+	this.turnsExpected = [];
+
 	this.currentTurn = 0;
 	this.turnData = {};
 
 	this.asteroidsLogic = undefined;
+	this.turnEnded = false;
 
 	events.EventEmitter.call(this);
 };
@@ -61,6 +64,7 @@ AsteroidsGame.prototype.addPlayer = function(username) {
 };
 
 AsteroidsGame.prototype.removePlayer = function(username) {
+	console.log("Player has left: " + username);
 	if (!this.hasPlayer(username)) {
 		//This player isn't here, how can we remove it??
 		return false;
@@ -74,6 +78,10 @@ AsteroidsGame.prototype.removePlayer = function(username) {
 			this.players.splice(i, 1);
 			break;
 		}
+	}
+
+	if (this.expectedPlayers.indexOf(username) !== -1) {
+		this.expectedPlayers.splice(this.expectedPlayers.indexOf(username), 1);
 	}
 
 	this.emit('player leave', player);
@@ -113,10 +121,20 @@ AsteroidsGame.prototype.startGame = function() {
 }
 
 AsteroidsGame.prototype.startTurn = function() {
+	var self = this;
+
 	//Increment turn number
 	this.currentTurn++;
 	this.turnsAdded = 0;
 	this.turnData = {};
+
+	this.players.forEach(function(player) {
+		if (player.alive()) {
+			self.expectedPlayers.push(player.username);
+		}
+	});
+
+	this.turnEnded = false;
 
 	this.emit('start turn');
 };
@@ -143,6 +161,19 @@ AsteroidsGame.prototype.checkFinishConditions = function() {
 		return true;
 	}
 
+	var playerAliveCount = 0;
+
+	for (var i = 0; i < this.players.length; i++) {
+		if (this.players[i].alive()) {
+			playerAliveCount++;
+		}
+	}
+
+	if (playerAliveCount < 2) {
+		this.gameEnd("Less than 2 players alive");
+		return true;
+	}
+
 	//No finish conditions were met
 	return false;
 };
@@ -153,9 +184,8 @@ AsteroidsGame.prototype.addTurn = function(username, data) {
 		return false;
 	}
 
-	if (this.turnData.hasOwnProperty(username)) {
-		//User has already submitted a turn
-		return false;
+	if (this.expectedPlayers.indexOf(username) !== -1) {
+		this.expectedPlayers.splice(this.expectedPlayers.indexOf(username), 1);
 	}
 
 	this.turnData[username] = data;
@@ -166,28 +196,38 @@ AsteroidsGame.prototype.addTurn = function(username, data) {
 };
 
 AsteroidsGame.prototype.checkTurnEnd = function() {
-	if (this.turnsAdded === this.players.length) {
-		this.turnEnd();
+	if (this.turnEnded) {
+		return; //Still processing turn results
 	}
+
+	if (this.expectedPlayers.length > 0) {
+		return; //Not all players have submitted moves
+	}
+
+	this.turnEnd();
 }
 
 AsteroidsGame.prototype.turnEnd = function() {
 	//Process turn result
+	this.turnEnded = true;
 
-	this.asteroidsLogic.processTurnResult(this.turnData);
-	this.emit('turn result', this.asteroidsLogic.getTurnResultData());
+	var self = this;
 
-	this.asteroidsLogic.endTurnCleanup();
+	this.asteroidsLogic.processTurnResult(this.turnData, function(err, turnResultData) {
+		self.emit('turn result', turnResultData);
 
-	this.turnData = {};
+		self.asteroidsLogic.endTurnCleanup();
 
-	//Check finish conditions to check the game isn't already over
-	if (this.checkFinishConditions()) {
-		return;
-	}
+		self.turnData = {};
 
-	//Start first turn
-	this.startTurn();
+		//Check finish conditions to check the game isn't already over
+		if (self.checkFinishConditions()) {
+			return;
+		}
+
+		//Start first turn
+		self.startTurn();
+	});
 };
 
 AsteroidsGame.prototype.getStartData = function() {
