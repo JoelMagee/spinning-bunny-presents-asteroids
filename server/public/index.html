@@ -147,8 +147,8 @@ if (!String.prototype.format) {
 				});
 
 				startGameButton.on('click', function() {
-					console.log("Start button clicked");
-					socket.emit('start game', {});
+					console.log("Launch button clicked");
+					socket.emit('launch game', {});
 				});
 
 				submitTurnButton.on('click', function() {
@@ -309,8 +309,20 @@ if (!String.prototype.format) {
 					}
 				});
 
+				socket.on('lauch game', function(e) {
+					if (e.success) {
+						console.log("Launch game successful");
+					} else {
+						console.log("Error launching game");
+					}
+				})
+
 				socket.on('game loading', function(e) {
 					console.log("Game loading message recieved");
+				});
+
+				socket.on('game start', function(e) {
+					console.log("GAME START");
 				});
 
 				socket.on('start game', function(e) {

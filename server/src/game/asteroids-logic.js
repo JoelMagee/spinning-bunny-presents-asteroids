@@ -20,6 +20,13 @@ AsteroidsLogic.prototype.initState = function() {
 	//Give each player a starting position
 	for (var i = 0; i < this.players.length; i++) {
 		var position = this.generateStartingPosition();
+		for (var j = 0; j < i; j++) {
+			if (Math.sqrt(Math.pow(position.x-this.players[j].position.x, 2) + Math.pow(position.y - this.players[j].position.y)) < 700) {
+				console.log("Player is starting close to another player");
+				position = this.generateStartingPosition();
+				j = 0;
+			}
+		}
 		this.players[i].setInitialPosisiton(position.x, position.y);
 	}
 };
@@ -84,7 +91,7 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 					continue; //We don't want to check collisions against players who are destroyed
 				}
 
-				if (player.distanceTo(self.players[k]) < 400) {
+				if (player.distanceTo(self.players[k]) < 40) {
 						console.log("collision between " + self.players[k].username + " and " + player.username);
 						//Collision
 						player.addCollision(t, self.players[k]);

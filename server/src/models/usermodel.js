@@ -20,6 +20,31 @@ module.exports = function(_mongoose) {
 		password: {
 			type: String,
 			required: true
+		},
+		shipKills: {
+			type: Number,
+			required: true,
+			default: 0
+		},
+		shipLosses: {
+			type: Number,
+			required: true,
+			default: 0
+		},
+		gamesStarted: {
+			type: Number,
+			required: true,
+			default: 0
+		},
+		gamesFinished: {
+			type: Number,
+			required: true,
+			default: 0
+		},
+		gamesWon: {
+			type: Number,
+			required: true,
+			default: 0
 		}
 	});
 
@@ -49,6 +74,16 @@ module.exports = function(_mongoose) {
 			callback(null, isMatch);
 		});
 	};
+
+	UserSchema.methods.getPublicData = function() {
+		return {
+			username: this.username,
+			shipKills: this.shipKills,
+			shipLosses: this.shipLosses,
+			gamesStarted: this.gamesStarted,
+			gamesFinished: this.gamesFinished
+		}
+	}
 
 	var User = mongoose.model('User', UserSchema);
 
