@@ -18,6 +18,9 @@ var GameManager = function(models) {
 	this.gameIDMap = {};
 	this.models = models;
 
+	console.log("MODELS");
+	console.dir(models);
+
 	this.outputPub = redis.createClient();
 };
 
@@ -41,7 +44,7 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 	var game = _game;
 	var self = this;
 
-	models.User.findOne({username: username}, function(err, _user) {
+	this.models.UserModel.findOne({username: username}, function(err, _user) {
 		if (err) {
 			console.error("Error loading user from database when starting a game")
 		}
@@ -75,17 +78,39 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 			self._sendResponse(sessionID, "turn result", { turnResult: turnResult });
 		};
 
-		var gameEnd = function(reason) {
+		var gameEnd = function(endData) {
 			console.log("[Game Manager] Game ended");
+
+
 
 			//Send response to user
 			self._sendResponse(sessionID, "game end", { 
 				gameInfo: game.getInfo(),
-				reason: reason 
+				endData: endData 
 			});
 
 			//Update users stats
 			user.gamesFinished++;
+
+			if (endData.type === 'win') {
+				//A single player is left alive
+				if (user.username === endData.winner) {
+					user.gamesWon++;
+				}
+			} else if (endData.type === 'draw') {
+				//Draw case happens when turns run out or all players are destroyed on the same turn
+				if (endData.winner.indexOf(user.username) !== -1) {
+					user.gamesDrawn++;
+				}
+			} else if (endData.type === 'default') {
+				//Default case happens when all but one players leave
+				if (user.username === endData.winner) {
+					user.gamesWon++;
+				}
+			}
+
+
+
 			user.save();
 
 			//Cleanup

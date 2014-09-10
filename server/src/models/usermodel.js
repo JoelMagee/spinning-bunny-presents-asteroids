@@ -40,6 +40,11 @@ module.exports = function(_mongoose) {
 			type: Number,
 			required: true,
 			default: 0
+		},
+		gamesWon: {
+			type: Number,
+			required: true,
+			default: 0
 		}
 	});
 

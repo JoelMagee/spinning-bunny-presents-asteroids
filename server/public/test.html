@@ -13,6 +13,8 @@
 
 			var joinCount = 0;
 
+			var createdLobby;
+
 			$(document).ready(function() {
 				$joelButton = $('#joel');
 				$samButton = $('#sam');
@@ -50,7 +52,7 @@
 					$statusArea.append("<p>" + message + "</p>");
 				};
 
-				var delayTime = 2000;
+				var delayTime = 200;
 
 				var delay = function(fn) {
 					setTimeout(fn,delayTime);
@@ -102,7 +104,11 @@
 							//Lobby is already there, join it
 							lobbyID = e.lobbyData[0].id,
 							socket1.emit("join lobby", { id: lobbyID });
+
+							createdLobby = false;
 						} else {
+
+							createdLobby = true;
 							//Lobby is not there, this client creates it
 							updateStatus("No lobbys, creating one");
 							socket1.emit("create lobby", { name: "Test lobby" });
@@ -203,6 +209,27 @@
 
 				socket1.on('game end', function(e) {
 					updateStatus("Game ended");
+
+					if (createdLobby) {
+						//Lobby is not there, this client creates it
+						updateStatus("Creating lobby");
+						socket1.emit("create lobby", { name: "Test lobby" });
+
+						socket1.on('user join lobby', function(e) {
+							delay(function() {
+								joinCount++;
+								if (joinCount === 2) {
+									updateStatus("Another user has joined, starting game");
+									socket1.emit('launch game', {});			
+								}
+							});
+						});
+					} else {
+						setTimeout(function() {
+
+							socket1.emit('info lobby', {});
+						}, 2000)
+					}
 				});
 			};
 			
