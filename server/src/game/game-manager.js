@@ -12,8 +12,7 @@ GameIDGenerator.prototype.generateID = function() {
 	return this.currentID++;
 };
 
-var GameManager = function(sessionManager) {
-	this.sessionManager = sessionManager;
+var GameManager = function() {
 	this.gameIDGenerator = new GameIDGenerator();
 	this.gameIDMap = {};
 
@@ -95,7 +94,7 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 	turnSub.on('message', function(channel, message) {
 		var messageObj = JSON.parse(message);
 		
-		if (game.addTurn(username, messageObj.data)) {
+		if (game.addTurn(username, messageObj.message)) {
 			self._sendResponse(sessionID, "game turn", { success: true, message: "Your turn has been added" });
 			game.checkTurnEnd();
 		} else {
@@ -111,8 +110,10 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 	leaveSub.subscribe('disconnect:' + sessionID);
 
 	leaveSub.on('message', function(channel, message) {
+		console.log("[Game Manager] Leave game message recieved");
 		removeListeners();
 		game.removePlayer(username);
+		game.checkTurnEnd();
 		self._sendResponse(sessionID, "leave game", { success: true, message: "You have left the game" });
 	});
 
@@ -122,7 +123,7 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 		leaveSub.unsubscribe('disconnect:' + sessionID);
 		turnSub.unsubscribe('game turn:' + sessionID);
 		game.removeListener('start turn', startTurn);
-		game.removeListener('turn result processed', turnResultProcessed);
+		game.removeListener('turn result', turnResultProcessed);
 		game.removeListener('game end', gameEnd);
 		game.removeListener('player leave', playerLeave);
 	};

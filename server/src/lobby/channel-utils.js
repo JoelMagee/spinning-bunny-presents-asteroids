@@ -6,7 +6,7 @@ ChannelUtils.messageIn = function(cb, err) {
 			var messageObj = JSON.parse(message);
 			var sessionID = messageObj.sessionID;
 			try {
-				cb(sessionID, messageObj.data);
+				cb(sessionID, messageObj.message);
 			} catch (e) {
 				console.log("Server error");
 				console.log(message);

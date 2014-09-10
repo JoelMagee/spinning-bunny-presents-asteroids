@@ -9,23 +9,26 @@ var Logout = function(sessionManager) {
 	var logoutPub = redis.createClient();
 
 	logoutSub.on('pmessage', function(channelPattern, actualChannel, message) {
-		console.log("Logout received from queue");
-
-		var messageObj = JSON.parse(message);
-		var sessionID = messageObj.sessionID;
-
-		console.log(sessionID);
-
 		var response = {};
 		response.channel = 'logout';
 		response.sessionID = sessionID;
 		response.data = {};
 
-		sessionManager.logoutUser(sessionID);
+		try {
+			var messageObj = JSON.parse(message);
+			var sessionID = messageObj.sessionID;
 
-		response.data.success = true;
-		response.data.message = "Successfully logged out";
-		logoutPub.publish('output message:' + sessionID, JSON.stringify(response));
+			sessionManager.logout(sessionID);
+
+			response.data.success = true;
+			response.data.message = "Successfully logged out";
+			logoutPub.publish('output message:' + sessionID, JSON.stringify(response));
+		} catch (e) {
+			response.data.success = false;
+			response.data.message = "Unknown exception when trying to log out";
+			logoutPub.publish('output message:' + sessionID, JSON.stringify(response));
+		}
+
 	});
 
 	logoutSub.psubscribe('logout:*');

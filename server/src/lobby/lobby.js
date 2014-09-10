@@ -37,9 +37,9 @@ Lobby.prototype.info = function() {
 	};
 };
 
-Lobby.prototype.destroy = function() {
-	this.name = "[Destroyed] " + this.name;
-	this.emit('lobby destroyed');
+Lobby.prototype.close = function() {
+	this.name = "[Closed] " + this.name;
+	this.emit('lobby closed');
 };
 
 Lobby.prototype.getLeader = function() {
@@ -53,7 +53,7 @@ Lobby.prototype.getLeader = function() {
 Lobby.prototype.startGame = function(game) {
 	this.emit('game start', game);
 	this.name = "[Started] " + this.name;
-	this.destroy();
+	this.close();
 };
 
 module.exports = function() {

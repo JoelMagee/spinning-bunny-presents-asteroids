@@ -1,30 +1,35 @@
 console.log("Bootstrapping Spinning Bunny");
 
-var program        = require('commander');
-var clc            = require('cli-color');
+var program              = require('commander');
+var clc                  = require('cli-color');
+var express              = require('express')
 
-var express        = require('express')
-var app            = express();
-var http           = require('http').Server(app);
-var io             = require('socket.io')(http);
+var app                  = express();
 
-var morgan         = require('morgan');
-var bodyParser     = require('body-parser');
-var methodOverride = require('method-override');
+var http                 = require('http').Server(app);
+var io                   = require('socket.io')(http);
 
-var redis          = require('redis');
+var morgan               = require('morgan');
+var bodyParser           = require('body-parser');
+var methodOverride       = require('method-override');
+var redis                = require('redis');
 
-var SocketHandler  = require('./src/sockethandler')(redis);
-var GlobalChat     = require('./src/globalchat')(redis);
-var SessionManager = require('./src/session-manager')();
-var LobbyManager   = require('./src/lobby/lobby-manager')();
-var GameManager    = require('./src/game/game-manager')(redis);
-var LobbyTransferManager = require('./src/lobby-transfer-manager')();
-var LobbyMessageManager = require('./src/lobby/lobby-message-handler')(redis);
+var SessionStorage       = require('./src/session/session-storage')(redis);
+var SessionManager       = require('./src/session/session-manager')();
 
-var Login          = require('./src/auth/login')(redis);
-var Logout         = require('./src/auth/logout')(redis);
-var Register       = require('./src/auth/register')(redis);
+var MessageValidator     = require('./src/validation/message-validator')();
+var SessionValidator     = require('./src/validation/session-validator')();
+var ContentValidator     = require('./src/validation/content-validator')();
+
+var SocketHandler        = require('./src/connection/sockethandler')(redis, MessageValidator, SessionValidator, ContentValidator);
+var GlobalChat           = require('./src/chat/globalchat')(redis);
+var LobbyManager         = require('./src/lobby/lobby-manager')();
+var GameManager          = require('./src/game/game-manager')(redis);
+var LobbyTransferManager = require('./src/lobby/lobby-transfer-manager')();
+var LobbyMessageManager  = require('./src/lobby/lobby-message-handler')(redis);
+var Login                = require('./src/auth/login')(redis);
+var Logout               = require('./src/auth/logout')(redis);
+var Register             = require('./src/auth/register')(redis);
 
 // Parse provided arguments
 program
@@ -52,7 +57,7 @@ if (program.dev) {
 var models = require('./src/models/models');
 
 // Load main internal modules
-var sessionManager = new SessionManager();
+var sessionManager = new SessionManager(SessionStorage);
 var socketHandler = new SocketHandler(io, sessionManager);
 var globalChat = new GlobalChat(sessionManager);
 
@@ -65,6 +70,7 @@ var login = new Login(sessionManager, models.UserModel);
 var logout = new Logout(sessionManager);
 var register = new Register(models.UserModel);
 
+console.log("Bootstrapping Complete");
 
 // Listen on required port
 http.listen(program.port);

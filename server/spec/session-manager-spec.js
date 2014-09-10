@@ -1,6 +1,6 @@
 /*jslint white: true */
 
-var SessionManager = require('../src/session-manager')();
+var SessionManager = require('../src/session/session-manager')();
 
 describe("session creation", function() {
 	var sessionManager = new SessionManager();

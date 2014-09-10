@@ -11,7 +11,7 @@
 
 			var username;
 
-			var joinCount = 1;
+			var joinCount = 0;
 
 			$(document).ready(function() {
 				$joelButton = $('#joel');
@@ -50,7 +50,7 @@
 					$statusArea.append("<p>" + message + "</p>");
 				};
 
-				var delayTime = 1000;
+				var delayTime = 2000;
 
 				var delay = function(fn) {
 					setTimeout(fn,delayTime);
@@ -158,6 +158,10 @@
 				socket1.on('start game', function(e) {
 					updateStatus("game start message recieved");
 					updateStatus("Starting position - " + e.data[username].position.x + ", " + e.data[username].position.y);
+				});
+
+				socket1.on('start turn', function(e) {
+					console.log("Start turn message recieved");
 
 					delay(function() {
 						var x = Math.random() * 10000;
@@ -183,25 +187,17 @@
 				});
 
 				socket1.on('turn result', function(e) {
+					console.dir(e);
+
 					updateStatus("Game turn result recieved");
-					e.turnResult.moves.forEach(function(e, i) {
-						updateStatus(e.username + " - " + e.position.x + ", " + e.position.y);
-					});
+					
+					updateStatus("Moved from: " + e.turnResult[username].oldPosition.x + ", " + e.turnResult[username].oldPosition.y + " to " + e.turnResult[username].position.x + " to " + e.turnResult[username].position.y);
+
+					if (e.turnResult[username].collisions.length > 0) {
+						updateStatus("COLLISION! at: " + e.turnResult[username].collisions[0].t);
+					}
+
 					updateStatus("---");
-
-					delay(function() {
-						var x = Math.random() * 10000;
-						var y = Math.random() * 10000;
-
-						updateStatus("Adding game turn - " + x + ", " + y);
-
-						socket1.emit('game turn', {
-							destination: {
-								x: x,
-								y: y
-							}
-						});
-					});
 				});
 
 

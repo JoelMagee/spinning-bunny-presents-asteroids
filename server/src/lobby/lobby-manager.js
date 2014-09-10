@@ -36,7 +36,7 @@ LobbyManager.prototype.createLobby = function(lobbyName) {
 
 	this.addLobby(newLobby);
 
-	newLobby.on('lobby destroyed', function() {
+	newLobby.on('lobby closed', function() {
 		self.removeLobby(newLobby);
 	});
 
