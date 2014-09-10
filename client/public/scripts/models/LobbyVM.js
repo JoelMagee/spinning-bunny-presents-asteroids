@@ -84,7 +84,7 @@ define([
 			self.players.remove(function(item) { return item.name === response.username; });
 		});
 		
-		this.socket.on('destroy lobby', function(response) {
+		this.socket.on('close lobby', function(response) {
 			if (response.success) {
 				console.log(response.message);
 			} else {
@@ -130,7 +130,7 @@ define([
 			this.socket.emit('leave lobby', {});
 		},
 		closeLobby: function () {
-			this.socket.emit('destroy lobby', {});
+			this.socket.emit('close lobby', {});
 		}
     };
   

@@ -4,7 +4,7 @@ define([
 	'models/LobbyListVM',
 	'models/LobbyVM',
 	'models/LoginVM',
-	'models/GameVM2',
+	'models/GameVM3',
 	'models/Session',
 	'socketio'
 ], function (ko, $, LobbyListVM, LobbyVM, LoginVM, GameVM, Session, io) {

@@ -13,7 +13,6 @@ define([
 		this.color = colors[0];
 		this.graphics = new PIXI.Graphics();
 		this.ghostGraphics = new PIXI.Graphics();
-		this.lineGraphics = new PIXI.Graphics();
 		this.text = new PIXI.Text(username, {font: '100px Verdana'});
 		this.username = username;
 		this.text.anchor.x = 0.5;
@@ -68,7 +67,7 @@ define([
 			}
 			
 			this.position = Helper.getBezier(t, this.startPosition, this.previousPrediction, this.destination);
-			var delta = Helper.getBezier(t+0.01, this.startPosition, this.previousPrediction, this.destination);
+			var delta = Helper.getBezier(t+0.001, this.startPosition, this.previousPrediction, this.destination);
 			delta.x = delta.x-this.position.x;
 			delta.y = delta.y-this.position.y;
 			this.rotation = Math.atan2(delta.y, delta.x);
@@ -83,6 +82,8 @@ define([
 		startReplay: function() {
 			this.replay = true;
 			this.timeElapsed = 0;
+			
+			// pass callback into here 
 		},
 		setInitialPosition: function(position) {
 			console.log("[Ship] Setting initial position: " + position.x + ", " + position.y);
@@ -98,9 +99,6 @@ define([
 		},
 		drawGhost: function (x, y) {
 			
-			// var transformX = x - this.position.x;
-			// var transformY = y - this.position.y;
-			
 			this.ghostGraphics.beginFill(this.color, this.ghostAlpha);
 			this.ghostGraphics.moveTo(0-this.width/4, 0);
 			this.ghostGraphics.lineTo(0-this.width/2, 0-this.width/2);
@@ -112,7 +110,7 @@ define([
 			this.ghostGraphics.y = y;
 			
 			var prevPos = Helper.getBezier(1, this.position, this.prediction, {'x': x, 'y': y});
-			var delta = Helper.getBezier(1+0.01, this.position, this.prediction, {'x': x, 'y': y});
+			var delta = Helper.getBezier(1+0.001, this.position, this.prediction, {'x': x, 'y': y});
 			delta.x = delta.x-prevPos.x;
 			delta.y = delta.y-prevPos.y;
 			this.ghostGraphics.rotation = Math.atan2(delta.y, delta.x);

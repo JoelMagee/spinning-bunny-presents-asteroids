@@ -6,13 +6,20 @@ define([
     'models/Ship',
 	'models/Asteroid',
 	'models/Helper',
-	'models/UI'
-], function (ko, $, PIXI, jsBezier, Ship, Asteroid, Helper, UI) {
+	'models/UI',
+	'models/PhaseManager',
+	'models/Phases/LoadingPhase',
+	'models/Phases/MovementPhase',
+	'models/Phases/FirePointPhase',
+	'models/Phases/FireDirectionPhase',
+	'models/Phases/WaitingPhase',
+	'models/Phases/AnimationPhase'
+], function (ko, $, PIXI, jsBezier, Ship, Asteroid, Helper, UI, PhaseManager, LoadingPhase, MovementPhase, FirePointPhase, FireDirectionPhase, WaitingPhase, AnimationPhase) {
     'use strict';
 	
 	/*jslint browser: true*/
     
-    var GameVM2 = function GameVM2(socket, session) {
+    var GameVM3 = function GameVM3(socket, session) {
 	
 		var self = this;
 
@@ -47,17 +54,47 @@ define([
 			var mouseY = function () { return (stage.getMousePosition().y-world.pannedAmountY)/world.scaledAmount; };
 		
 			return {"x": mouseX, "y": mouseY};
-		};			
+		};
+		
+		var mouse = createMouse(this.world, stage);
 		
 		var border = new PIXI.Graphics();
 		this.world.addChild(border);
 		
-		// this.UI = new UI();
-		// this.world.addChild(this.UI.movementLine);
-		// this.world.addChild(this.UI.fireDot);
-		// this.world.addChild(this.UI.fireLine);
+		this.UI = new UI(this.world);
+		this.world.addChild(this.UI.movementLine);
+		this.world.addChild(this.UI.fireDot);
+		this.world.addChild(this.UI.fireLine);
 		
-		var mouse = createMouse(this.world, stage);
+		var loadingPhase = new LoadingPhase();
+		var movementPhase = new MovementPhase(stage, mouse, this.UI, this.ships);
+		var firePointPhase = new FirePointPhase(stage, mouse, this.UI, this.ships);
+		var fireDirectionPhase = new FireDirectionPhase(stage, mouse, this.UI, this.ships);
+
+		var waitingPhase = new WaitingPhase(self.UI, this.socket);
+		var animationPhase = new AnimationPhase();
+
+		var phaseManager = new PhaseManager();
+
+		movementPhase.on('movement set', function() {
+			phaseManager.setCurrentPhase(firePointPhase);
+		});
+
+		firePointPhase.on('fire point set', function() {
+			phaseManager.setCurrentPhase(fireDirectionPhase);
+		});
+
+		// firePointPhase.on('end turn', function() {
+			// phaseManager.setCurrentPhase(waitingPhase);
+		// });
+		
+		// fireDirectionPhase.on('fire direction set', function() {
+			// phaseManager.setCurrentPhase(fireDirectionPhase); //what phase to set
+		// });
+
+		// fireDirectionPhase.on('end turn', function() {
+			// phaseManager.setCurrentPhase(waitingPhase);
+		// });
 
 		// create a renderer instance.
 		var renderer = PIXI.autoDetectRenderer(this.SCREEN_WIDTH, this.SCREEN_HEIGHT, null, false, true); //width, height, view, transparent, antialias
@@ -65,7 +102,7 @@ define([
 		// add the renderer view element to the DOM
 		$('#gameScreen').append(renderer.view);
 
-		// simple resize listener - can be expanded on
+		// simple resize listener - can be expanded upon
 		$(window).resize(resizeRenderer);
 		function resizeRenderer() {
 		
@@ -151,15 +188,11 @@ define([
 		var updateLogic = function () {
 			var time = Date.now();
 			var prevTime = time;
-			return function () {
+			return function (cb) {
 				prevTime = time;
 				time = Date.now();
 				
-				var timeDiff = time-prevTime;
-				self.ships.forEach(function(ship) {
-					ship.update(timeDiff);
-				});
-				self.UI.update(mouse);
+				cb(time-prevTime);
 			};
 		};
 		
@@ -171,17 +204,20 @@ define([
 		
 			if (self.started) {
 			
-				update();
+				update(phaseManager.currentPhase.update.bind(phaseManager.currentPhase));
+				
+				// phaseManager.currentPhase.update();
+				phaseManager.currentPhase.draw();
 				
 				border.clear();
 				border.lineStyle(2/self.world.scale.x, 0x000000, 1);
 				border.drawRect(0, 0, 10000, 10000);
 				
-				self.UI.draw(self.clientShip, self.world);
+				// self.UI.draw(self.clientShip, self.world);
 				
-				self.ships.forEach(function(ship) {
-					ship.draw();
-				});
+				// self.ships.forEach(function(ship) {
+					// ship.draw();
+				// });
 			}
 
 			// render the stage   
@@ -190,13 +226,18 @@ define([
 		} 
 			
 		
-		this.socket.on('game loading', function(response) {
-			console.log(response.message);
+		this.socket.on('loading game', function(response) {
+			console.log(response);
+			
+			console.log("setting current phase");
+			phaseManager.setCurrentPhase(loadingPhase);
 		});
 		 
 		this.socket.on('start game', function(response) {
 			console.log(response);
 			self.started = true;
+			
+			phaseManager.setCurrentPhase(movementPhase);
 			
 			
 			for (var username in response.data) {
@@ -204,12 +245,7 @@ define([
 				var ship = self.createShip(username);
 				ship.setInitialPosition(position);
 			}
-			
-			self.UI = new UI();
-			self.world.addChild(self.UI.movementLine);
-			self.world.addChild(self.UI.fireDot);
-			self.world.addChild(self.UI.fireLine);
-			
+						
 		});
 		
 		this.socket.on('start turn', function(response) {
@@ -219,6 +255,9 @@ define([
 		this.socket.on('game turn', function(response) {
 			if (response.success) {
 				console.log("waiting");
+				
+				phaseManager.setCurrentPhase(waitingPhase);
+				
 				self.UI.waiting = true;
 				self.waiting(true);
 			} else {
@@ -228,6 +267,8 @@ define([
 		
 		this.socket.on('turn result', function(response) {
 			console.log(response);
+			
+			phaseManager.setCurrentPhase(animationPhase);
 			
 			// var moves = response.turnResult.moves;
 						
@@ -291,7 +332,7 @@ define([
         
     };
 	
-    GameVM2.prototype = {
+    GameVM3.prototype = {
 		endGame: function () {
 			
 			alert('work in progress');
@@ -299,7 +340,7 @@ define([
 		},
 		endTurn: function () {
 			var self = this;
-		
+
 			if (!this.waiting()) {
 				console.log("turn submitted");
 				if ($.isEmptyObject(self.clientShip.currentMove)) {
@@ -366,6 +407,7 @@ define([
 			this.world.addChild(ship.ghostGraphics);
 			if (username === this.session.username) {
 				this.clientShip = ship;
+				this.UI.setClientShip(ship);
 			}
 			this.ships.push(ship);
 			
@@ -420,5 +462,5 @@ define([
 		}
     };
 	
-    return GameVM2;
+    return GameVM3;
 });

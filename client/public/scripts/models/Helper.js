@@ -342,11 +342,9 @@ define([
 			return {
 				setBezier: setBezier,
 				update: update,
-				// hitTest: hitTest,
 				findNearestPoint: findNearestPoint,
 				getPos: getPos,
-				// getSpeed: getSpeed,
-				getNor: getNor
+				getNor: getNor 
 			};
 		})()
     };
