@@ -12,7 +12,6 @@
  */
 
 var Lobby = require('./lobby')();
-var LobbyMessages = require('./lobby-messages');
 
 
 var LobbyIDGenerator = function() {

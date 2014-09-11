@@ -81,8 +81,6 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 		var gameEnd = function(endData) {
 			console.log("[Game Manager] Game ended");
 
-
-
 			//Send response to user
 			self._sendResponse(sessionID, "game end", { 
 				gameInfo: game.getInfo(),
@@ -167,12 +165,17 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 			leaveSub.unsubscribe('leave game:' + sessionID);
 			leaveSub.unsubscribe('logout:' + sessionID);
 			leaveSub.unsubscribe('disconnect:' + sessionID);
+			leaveSub.end();
+			
 			turnSub.unsubscribe('game turn:' + sessionID);
+			turnSub.end();
+			
 			game.removeListener('start turn', startTurn);
 			game.removeListener('turn result', turnResultProcessed);
 			game.removeListener('game end', gameEnd);
 			game.removeListener('player leave', playerLeave);
 		};
+
 
 		game.addPlayer(username);
 

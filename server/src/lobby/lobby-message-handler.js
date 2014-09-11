@@ -137,8 +137,11 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 		leaveSub.unsubscribe('logout:' + sessionID);
 		leaveSub.unsubscribe('disconnect:' + sessionID);
 		leaveSub.unsubscribe('join lobby:' + sessionID);
+		leaveSub.end();
 		closeSub.unsubscribe('close lobby:' + sessionID);
+		closeSub.end();
 		startGameSub.unsubscribe('launch game:' + sessionID);
+		startGameSub.end();
 	};
 
 	leaveSub.on('message', function(channel, message) {

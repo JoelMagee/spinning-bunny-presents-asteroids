@@ -10,7 +10,7 @@ var AsteroidsLogic;
 
 var defaultOptions = {
 	world: {},
-	turnLimit: 20
+	turnLimit: 100
 }
 
 

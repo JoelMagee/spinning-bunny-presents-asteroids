@@ -37,6 +37,8 @@ var GlobalChat = function(sessionManager) {
 	});
 
 	globalChatSub.psubscribe('global message:*');
+
+	console.log("Global Message Module loaded");
 };
 
 module.exports = function(_redis) {
