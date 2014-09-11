@@ -59,7 +59,7 @@ SocketHandler.prototype.setUpValidators = function() {
 	this.globalValidator
 		.requirement(self.sessionValidator.hasSession())
 		.requirement(self.sessionValidator.hasProperty('username'))
-		.requirement(self.contentValidator.hasProperty('message'));
+		.requirement(self.contentValidator.hasProperty('content'));
 
 	this.globalValidator.on('success', function(request) {
 		self.inputPublisher.publish('global message:' + request.sessionID, JSON.stringify(request));
@@ -293,7 +293,7 @@ SocketHandler.prototype.clientConnected = function(connection) {
 
 	connection.on('global message', function(message) {
 		console.log("Received global chat message");
-		self.globalValidator.valiate({ sessionID: sessionID, message: message });
+		self.globalValidator.validate({ sessionID: sessionID, message: message });
 	});
 
 	connection.on('login', function(message) {

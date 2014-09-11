@@ -2,20 +2,26 @@
 <html>
 	<head>
 		<title>spinning bunny</title>
-		<!-- Bootstrap -->
-		<link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+		<link href='http://fonts.googleapis.com/css?family=Roboto:400,500,300,700' rel='stylesheet' type='text/css'>
+		<link href="/assets/styles/style.css" rel="stylesheet">
 		
 		<script src="scripts/require.config.js"></script>
 		<script data-main="scripts/main" src="scripts/libs/require.js"></script>
-		
 	</head>
 	<body>
-		<div id="loginScreen" class="container-fluid">
-			<div class="row">
-				<div class="col-md-2 col-md-offset-1">
-					<h1>Login screen</h1>
+		<div id="loginScreen" class="container">
+			<header class="header">
+				<div class="row">
+					<div class="col-xs-12">
+						<img src="/assets/images/asteroids.png" alt="">
+					</div>
 				</div>
-			</div>
+			</header>
 			<div class="row">
 				<div class="col-md-4 col-md-offset-4">
 					<div class="panel panel-primary">
@@ -24,15 +30,16 @@
 							<form role="form" data-bind="submit: login">
 								<div class="form-group">
 									<label for="usernameInput">Username</label>
-									<input type="text" class="form-control" id="usernameInput" placeholder="Username" data-bind="value: username" autofocus>
+									<input type="text" class="form-control" id="usernameInput" data-bind="value: username" autofocus>
 								</div>
 								<div class="form-group">
 									<label for="passwordInput">Password</label>
-									<input type="password" class="form-control" id="passwordInput" placeholder="Password" data-bind="value: password">
+									<input type="password" class="form-control" id="passwordInput" data-bind="value: password">
 								</div>
-								<button type="submit" class="btn btn-default">Login</button>
+								<hr>
+								<button type="submit" class="btn btn-primary btn-block">Login</button>
 							</form>	
-							<br/>
+							<hr>
 							<p>Not registered? <a data-toggle="modal" data-target="#registerModal" style="cursor: pointer" data-bind="click: clearModal">Register here</a></p>
 							<div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
 								<div class="modal-dialog">
@@ -46,11 +53,11 @@
 											<form role="form">
 												<div class="form-group">
 													<label for="usernameInputModal">Username</label>
-													<input type="text" class="form-control" id="usernameInputModal" placeholder="Username" data-bind="value: usernameModal">
+													<input type="text" class="form-control" id="usernameInputModal" data-bind="value: usernameModal">
 												</div>
 												<div class="form-group">
 													<label for="passwordInputModal">Password</label>
-													<input type="password" class="form-control" id="passwordInputModal" placeholder="Password" data-bind="value: passwordModal">
+													<input type="password" class="form-control" id="passwordInputModal" data-bind="value: passwordModal">
 												</div>
 											</form>	
 										</div>
@@ -70,100 +77,110 @@
 				</div>
 			</div>
 		</div>
-		<div id="lobbyListScreen" class="screen container-fluid">
-			<div class="row">
-				<div class="col-md-4 col-md-offset-1">
-					<h1>Game lobbies</h1>
+		<div id="lobbyListScreen" class="screen container">
+			<header class="header">
+				<div class="row">
+					<div class="col-xs-12">
+						<img src="/assets/images/asteroids.png" alt="">
+					</div>
 				</div>
-				<div class="col-md-2 col-md-offset-5">
-					<button type="button" class="btn btn-default spaced" data-bind="click: logout">Logout</button>
+			</header>
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="page-header">
+						<button type="button" class="btn btn-default pull-right" data-bind="click: logout">Logout</button>
+						<h1>Game Lobbies </h1>
+						<small>For all your game lobby needs</small>
+					</div>
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-md-2 col-md-offset-1">
-					<button class="btn btn-default spaced" data-bind="click: refreshLobbies">Refresh Lobby List</button>
-					<button class="btn btn-default spaced" data-bind="click: createLobby">Create Lobby</button>
-					<input class="spaced" data-bind="value: lobbyName">
-				</div>
-				<div class="col-md-6">
-					<div class="panel panel-default">
-						<div class="panel-heading">Open Lobbies</div>
-						<table class="table table-hover">
-							<thead>
-								<tr>
-									<th>#</th>
-									<th>Name</th>
-									<th>Players</th>
-								</tr>
-							</thead>
-							<!-- ko if: lobbies().length -->
-							<tbody data-bind="foreach: lobbies">
-								<tr data-bind="click: function () {$parent.joinLobby($data)}"> <!-- didn't work otherwise -->
-									<td data-bind="text: id "></td>
-									<td data-bind="text: name"></td>
-									<td data-bind="text: totPlayers"></td>
-								</tr>
-							</tbody>
-							<!-- /ko -->
-							<tbody data-bind="if: lobbies().length === 0">
-								<tr >
-									<td colspan="3" style="text-align:center">No lobbies</td>
-								</tr>
-							</tbody>
-						</table>
+				<div class="col-xs-12">
+					<div class="panel panel-primary">
+						<div class="panel-heading">Open Lobbies
+							<button class="btn btn-link lobby-link pull-right" data-bind="click: refreshLobbies"><i class="fa fa-refresh"></i></button>
+							<input class="pull-right" data-bind="executeOnEnter: createLobby, value: lobbyName, valueUpdate: 'keydown'">
+							<button class="btn btn-link lobby-link pull-right" data-bind="click: createLobby"><i class="fa fa-plus"></i></button>
+						</div>
+						<div class="panel-body lobby-panel">
+							<div data-bind="foreach: lobbies">
+								<div class="lobby-row">
+									<p class="lobby-name"><span data-bind="text: name"></span> (<span data-bind="text: players().length"></span>)</p>
+									<p class="hidden" data-bind="text: id"></p>
+									<div class="lobby-info">
+										<h4>Players: <span class="light" data-bind="text: players().join(', ')"></span></h4>
+										<button class="join-button btn btn-primary" data-bind="click: function () {$parent.joinLobby($data)}">Join Lobby</button>
+									</div>
+								</div>
+							</div>
+							<div data-bind="if: lobbies().length === 0">
+								<h4 class="text-center">No lobbies are currently available</h4>
+							</div>
+						</div>
 					</div>
 				</div>
-				<div class="col-md-2">
-					<div class="panel panel-default">
-						<div class="panel-heading">Users Online</div>
-						<ul class="list-group" data-bind="foreach: users">
-							<li class="list-group-item" data-bind="text: name"></li>
-						</ul>						
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
+					<hr class="primary">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="panel panel-primary">
+						<div class="panel-heading">Global Chat</div>
+						<div class="panel-body chat-panel">
+							<div class="chat-input">
+								<input type="text" data-bind="executeOnEnter: sendGlobalMessage, value: chatMessage, valueUpdate: 'keydown'">
+							</div>
+							<div class="chat-area" data-bind="foreach: chatHistory">
+								<p><span data-bind="text: moment(time).format('HH:mm:ss') "></span> <strong data-bind="text: username"></strong> - <span data-bind="text: content"></span></p>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div id="lobbyScreen" class="screen container-fluid">
+		<div id="lobbyScreen" class="screen container">
+			<header class="header">
+				<div class="row">
+					<div class="col-xs-12">
+						<img src="/assets/images/asteroids.png" alt="">
+					</div>
+				</div>
+			</header>
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="page-header">
+						<h1>Your Lobby</h1>
+						<small>You're country needs you!</small>
+					</div>
+				</div>
+			</div>
 			<div class="row">
 				<br/>
-				<div class="col-md-6 col-md-offset-3">
-					<div class="panel panel-default">
+				<div class="col-xs-12">
+					<div class="panel panel-primary">
 						<div class="panel-heading" data-bind="text: name">Lobby name</div>
-						<br/>
-						<div class="row">
-							<div class="  col-md-4 col-md-offset-1">
-								<div class="panel panel-default">
-									<div class="panel-heading">Players</div>
-									<ul class="list-group" data-bind="foreach: players">
-										<li class="list-group-item" data-bind="text: name"></li>
-									</ul>
+						<div class="panel-body">
+							<div class="row">
+								<div class="col-sm-6">
+									<div class="well">
+										<h3>Players</h3>
+										<ul class="list-group" data-bind="foreach: players">
+											<li class="list-group-item" data-bind="text: name"></li>
+										</ul>
+									</div>
+
 								</div>
-							</div>
-							<div class="col-md-5 col-md-offset-1">
-								<div class="panel panel-default">
-									<div class="panel-heading">Chat</div>
-									<ul id="chatbody" class="list-group scrollable" data-bind="foreach: messages">
-										<li class="list-group-item" data-bind="text: $data"></li>
-									</ul>
-									<form role="form">
-										<div class="input-group">
-											<input type="text" class="form-control square" placeholder="..." data-bind="value: message">
-												<span class="input-group-btn">
-													<button class="btn btn-default square" type="submit" data-bind="click: sendMessage"><span class="glyphicon glyphicon-comment"></span></button>
-												</span>
-										</div>
-									</form>
+								<div class="col-sm-6">
+									<button type="button" class="btn btn-success" data-bind="click: startLobby">Start</button>
+									<button class="btn btn-warning" data-bind="click: leaveLobby">Leave</button>
+									<button class="btn btn-danger" data-bind="click: closeLobby">Close lobby</button>
 								</div>
 							</div>
 						</div>
-						<div class="row">
-							<div class="col-md-5 col-md-offset-1">
-								<button type="button" class="btn btn-success" data-bind="click: startLobby">Start</button>
-								<button class="btn btn-warning" data-bind="click: leaveLobby">Leave</button>
-								<button class="btn btn-danger" data-bind="click: closeLobby">Close lobby</button>
-							</div>
-						</div>
-						<br/>
+
 					</div>
 				</div>
 			</div>
