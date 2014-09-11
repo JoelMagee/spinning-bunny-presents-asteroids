@@ -8,37 +8,68 @@
 
 			var $joelButton;
 			var $samButton;
+			var $deanButton;
+			var $tomButton;
+			var $philButton;
+			var $tedButton;
+			var $simonButton;
 
 			var username;
 
 			var joinCount = 0;
 
+			var createdLobby;
+
+			var dead = false;
+
 			$(document).ready(function() {
 				$joelButton = $('#joel');
 				$samButton = $('#sam');
 				$deanButton = $('#dean');
+				$tomButton = $("#tom");
+				$philButton = $("#phil");
+				$tedButton = $("#ted");
+				$simonButton = $("#simon");
 
 				$joelButton.on('click', function() {
-					$joelButton.attr('disabled', 'disasbled');
-					$samButton.attr('disabled', 'disasbled');
-					$deanButton.attr('disabled', 'disasbled');
+					$("button").attr('disabled', 'disasbled');
 					username = "joel";
 					start();
 				});
 
 				$samButton.on('click', function() {
-					$joelButton.attr('disabled', 'disasbled');
-					$samButton.attr('disabled', 'disasbled');
-					$deanButton.attr('disabled', 'disasbled');
+					$("button").attr('disabled', 'disasbled');
 					username = "sam";
 					start();
 				});
 
 				$deanButton.on('click', function() {
-					$joelButton.attr('disabled', 'disasbled');
-					$samButton.attr('disabled', 'disasbled');
-					$deanButton.attr('disabled', 'disasbled');
+					$("button").attr('disabled', 'disasbled');
 					username = "dean";
+					start();
+				});
+
+				$tomButton.on('click', function() {
+					$("button").attr('disabled', 'disasbled');
+					username = "joel";
+					start();
+				});
+
+				$philButton.on('click', function() {
+					$("button").attr('disabled', 'disasbled');
+					username = "tom";
+					start();
+				});
+
+				$tedButton.on('click', function() {
+					$("button").attr('disabled', 'disasbled');
+					username = "ted";
+					start();
+				});
+
+				$simonButton.on('click', function() {
+					$("button").attr('disabled', 'disasbled');
+					username = "simon";
 					start();
 				});
 			});
@@ -47,10 +78,10 @@
 				var $statusArea = $("#status-area");
 
 				var updateStatus = function(message) {
-					$statusArea.append("<p>" + message + "</p>");
+					$statusArea.prepend("<p>" + message + "</p>");
 				};
 
-				var delayTime = 2000;
+				var delayTime = 200;
 
 				var delay = function(fn) {
 					setTimeout(fn,delayTime);
@@ -102,20 +133,14 @@
 							//Lobby is already there, join it
 							lobbyID = e.lobbyData[0].id,
 							socket1.emit("join lobby", { id: lobbyID });
+
+							createdLobby = false;
 						} else {
+
+							createdLobby = true;
 							//Lobby is not there, this client creates it
 							updateStatus("No lobbys, creating one");
 							socket1.emit("create lobby", { name: "Test lobby" });
-
-							socket1.on('user join lobby', function(e) {
-								delay(function() {
-									joinCount++;
-									if (joinCount === 2) {
-										updateStatus("Another user has joined, starting game");
-										socket1.emit('launch game', {});			
-									}
-								});
-							});
 						}
 					} else {
 						updateStatus("ERROR - Lobby info request failed");
@@ -164,17 +189,22 @@
 					console.log("Start turn message recieved");
 
 					delay(function() {
-						var x = Math.random() * 10000;
-						var y = Math.random() * 10000;
+						var x = 2500 + Math.random() * 5000;
+						var y = 2500 + Math.random() * 5000;
 
-						updateStatus("Adding game turn - " + x + ", " + y);
+						
 
-						socket1.emit('game turn', {
-							destination: {
-								x: x,
-								y: y
-							}
-						});
+						if (!dead) {
+							updateStatus("Adding game turn - " + x + ", " + y);
+							socket1.emit('game turn', {
+								destination: {
+									x: x,
+									y: y
+								}
+							});
+						} else {
+							updateStatus("<strong>I am dead</strong> Not sending move data");
+						}
 					});
 				});
 
@@ -189,12 +219,17 @@
 				socket1.on('turn result', function(e) {
 					console.dir(e);
 
-					updateStatus("Game turn result recieved");
-					
-					updateStatus("Moved from: " + e.turnResult[username].oldPosition.x + ", " + e.turnResult[username].oldPosition.y + " to " + e.turnResult[username].position.x + " to " + e.turnResult[username].position.y);
 
-					if (e.turnResult[username].collisions.length > 0) {
-						updateStatus("COLLISION! at: " + e.turnResult[username].collisions[0].t);
+
+					updateStatus("Game turn result recieved");
+
+					var playerData = e.turnResult.players[username];
+					
+					updateStatus("Moved from: " + playerData.oldPosition.x + ", " + playerData.oldPosition.y + " to " +playerData.position.x + " to " +playerData.position.y);
+
+					if (playerData.collisions.length > 0) {
+						updateStatus("<strong>COLLISION</strong>! at: " + playerData.collisions[0].t);
+						dead = true;
 					}
 
 					updateStatus("---");
@@ -203,6 +238,32 @@
 
 				socket1.on('game end', function(e) {
 					updateStatus("Game ended");
+					dead = false;
+					if (createdLobby) {
+						//Lobby is not there, this client creates it
+						updateStatus("Creating lobby");
+						socket1.emit("create lobby", { name: "Test lobby" });
+						joinCount = 0;
+						
+
+					} else {
+						setTimeout(function() {
+
+							socket1.emit('info lobby', {});
+						}, 3000)
+					}
+				});
+
+				socket1.on('user join lobby', function(e) {
+					if (createdLobby) {
+						joinCount++;
+						if (joinCount === 5) {
+							updateStatus("Another user has joined, starting game");
+							socket1.emit('launch game', {});			
+						} else {
+							updateStatus(joinCount + " other people have joined, waiting for 5");
+						}
+					}
 				});
 			};
 			
@@ -215,6 +276,10 @@
 		<button id="joel">Start as Joel</button>
 		<button id="sam">Start as Sam</button>
 		<button id="dean">Start as Dean</button>
+		<button id="simon">Start as Simon</button>
+		<button id="ted">Start as Ted</button>
+		<button id="phil">Start as Phil</button>
+		<button id="tom">Start as Tom</button>
 		<h2>Status</h2>		
 		<div id="status-area">
 			

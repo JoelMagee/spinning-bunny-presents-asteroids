@@ -2,10 +2,27 @@ define([
 	'models/LobbyVM',
     'knockout',
     'jquery',
-	'models/Lobby'
-], function (LobbyVM, ko, $, Lobby) {
+	'models/Lobby',
+	'moment'
+], function (LobbyVM, ko, $, Lobby, moment) {
     'use strict';
-	
+
+	(function() {
+		var previous= {};
+
+		$("body").on('click', '.lobby-name', function(e) {
+			if (previous === this) {
+				$(".active-lobby").removeClass("active-lobby").find(".lobby-info").slideUp();
+				previous = {};
+				return;
+			}
+
+			$(".active-lobby").removeClass("active-lobby").find(".lobby-info").slideUp();
+			$(this).parent().addClass("active-lobby").find(".lobby-info").slideDown();
+			previous = this;
+		});
+	})();
+
     var LobbyListVM = function LobbyListVM(socket) {
 	
 		var self = this;
@@ -21,6 +38,10 @@ define([
 		
 		this.lobbySelectEvents = [];
 		
+		//Chat observables
+		this.chatMessage = ko.observable();
+		this.chatHistory = ko.observableArray();
+
 		this.socket.on('logout', function(response) {
 			if (response.success) {
 				console.log("logged out");
@@ -42,7 +63,7 @@ define([
 					self.lobbies.removeAll();
 
 					for (var i = 0; i < response.lobbyData.length; i++) {
-						var lobby = new Lobby(response.lobbyData[i].id, response.lobbyData[i].name, response.lobbyData[i].usernames.length);
+						var lobby = new Lobby(response.lobbyData[i].id, response.lobbyData[i].name, response.lobbyData[i].usernames);
 						self.lobbies.push(lobby);
 					}
 				} else {
@@ -77,6 +98,12 @@ define([
 			
 		});
 		
+		this.socket.on('global message', function(response) {
+			self.chatHistory.unshift({content: response.message.content, time: new Date(), username: response.message.username });
+			if(self.chatHistory().length > 100) {
+				self.chatHistory.pop();
+			}
+		});
     };
 	
     LobbyListVM.prototype = {
@@ -118,6 +145,10 @@ define([
 		},
 		logout: function () {
 			this.socket.emit('logout', {});
+		},
+		sendGlobalMessage: function() {
+			this.socket.emit('global message', { content: this.chatMessage() });
+			this.chatMessage("");
 		}
     };
 	

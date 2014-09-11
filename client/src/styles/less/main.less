@@ -1,0 +1,220 @@
+.scrollable {
+    min-height: 246px;
+	max-height: 246px;
+    overflow-y: scroll;
+}
+
+.square {
+    border-radius: 0px;
+}
+
+canvas {
+	display: block;
+	z-index: -1;
+}
+
+#endGameButton { 
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+#endTurnButton { 
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+#undoButton { 
+	position: absolute;
+	top: 0;
+	left:100px;
+}
+
+.screen {
+	display: none;
+}
+
+.spaced {
+	margin: 10px 10px 0px 0px;
+}
+
+/* -- Bootstrap overrides -- */
+
+@primary-color: #F05800;
+@primary-offset-1:#FF6E19;
+@primary-offset-2: #A33C00;
+
+@secondary-color: #00A3A2;
+@secondary-color-offset: #00F0EE;
+
+.page-header {
+  h1 {
+    color: #fff;
+    margin-bottom: 0;
+  }
+
+  small {
+    display: block;
+    color: #777;
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin-bottom: 10px;
+  }
+
+  border-bottom: 1px solid @primary-color;
+}
+
+.panel {
+  border-radius: 0;
+}
+
+.panel-primary {
+  border: 0;
+
+  .panel-heading {
+    border-radius: 0;
+    border: 1px solid #DDD;
+    background-color: #DDD;
+    color: #333;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+
+  .panel-body {
+    border: 1px solid #DDD;
+    background-color: #f8f8f8;
+  }
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #F05800;
+  border-color: #FF6E19;
+
+  &:hover, &:focus, &.active {
+    color: #fff;
+    background-color: #FF6E19;
+    border-color: #FF6E19;
+  }
+}
+
+.btn-link {
+  color: @primary-color;
+
+  &:hover {
+    color: @primary-offset-1;
+  }
+}
+
+.form-control:focus {
+  border-color: @primary-color;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(red(@primary-color), green(@primary-color), blue(@primary-color), 0.6);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(red(@primary-color), green(@primary-color), blue(@primary-color), 0.6);
+}
+
+/* -- */
+
+html, body {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+body {
+  background-color: #000;
+  font-family: 'Roboto', sans-serif;
+  overflow-y:scroll;
+}
+
+.light {
+  font-weight: 300;
+}
+
+.header {
+  text-align: center;
+  padding: 20px;
+}
+
+.panel-heading {
+  input {
+    font-size: 1rem;
+    padding: 3px;
+    border: 0;
+    color: #333;
+    font-weight: 400;
+  }
+  .btn-link {
+    font-size: 1rem;
+    padding: 3px 9px;
+    margin: 0;
+  }
+}
+
+.lobby-panel {
+  padding: 0;
+  margin: 0;
+}
+
+.lobby-row {
+  &.active-lobby {
+    background-color: #fff;
+  }
+  border-bottom: 1px solid #ddd;
+}
+
+.active-lobby {
+
+  .lobby-name {
+    background-color: #f2f2f2;
+    color: @primary-color;
+  }
+
+}
+
+.lobby-name {
+  cursor: pointer;
+  transition: 0.2s;
+  &:hover {
+    background-color: #bbb;
+    color: @primary-color;
+  }
+}
+
+.lobby-name, .lobby-info {
+  font-size: 1.2rem;
+  padding: 10px;
+  margin: 0;
+}
+
+.lobby-info {
+  display: none;
+
+  h4 {
+    font-size: 1.2rem;
+    margin: 0;
+    padding: 4px 0;
+    margin-bottom: 8px;
+  }
+}
+
+.chat-input {
+  input {
+    display: block;
+    width: 100%;
+  }
+}
+
+.chat-area {
+  background-color: #fff;
+  border: 1px solid #eee;
+  margin-top: 5px;
+
+  min-height: 80px;
+  max-height: 300px;
+  overflow-y: scroll;
+
+  p {
+    margin: 5px;
+    padding: 0;
+  }
+}

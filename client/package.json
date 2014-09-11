@@ -1,0 +1,14 @@
+{
+	"name": "asteroids-client",
+	"description": "A client for the multiplayer turn based game asteroids.",
+	"version": "0.3.0",
+    "private": true,
+    "dependencies": {},
+	"devDependencies": {
+		"grunt-autoprefixer": "0.6.x",
+		"grunt-contrib-less": "0.9.x",
+		"grunt-contrib-cssmin": "0.7.x",
+		"grunt-contrib-watch": "0.5.x"
+	},
+	"main": "server.js"
+}

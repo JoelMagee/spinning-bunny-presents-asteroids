@@ -30,6 +30,7 @@ var LobbyMessageManager  = require('./src/lobby/lobby-message-handler')(redis);
 var Login                = require('./src/auth/login')(redis);
 var Logout               = require('./src/auth/logout')(redis);
 var Register             = require('./src/auth/register')(redis);
+var UserInfo             = require('./src/auth/user-info')(redis);
 
 // Parse provided arguments
 program
@@ -62,13 +63,14 @@ var socketHandler = new SocketHandler(io, sessionManager);
 var globalChat = new GlobalChat(sessionManager);
 
 var lobbyManager = new LobbyManager();
-var gameManager = new GameManager(sessionManager);
+var gameManager = new GameManager(models);
 var lobbyMessageManager = new LobbyMessageManager(sessionManager, lobbyManager);
 var lobbyTransferManager = new LobbyTransferManager(lobbyMessageManager, gameManager);
 
 var login = new Login(sessionManager, models.UserModel);
 var logout = new Logout(sessionManager);
 var register = new Register(models.UserModel);
+var userInfo = new UserInfo(models.UserModel);
 
 console.log("Bootstrapping Complete");
 

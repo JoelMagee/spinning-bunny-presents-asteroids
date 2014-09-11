@@ -234,8 +234,10 @@ AsteroidsGame.prototype.getStartData = function() {
 	return this.asteroidsLogic.getPlayerPositions();
 };
 
-AsteroidsGame.prototype.gameEnd = function(reason) {
-	this.emit('game end', reason);
+AsteroidsGame.prototype.gameEnd = function(type, winner, reason) {
+
+
+	this.emit('game end', { type: type, winner: winner, reason: reason });
 };
 
 AsteroidsGame.prototype.getInfo = function() {

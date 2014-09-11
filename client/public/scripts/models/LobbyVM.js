@@ -95,6 +95,7 @@ define([
 		
 		this.socket.on('start game' , function(response) {
 			if (response.success) {
+				$('#lobbyListScreen').hide();
 				$('#lobbyScreen').hide();
 				console.log(response.message);
 				$('#gameScreen').show();

@@ -8,7 +8,8 @@ var require = {
         'text': 'libs/text',
 		'bootstrap': '../bootstrap/js/bootstrap',
 		'socketio': 'https://cdn.socket.io/socket.io-1.0.0',
-		'jsBezier': 'libs/jsBezier-0.3'
+		'jsBezier': 'libs/jsBezier-0.3',
+        'moment' : 'libs/moment'
     },
     map: {
         '*': {

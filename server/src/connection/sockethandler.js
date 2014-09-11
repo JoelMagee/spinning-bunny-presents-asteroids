@@ -59,7 +59,7 @@ SocketHandler.prototype.setUpValidators = function() {
 	this.globalValidator
 		.requirement(self.sessionValidator.hasSession())
 		.requirement(self.sessionValidator.hasProperty('username'))
-		.requirement(self.contentValidator.hasProperty('message'));
+		.requirement(self.contentValidator.hasProperty('content'));
 
 	this.globalValidator.on('success', function(request) {
 		self.inputPublisher.publish('global message:' + request.sessionID, JSON.stringify(request));
@@ -198,6 +198,7 @@ SocketHandler.prototype.setUpValidators = function() {
 	this.launchGameValidator.on('success', function(request) {
 		self.inputPublisher.publish('launch game:' + request.sessionID, JSON.stringify(request));
 	});
+
 	/*
 	 * Game Turn
 	 */
@@ -209,6 +210,18 @@ SocketHandler.prototype.setUpValidators = function() {
 
 	this.gameTurnValidator.on('success', function(request) {
 		self.inputPublisher.publish('game turn:' + request.sessionID, JSON.stringify(request));
+	});
+
+	/*
+	 * User info
+	 */
+	this.userInfoValidator = new MessageValidator();
+
+	this.userInfoValidator
+		.requirement(self.sessionValidator.hasSession())
+
+	this.userInfoValidator.on('success', function(request) {
+		self.inputPublisher.publish('user info:' + request.sessionID, JSON.stringify(request));
 	});
 }
 
@@ -280,7 +293,7 @@ SocketHandler.prototype.clientConnected = function(connection) {
 
 	connection.on('global message', function(message) {
 		console.log("Received global chat message");
-		self.globalValidator.valiate({ sessionID: sessionID, message: message });
+		self.globalValidator.validate({ sessionID: sessionID, message: message });
 	});
 
 	connection.on('login', function(message) {
@@ -332,19 +345,12 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		console.log("Received game turn message");
 		self.gameTurnValidator.validate({ sessionID: sessionID, message: message });
 	});
+
+	connection.on('user info', function(message) {
+		console.log("Received user info message");
+		self.userInfoValidator.validate({ sessionID: sessionID, message: message});
+	})
 };
-
-// SocketHandler.prototype.sendNoSessionError = function(connection) {
-// 	connection.emit('error-message', "You have not created a session, send a SocketIO message on the channel 'session'");
-// };
-
-// SocketHandler.prototype.sendNotLoggedInError = function(connection) {
-// 	connection.emit('error-message', "You have not logged in, please log in before continuing");
-// };
-
-// SocketHandler.prototype.sendGenericError = function(connection) {
-// 	connection.emit('error-message', "Unknown error occured!");
-// }
 
 var SocketClient = function(sessionID, connection) {
 	this.sessionID = sessionID;

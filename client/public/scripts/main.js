@@ -10,7 +10,22 @@ define([
 ], function (ko, $, LobbyListVM, LobbyVM, LoginVM, GameVM, Session, io) {
     'use strict';
 	
-	var socket = io('http://sl-ws-230:8500/');
+	//Knockout plugin for adding function calls when enter is pressed
+	ko.bindingHandlers.executeOnEnter = {
+	    init: function (element, valueAccessor, allBindingsAccessor, viewModel) {
+	        var allBindings = allBindingsAccessor();
+	        $(element).keypress(function (event) {
+	            var keyCode = (event.which ? event.which : event.keyCode);
+	            if (keyCode === 13) {
+	                allBindings.executeOnEnter.call(viewModel);
+	                return false;
+	            }
+	            return true;
+	        });
+	    }
+	};
+
+	var socket = io('http://sl-ws-230:5000/');
 	socket.emit('session', {});
 	
 	socket.on('connect', function() {
@@ -33,4 +48,6 @@ define([
 	ko.applyBindings(lobbyVM, $('#lobbyScreen')[0]);
 	ko.applyBindings(gameVM, $('#gameScreen')[0]);
 	
+	
+
 });
