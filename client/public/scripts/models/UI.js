@@ -9,62 +9,53 @@ define([
 		this.movementLine = new PIXI.Graphics();
 		this.fireDot = new PIXI.Graphics();
 		this.fireLine = new PIXI.Graphics();
-		
-		this.drawingUI = true;		
-		
+
 		this.moveSelect = true;
 		this.firePositionSelect = false;
 		this.fireDirectionSelect = false;
 		
-		this.waiting = false;
+		this.dragging = false;
 		
 		this.movementPosition = {};
 		this.firePoint = {};
 		this.fireDestination = {};
 		this.possibleFireDestination = {};
 		
+		this.moveSet = false;
+		this.firePointSet = false;
+		this.fireDestinationSet = false;
+		
 		this.fireDestinationLineTo = this.possibleFireDestination;
 		
-		this.clientShip = undefined;
+		this.clientShip = {};
 		this.world = world;
+		
+		this.prev = {'x': 0, 'y': 0};
 		
     };
 	
     UI.prototype = {
-		draw: function (clientShip, world) {	
-			
-			if (this.drawingUI) {
-						
-				if (this.movementPosition) {
-					this.movementLine.clear();
-					this.movementLine.lineStyle(2/world.scale.x, 0x000000, 1);
-					this.movementLine.moveTo(clientShip.position.x, clientShip.position.y);
-					this.movementLine.quadraticCurveTo(clientShip.prediction.x, clientShip.prediction.y, this.movementPosition.x, this.movementPosition.y);
+		drag: function (data) {
+			if (this.dragging) {
+									
+					var changeX = data.global.x-this.prev.x;
+					var changeY = data.global.y-this.prev.y;
 					
-					this.movementLine.drawCircle(clientShip.prediction.x, clientShip.prediction.y, 1/world.scale.x);
-				}
-				
-				if (this.firePoint) {
-					Helper.bezierHelper.setBezier(clientShip.position.x, clientShip.position.y, clientShip.prediction.x, clientShip.prediction.y, clientShip.currentMove.x, clientShip.currentMove.y);
-					var nearestPoint = Helper.bezierHelper.findNearestPoint(this.firePoint.x, this.firePoint.y);
+					this.world.x += changeX;
+					this.world.pannedAmountX += changeX;
+					this.world.y += changeY;
+					this.world.pannedAmountY += changeY;
 					
-					this.fireDot.clear();
-					this.fireDot.beginFill(0xFF0000);
-					this.fireDot.drawCircle(nearestPoint.pos.x, nearestPoint.pos.y, 4/world.scale.x);
-					this.fireDot.endFill();
+					this.prev.x = data.global.x;
+					this.prev.y = data.global.y;
+					
+					/* 
+						Add a check in here somewhere that means that
+						the world can only be panned a certain distance
+						based on pannedAmountX and pannedAmountY
+					*/
+					
 				}
-
-				if (this.fireDestination) {
-					this.fireLine.clear();
-					this.fireLine.lineStyle(2/world.scale.x, 0x000000, 1);
-					this.fireLine.moveTo(clientShip.firePoint.x, clientShip.firePoint.y);
-					this.fireLine.lineTo(this.fireDestination.x, this.fireDestination.y);
-				}
-				
-			} else {
-				this.reset();
-			}
-						
 		},
 		clearMovementLine: function () {
 			this.movementLine.clear();
@@ -83,7 +74,7 @@ define([
 			
 			this.movementLine.drawCircle(this.clientShip.prediction.x, this.clientShip.prediction.y, 1/this.world.scale.x);
 		},
-		drawFirePoint: function (clientShip, world) {
+		drawFirePoint: function () {
 			this.fireDot.clear();
 			if (this.firePoint.x) {
 				Helper.bezierHelper.setBezier(this.clientShip.position.x, this.clientShip.position.y, this.clientShip.prediction.x, this.clientShip.prediction.y, this.clientShip.currentMove.x, this.clientShip.currentMove.y);
@@ -108,6 +99,8 @@ define([
 				
 			this.clientShip.drawGhost(this.movementPosition.x, this.movementPosition.y);
 			this.clientShip.setCurrentMove(this.movementPosition.x, this.movementPosition.y);
+			
+			this.moveSet = true;
 				
 			return true;
 		},
@@ -118,7 +111,10 @@ define([
 			console.log("t point is: " + nearestPoint.t);
 			console.log("nearest point is " + nearestPoint.pos.x + ", " + nearestPoint.pos.y);
 			
+			this.clientShip.t = nearestPoint.t;
 			this.clientShip.firePoint = nearestPoint.pos;
+			
+			this.firePointSet = true;
 		
 			return true;
 		},
@@ -129,100 +125,26 @@ define([
 			this.fireDestination.x = this.possibleFireDestination.x;
 			this.fireDestination.y = this.possibleFireDestination.y;
 		
-			var angle = Math.atan2(this.firePoint.y-this.fireDestination.y, this.firePoint.x-this.fireDestination.x);
+			var angle = Math.atan2(this.clientShip.firePoint.y-this.fireDestination.y, this.clientShip.firePoint.x-this.fireDestination.x)+Math.PI;
 			console.log("angle from t point in radians is " + angle);
+			this.clientShip.angle = angle;
+			
+			this.clientShip.drawBullet();
+			
+			this.fireDestinationSet = true;
 			
 			return true;
 		},
 		setClientShip: function (ship) {
 			this.clientShip = ship;
 		},
-		startDrag: function () {
-			
+		startDrag: function (data) {
+			this.dragging = true;
+			this.prev.x = data.global.x;
+			this.prev.y = data.global.y;
 		},
 		stopDrag: function () {
-			
-		},
-		update: function (mouse) {
-		
-			var mousePos = {'x': mouse.x(), 'y': mouse.y()};
-			
-			if (this.moveSelect) {
-				if (this.waiting) {
-					this.movementPosition = null;
-					this.movementLine.clear();
-				} else {
-					this.movementPosition = mousePos;
-				} 
-			} else if (this.firePositionSelect) {
-				if (this.waiting) {
-					this.firePoint = null;
-					this.fireDot.clear();
-				} else {
-					this.firePoint = mousePos;
-					}
-			} else if (this.fireDirectionSelect) {
-				if (this.waiting) {
-					this.fireDestination = null;
-					this.fireLine.clear();
-				} else {
-					this.fireDestination = mousePos;
-				}
-			}
-			
-		},
-		mouseClick: function (clientShip) {
-		
-			if (this.moveSelect) {
-			
-				this.moveSelect = false;
-				
-				clientShip.drawGhost(this.movementPosition.x, this.movementPosition.y);
-
-				clientShip.setCurrentMove(this.movementPosition.x, this.movementPosition.y);
-				
-				this.firePositionSelect = true;
-			
-			} else if (this.firePositionSelect) {
-				this.firePositionSelect = false;
-				Helper.bezierHelper.setBezier(clientShip.position.x, clientShip.position.y, clientShip.prediction.x, clientShip.prediction.y, clientShip.currentMove.x, clientShip.currentMove.y);
-				var nearestPoint = Helper.bezierHelper.findNearestPoint(this.firePoint.x, this.firePoint.y);
-				console.log("t point is: " + nearestPoint.t);
-				console.log("nearest point is " + nearestPoint.pos.x + ", " + nearestPoint.pos.y);
-				
-				clientShip.firePoint = nearestPoint.pos;
-				this.fireDirectionSelect = true;
-			} else if (this.fireDirectionSelect) {
-				this.fireDirectionSelect = false;
-				var angle = Math.atan2(this.firePoint.y-this.fireDestination.y, this.firePoint.x-this.fireDestination.x);
-				console.log("angle from t point in radians is " + angle);
-			}
-		
-		},
-		reset: function () {
-			this.movementLine.clear();
-			this.fireDot.clear();
-			this.fireLine.clear();
-			
-			this.moveSelect = true;
-			this.firePositionSelect = false;
-			this.fireDirectionSelect = false;
-			
-			this.movementPosition = null;
-			this.firePoint = null;
-			this.fireDestination = null;
-		},
-		completeReset: function () {
-			this.reset();
-			this.drawingUI = true;
-			this.waiting = false;
-		},
-		createMouse: function(world, stage) {
-		
-			var mouseX = function () { return (stage.getMousePosition().x-world.pannedAmountX)/world.scaledAmount; };
-			var mouseY = function () { return (stage.getMousePosition().y-world.pannedAmountY)/world.scaledAmount; };
-		
-			return {"x": mouseX, "y": mouseY};
+			this.dragging = false;
 		}
     };
 

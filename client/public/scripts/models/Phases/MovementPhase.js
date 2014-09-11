@@ -15,7 +15,6 @@ define([
 	
 	MovementPhase.prototype.onStart = function () {
 		console.log("Movement phase has started");
-		//Add mouse movement listeners for bezier curve drawing
 		
 		var self = this;
 		
@@ -24,18 +23,23 @@ define([
 			if (self.mouse.x() < 0 || self.mouse.x() > 10000 || self.mouse.y() < 0 || self.mouse.y() > 10000) {
 				return false;
 			} else if (data.originalEvent.which === 3 || data.originalEvent.which === 2) { //Right click
-				self.ui.startDrag();
+				self.ui.startDrag(data);
 			} else if (data.originalEvent.which === 1) {
 				if (self.ui.setMove()) {
 					self.emitEvent('movement set');
 				}
 			}
-
+		};
+		
+		this.stage.mousemove = function(data) {
+			self.ui.drag(data);
 		};
 		
 		this.stage.mouseup = function () {
 			self.ui.stopDrag();
 		};
+		
+		
 	};
 	
 	MovementPhase.prototype.draw = function () {
@@ -50,7 +54,6 @@ define([
 	
 	MovementPhase.prototype.update = function (t) {
 		// console.log("Movement phase is updating");
-		//Update current points
 		this.ui.movementPosition.x = this.mouse.x();
 		this.ui.movementPosition.y = this.mouse.y();
 	};

@@ -13,6 +13,7 @@ define([
 		this.color = colors[0];
 		this.graphics = new PIXI.Graphics();
 		this.ghostGraphics = new PIXI.Graphics();
+		this.bulletGraphics = new PIXI.Graphics();
 		this.text = new PIXI.Text(username, {font: '100px Verdana'});
 		this.username = username;
 		this.text.anchor.x = 0.5;
@@ -28,7 +29,6 @@ define([
 
 		this.currentMove = {};
 		
-		this.replay = false; //Whether the ship is currently animating
 		this.timeElapsed = 0; //Time elapsed in ms in current replay
 		this.replayTime = 2000; 
 
@@ -51,13 +51,8 @@ define([
 			this.text.y = this.position.y-this.width;
 			
 			this.graphics.rotation = this.rotation;
-			
 		},
-		update: function (timeDif) {
-			if (!this.replay) {
-				return false;
-			}
-			
+		update: function (timeDif) {	
 			this.timeElapsed += timeDif;
 			
 			var t = 1;
@@ -79,12 +74,6 @@ define([
 			this.previousPrediction = this.prediction;
 			this.prediction = prediction;
 		},
-		startReplay: function() {
-			this.replay = true;
-			this.timeElapsed = 0;
-			
-			// pass callback into here 
-		},
 		setInitialPosition: function(position) {
 			console.log("[Ship] Setting initial position: " + position.x + ", " + position.y);
 			this.startPosition = position;
@@ -96,6 +85,16 @@ define([
 			console.log("[Ship] Setting current move position to: " + x + ", " + y);
 			this.currentMove.x = x;
 			this.currentMove.y = y;
+		},
+		drawBullet: function () {
+			this.bulletGraphics.clear();
+			this.bulletGraphics.beginFill(0xFFFF00);
+			this.bulletGraphics.drawRect(0+this.width/2, 0-this.width/8, this.width/4, this.width/4);
+			this.bulletGraphics.endFill();
+			
+			this.bulletGraphics.x = this.position.x;
+			this.bulletGraphics.y = this.position.y;
+			this.bulletGraphics.rotation = this.angle;
 		},
 		drawGhost: function (x, y) {
 			
@@ -117,16 +116,16 @@ define([
 			
 		},
 		destroy: function () {
-				//ship gets destroyed
-				
-				var self = this;
-				var interval = setInterval(function () {
-					if (self.graphics.alpha > 0) {
-						self.graphics.alpha -= 0.25;
-					} else {
-						clearInterval(interval);
-					}
-				}, 500);
+			//ship gets destroyed
+			
+			var self = this;
+			var interval = setInterval(function () {
+				if (self.graphics.alpha > 0) {
+					self.graphics.alpha -= 0.25;
+				} else {
+					clearInterval(interval);
+				}
+			}, 500);
 				
 		}
     };

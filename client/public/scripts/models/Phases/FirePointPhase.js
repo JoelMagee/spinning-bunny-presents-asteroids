@@ -23,14 +23,16 @@ define([
 			if (self.mouse.x() < 0 || self.mouse.x() > 10000 || self.mouse.y() < 0 || self.mouse.y() > 10000) {
 				return false;
 			} else if (data.originalEvent.which === 3 || data.originalEvent.which === 2) { //Right click
-				self.ui.startDrag();
+				self.ui.startDrag(data);
 			} else if (data.originalEvent.which === 1) {
 				if (self.ui.setFirePoint()) {
 					self.emitEvent('fire point set');
 				}
-	
 			}
-
+		};
+		
+		this.stage.mousemove = function(data) {
+			self.ui.drag(data);
 		};
 		
 		this.stage.mouseup = function () {
@@ -55,7 +57,8 @@ define([
 	FirePointPhase.prototype.update = function () {
 		// console.log("Fire Point phase is updating");
 		
-		this.ui.firePoint = {'x': this.mouse.x(), 'y': this.mouse.y()};
+		this.ui.firePoint.x = this.mouse.x();
+		this.ui.firePoint.y = this.mouse.y();
 	};
 	
 	FirePointPhase.prototype.onEnd = function () {

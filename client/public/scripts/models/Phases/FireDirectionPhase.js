@@ -23,19 +23,23 @@ define([
 			if (self.mouse.x() < 0 || self.mouse.x() > 10000 || self.mouse.y() < 0 || self.mouse.y() > 10000) {
 				return false;
 			} else if (data.originalEvent.which === 3 || data.originalEvent.which === 2) { //Right click
-				self.ui.startDrag();
+				self.ui.startDrag(data);
 			} else if (data.originalEvent.which === 1) {
 				if (self.ui.setFireDestination()) {
 					self.emitEvent('fire direction set');
 				}
-	
 			}
-
+		};
+		
+		this.stage.mousemove = function(data) {
+			self.ui.drag(data);
 		};
 		
 		this.stage.mouseup = function () {
 			self.ui.stopDrag();
 		};
+		
+		this.ui.fireDestinationLineTo = this.ui.possibleFireDestination;
 	};
 	
 	FireDirectionPhase.prototype.draw = function () {

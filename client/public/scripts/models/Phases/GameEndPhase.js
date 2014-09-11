@@ -4,22 +4,32 @@ define([
 ], function ($, Phase) {
     'use strict';
 	
-	var GameEndPhase = function(stage, ships) {
-	
+	var GameEndPhase = function(world, ships, socket) {
+		this.world = world;
+		this.ships = ships;
+		this.socket = socket;
 	};
 	
 	GameEndPhase.prototype = $.extend(true, {}, Phase.prototype);
 	
 	GameEndPhase.prototype.onStart = function () {
 		console.log("Game End phase has started");
+		
+		alert('Game is over');
+		this.socket.emit('info lobby', {});
+		
+
+		this.world.removeChildren(1); // removes children from index 1 to the end
+		this.ships = [];
+		
+		$('#gameScreen').hide();
+		$('#lobbyListScreen').show();
 	};
 	
 	GameEndPhase.prototype.draw = function () {
-		console.log("Game End phase is drawing");
 	};
 	
 	GameEndPhase.prototype.update = function () {
-		console.log("Game End phase is updating");
 	};
 	
 	GameEndPhase.prototype.onEnd = function () {

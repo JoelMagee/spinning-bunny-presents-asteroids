@@ -13,14 +13,20 @@ define([
 	'models/Phases/FirePointPhase',
 	'models/Phases/FireDirectionPhase',
 	'models/Phases/WaitingPhase',
-	'models/Phases/AnimationPhase'
-], function (ko, $, PIXI, jsBezier, Ship, Asteroid, Helper, UI, PhaseManager, LoadingPhase, MovementPhase, FirePointPhase, FireDirectionPhase, WaitingPhase, AnimationPhase) {
+	'models/Phases/AnimationPhase',
+	'models/Phases/GameEndPhase'
+], function (ko, $, PIXI, jsBezier, Ship, Asteroid, Helper, UI, PhaseManager, LoadingPhase, MovementPhase, FirePointPhase, FireDirectionPhase, WaitingPhase, AnimationPhase, GameEndPhase) {
     'use strict';
 	
 	/*jslint browser: true*/
     
     var GameVM3 = function GameVM3(socket, session) {
-	
+		
+		var setMovementPhase = function() {
+			self.phaseManager.setCurrentPhase(self.movementPhase);
+			self.waiting(false);
+		};
+
 		var self = this;
 
 		this.socket = socket;
@@ -61,40 +67,29 @@ define([
 		var border = new PIXI.Graphics();
 		this.world.addChild(border);
 		
-		this.UI = new UI(this.world);
+		this.UI = new UI(this.world, mouse);
 		this.world.addChild(this.UI.movementLine);
 		this.world.addChild(this.UI.fireDot);
 		this.world.addChild(this.UI.fireLine);
 		
-		var loadingPhase = new LoadingPhase();
-		var movementPhase = new MovementPhase(stage, mouse, this.UI, this.ships);
-		var firePointPhase = new FirePointPhase(stage, mouse, this.UI, this.ships);
-		var fireDirectionPhase = new FireDirectionPhase(stage, mouse, this.UI, this.ships);
+		this.loadingPhase = new LoadingPhase();
+		this.movementPhase = new MovementPhase(stage, mouse, this.UI, this.ships);
+		this.firePointPhase = new FirePointPhase(stage, mouse, this.UI, this.ships);
+		this.fireDirectionPhase = new FireDirectionPhase(stage, mouse, this.UI, this.ships);
 
-		var waitingPhase = new WaitingPhase(self.UI, this.socket);
-		var animationPhase = new AnimationPhase();
+		this.waitingPhase = new WaitingPhase(this.UI, stage, mouse);
+		this.animationPhase = new AnimationPhase(this.UI, this.ships, stage, mouse);
+		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.socket);
 
-		var phaseManager = new PhaseManager();
+		this.phaseManager = new PhaseManager();
 
-		movementPhase.on('movement set', function() {
-			phaseManager.setCurrentPhase(firePointPhase);
+		this.movementPhase.on('movement set', function() {
+			self.phaseManager.setCurrentPhase(self.firePointPhase);
 		});
 
-		firePointPhase.on('fire point set', function() {
-			phaseManager.setCurrentPhase(fireDirectionPhase);
+		this.firePointPhase.on('fire point set', function() {
+			self.phaseManager.setCurrentPhase(self.fireDirectionPhase);
 		});
-
-		// firePointPhase.on('end turn', function() {
-			// phaseManager.setCurrentPhase(waitingPhase);
-		// });
-		
-		// fireDirectionPhase.on('fire direction set', function() {
-			// phaseManager.setCurrentPhase(fireDirectionPhase); //what phase to set
-		// });
-
-		// fireDirectionPhase.on('end turn', function() {
-			// phaseManager.setCurrentPhase(waitingPhase);
-		// });
 
 		// create a renderer instance.
 		var renderer = PIXI.autoDetectRenderer(this.SCREEN_WIDTH, this.SCREEN_HEIGHT, null, false, true); //width, height, view, transparent, antialias
@@ -125,63 +120,7 @@ define([
 			return false;
 		});
 
-		requestAnimFrame( animate );				
-		
-		stage.mousedown = function (data) {
-
-			if (mouse.x() < 0 || mouse.x() > 10000 || mouse.y() < 0 || mouse.y() > 10000) {
-				return false;
-			} else if (data.originalEvent.which === 3 || data.originalEvent.which === 2) { //Right click
-				self.dragging = true;
-				self.firstDrag = true;
-			} else if (data.originalEvent.which === 1) {
-				
-				self.UI.mouseClick(self.clientShip);
-				
-			}
-
-		};
-		
-		stage.mouseup = function () {
-			self.dragging = false;
-		};
-		
-		stage.mousemove = (function() {
-			var prevX;
-			var prevY;
-		
-			return function (data) {
-				if (self.dragging) {
-					
-					if (self.firstDrag) {
-						prevX = data.global.x;
-						prevY = data.global.y;
-						self.firstDrag = false;
-					}
-					
-					var changeX = data.global.x-prevX;
-					var changeY = data.global.y-prevY;
-					
-					self.world.x += changeX;
-					self.world.pannedAmountX += changeX;
-					self.world.y += changeY;
-					self.world.pannedAmountY += changeY;
-					
-					prevX = data.global.x;
-					prevY = data.global.y;
-					
-					/* 
-						Add a check in here somewhere that means that
-						the world can only be panned a certain distance
-						based on pannedAmountX and pannedAmountY
-					*/
-					
-				}
-			};
-			
-		})();
-		
-		// this._drawAsteroids();
+		requestAnimFrame( animate );
 		
 		stage.addChild(this.world);
 
@@ -204,59 +143,62 @@ define([
 		
 			if (self.started) {
 			
-				update(phaseManager.currentPhase.update.bind(phaseManager.currentPhase));
+				update(self.phaseManager.currentPhase.update.bind(self.phaseManager.currentPhase));
 				
-				// phaseManager.currentPhase.update();
-				phaseManager.currentPhase.draw();
+				self.phaseManager.currentPhase.draw();
 				
 				border.clear();
 				border.lineStyle(2/self.world.scale.x, 0x000000, 1);
 				border.drawRect(0, 0, 10000, 10000);
 				
-				// self.UI.draw(self.clientShip, self.world);
-				
-				// self.ships.forEach(function(ship) {
-					// ship.draw();
-				// });
 			}
-
+			
 			// render the stage   
 			renderer.render(stage);
 		
 		} 
-			
 		
 		this.socket.on('loading game', function(response) {
 			console.log(response);
 			
 			console.log("setting current phase");
-			phaseManager.setCurrentPhase(loadingPhase);
+			self.phaseManager.setCurrentPhase(self.loadingPhase);
 		});
 		 
 		this.socket.on('start game', function(response) {
 			console.log(response);
 			self.started = true;
-			
-			phaseManager.setCurrentPhase(movementPhase);
-			
+
+			if (self.world.children.length > 1) {
+				self.world.removeChild(self.UI.movementLine);
+				self.world.removeChild(self.UI.fireDot);
+				self.world.removeChild(self.UI.fireLine);
+			}
+			self.world.addChild(self.UI.movementLine);
+			self.world.addChild(self.UI.fireDot);
+			self.world.addChild(self.UI.fireLine);
 			
 			for (var username in response.data) {
 				var position = response.data[username].position;
 				var ship = self.createShip(username);
 				ship.setInitialPosition(position);
 			}
-						
+			
+			self.phaseManager.setCurrentPhase(self.movementPhase);
+			
 		});
 		
-		this.socket.on('start turn', function(response) {
-			console.log(response);
+		this.socket.on('start turn', function() {
+			console.log("start turn");
+			self.animationPhase.off('animation finished', setMovementPhase);
+			self.animationPhase.once('animation finished', setMovementPhase);
 		});
 		
 		this.socket.on('game turn', function(response) {
 			if (response.success) {
 				console.log("waiting");
 				
-				phaseManager.setCurrentPhase(waitingPhase);
+				self.phaseManager.setCurrentPhase(self.waitingPhase);
 				
 				self.UI.waiting = true;
 				self.waiting(true);
@@ -268,23 +210,14 @@ define([
 		this.socket.on('turn result', function(response) {
 			console.log(response);
 			
-			phaseManager.setCurrentPhase(animationPhase);
-			
-			// var moves = response.turnResult.moves;
+			self.phaseManager.setCurrentPhase(self.animationPhase);
 						
 			self.ships.forEach(function(ship) {
 				var shipResult = undefined;
 				
-				// for (var i = 0; i < moves.length; i++) {
-					// if (moves[i].username === ship.username) {
-						// shipResult = moves[i];
-					// }
-				// }
-				
 				if (response.turnResult.hasOwnProperty(ship.username)) {
 					shipResult = response.turnResult[ship.username];
 				}
-				
 				
 				if (shipResult === undefined) {
 					console.error("Player has no result");
@@ -297,36 +230,17 @@ define([
 			// clear the ghost before showing the replay
 			self.clientShip.ghostGraphics.clear();
 			
-			self.UI.drawingUI = false;
-			
-			self.ships.forEach(function(ship) {
-				ship.startReplay();
-			});
-			
-			// hacky way to wait for the replay to finish before entering planning state - replace with a callback
-			setTimeout(function () {
-				self.waiting(false);
-				self.UI.completeReset();
-			}, 2000);
-			
 		});
 		
 		this.socket.on('game end', function(response) {
 		
-			//add the stuff in here to a callback array which is called when the timer runs out
-
-			//handle this better so that we can show the last turn
-			alert('Game is over');
-			console.log("game over");
-			console.log(response);
-			self.socket.emit('info lobby', {});
-			
-			self.started = false;
-			self.world.removeChildren(1); // removes children from index 1 to the end
-			self.ships = [];
-			
-			$('#gameScreen').hide();
-			$('#lobbyListScreen').show();
+			self.animationPhase.off('animation finished', setMovementPhase);
+			self.animationPhase.once('animation finished', function() {
+				console.log(response);
+				self.phaseManager.setCurrentPhase(self.gameEndPhase);
+				self.waiting(false);
+				self.started = false;
+			});
 
 		});
         
@@ -346,18 +260,29 @@ define([
 				if ($.isEmptyObject(self.clientShip.currentMove)) {
 					self.clientShip.currentMove = self.clientShip.position;
 				}
-				console.log("sent next values as: " + self.clientShip.currentMove.x + ", " + self.clientShip.currentMove.y);
-				this.socket.emit('game turn', {
-					destination: self.clientShip.currentMove
-				});
+				console.log(self.clientShip.angle);
+				if (self.clientShip.angle) {
+					console.log("sent next values as: " + self.clientShip.currentMove.x + ", " + self.clientShip.currentMove.y);
+					console.log("sent t value as: " + self.clientShip.t + ", sent angle as: " + self.clientShip.angle);
+					this.socket.emit('game turn', {
+						destination: self.clientShip.currentMove,
+						shot: {'t': self.clientShip.t, 'direction': self.clientShip.angle}
+					});
+				} else {
+					console.log("sent next values as: " + self.clientShip.currentMove.x + ", " + self.clientShip.currentMove.y);
+					this.socket.emit('game turn', {
+						destination: self.clientShip.currentMove
+					});
+				}
 			}
 		},
 		undo: function () {
 			if (!this.waiting()) {
-				this.UI.reset();
 				this.clientShip.ghostGraphics.clear();
+				this.phaseManager.setCurrentPhase(this.movementPhase);
 			}
 		},
+
 		_zoomIn: function (mouseX, mouseY) {
 			if (this.world.scaledAmount < 2) {
 			
@@ -405,6 +330,7 @@ define([
 			this.world.addChild(ship.graphics);
 			this.world.addChild(ship.text);
 			this.world.addChild(ship.ghostGraphics);
+			this.world.addChild(ship.bulletGraphics);
 			if (username === this.session.username) {
 				this.clientShip = ship;
 				this.UI.setClientShip(ship);
@@ -412,53 +338,6 @@ define([
 			this.ships.push(ship);
 			
 			return ship;
-		},
-		_drawAsteroids: function () {
-			var pass = false;
-			var asteroids = [];  // the array of asteroids
-			var asteroid;
-			
-			for (var j = 0; j < 30; j++) {
-				// randomly generates an asteroid x and y with relation to the screen size
-				var asteroidX = Math.floor(Math.random() * $(window).width());
-				var asteroidY = Math.floor(Math.random() * $(window).height());
-				
-				if (j === 0) {
-					// for the first asteroid place it anywhere
-					asteroid = new Asteroid(asteroidX, asteroidY);
-					asteroid.draw();
-					this.world.addChild(asteroid.graphics);
-					asteroids[j] = asteroid;
-				} else {	
-					// for the following asteroids check whether it passes the check
-					while (!pass) {
-						asteroidX = Math.floor(Math.random() * $(window).width());
-						asteroidY = Math.floor(Math.random() * $(window).height());
-						// loop through the asteroids in the array
-						for (var k = j-1; k >= 0; k--) {
-							// check whether the distance between the generated points is large enough
-							if (Helper.dist(new PIXI.Point(asteroidX, asteroidY), new PIXI.Point(asteroids[k].midX, asteroids[k].midY)) > 60 && asteroidX > 30 && asteroidX < $(window).width()-30 && asteroidY > 30 && asteroidY < $(window).height()-30) { //additional checks to make sure that the asteroids fit in the screen, just leave in the original dist check if that doesn't matter
-								pass = true;
-							} else {
-								//break this for loop and start again with another randomly generated x and y
-								pass = false;
-								break;
-							}
-						}
-					}
-					
-					// when the check is passed then create an asteroid at that point
-					asteroid = new Asteroid(asteroidX, asteroidY);
-					asteroid.draw();
-					this.world.addChild(asteroid.graphics);
-					asteroids[j] = asteroid;
-				}
-				
-				// set check back to not passed
-				pass = false;
-				
-			}
-			this.worldObects.asteroids = asteroids;
 		}
     };
 	
