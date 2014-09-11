@@ -47,6 +47,8 @@ define([
 		this.ui.clearMovementLine();
 		this.ui.drawMovementLine();
 		
+		this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
+		
 		this.ships.forEach(function(ship) {
 			ship.draw();
 		});
@@ -61,6 +63,8 @@ define([
 			
 	MovementPhase.prototype.onEnd = function () {
 		console.log("Movement phase has ended");
+		
+		this.ui.clientShip.clearGhost();
 		
 		this.ui.clearMovementLine();
 		

@@ -45,6 +45,8 @@ define([
 	FireDirectionPhase.prototype.draw = function () {
 		// console.log("Fire Direction phase is drawing");
 		
+		this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
+		
 		this.ui.clearMovementLine();
 		this.ui.drawMovementLine();
 		
@@ -69,6 +71,8 @@ define([
 	
 	FireDirectionPhase.prototype.onEnd = function () {
 		console.log("Fire Direction phase has ended");
+		
+		this.ui.clientShip.clearGhost();
 		
 		this.ui.clearMovementLine();
 		this.ui.clearFirePoint();

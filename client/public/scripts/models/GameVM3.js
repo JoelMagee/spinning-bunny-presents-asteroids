@@ -40,8 +40,6 @@ define([
 		this.world.pannedAmountY = 0;
 		this.world.scaledAmount = 1;
 			
-		this.dragging = false;
-		this.firstDrag = false;
 		this.started = false;
 		this.waiting = ko.observable(false);
 		
@@ -199,8 +197,7 @@ define([
 				console.log("waiting");
 				
 				self.phaseManager.setCurrentPhase(self.waitingPhase);
-				
-				self.UI.waiting = true;
+
 				self.waiting(true);
 			} else {
 				console.log("failed");
@@ -227,9 +224,6 @@ define([
 				ship.setDestination(shipResult.position, shipResult.prediction);
 			});
 			
-			// clear the ghost before showing the replay
-			self.clientShip.ghostGraphics.clear();
-			
 		});
 		
 		this.socket.on('game end', function(response) {
@@ -255,32 +249,27 @@ define([
 		endTurn: function () {
 			var self = this;
 
-			if (!this.waiting()) {
-				console.log("turn submitted");
-				if ($.isEmptyObject(self.clientShip.currentMove)) {
-					self.clientShip.currentMove = self.clientShip.position;
-				}
-				console.log(self.clientShip.angle);
-				if (self.clientShip.angle) {
-					console.log("sent next values as: " + self.clientShip.currentMove.x + ", " + self.clientShip.currentMove.y);
-					console.log("sent t value as: " + self.clientShip.t + ", sent angle as: " + self.clientShip.angle);
-					this.socket.emit('game turn', {
-						destination: self.clientShip.currentMove,
-						shot: {'t': self.clientShip.t, 'direction': self.clientShip.angle}
-					});
-				} else {
-					console.log("sent next values as: " + self.clientShip.currentMove.x + ", " + self.clientShip.currentMove.y);
-					this.socket.emit('game turn', {
-						destination: self.clientShip.currentMove
-					});
-				}
+			console.log("turn submitted");
+			if ($.isEmptyObject(self.clientShip.currentMove)) {
+				self.clientShip.currentMove = self.clientShip.position;
 			}
+			if (self.clientShip.angle) {
+				console.log("sent next values as: " + self.clientShip.currentMove.x + ", " + self.clientShip.currentMove.y);
+				console.log("sent t value as: " + self.clientShip.t + ", sent angle as: " + self.clientShip.angle);
+				this.socket.emit('game turn', {
+					destination: self.clientShip.currentMove,
+					shot: {'t': self.clientShip.t, 'direction': self.clientShip.angle}
+				});
+			} else {
+				console.log("sent next values as: " + self.clientShip.currentMove.x + ", " + self.clientShip.currentMove.y);
+				this.socket.emit('game turn', {
+					destination: self.clientShip.currentMove
+				});
+			}
+			
 		},
 		undo: function () {
-			if (!this.waiting()) {
-				this.clientShip.ghostGraphics.clear();
-				this.phaseManager.setCurrentPhase(this.movementPhase);
-			}
+			this.phaseManager.setCurrentPhase(this.movementPhase);
 		},
 
 		_zoomIn: function (mouseX, mouseY) {

@@ -75,25 +75,19 @@ define([
 			this.movementLine.drawCircle(this.clientShip.prediction.x, this.clientShip.prediction.y, 1/this.world.scale.x);
 		},
 		drawFirePoint: function () {
+			Helper.bezierHelper.setBezier(this.clientShip.position.x, this.clientShip.position.y, this.clientShip.prediction.x, this.clientShip.prediction.y, this.clientShip.currentMove.x, this.clientShip.currentMove.y);
+			var nearestPoint = Helper.bezierHelper.findNearestPoint(this.firePoint.x, this.firePoint.y);
+			
 			this.fireDot.clear();
-			if (this.firePoint.x) {
-				Helper.bezierHelper.setBezier(this.clientShip.position.x, this.clientShip.position.y, this.clientShip.prediction.x, this.clientShip.prediction.y, this.clientShip.currentMove.x, this.clientShip.currentMove.y);
-				var nearestPoint = Helper.bezierHelper.findNearestPoint(this.firePoint.x, this.firePoint.y);
-				
-				this.fireDot.clear();
-				this.fireDot.beginFill(0xFF0000);
-				this.fireDot.drawCircle(nearestPoint.pos.x, nearestPoint.pos.y, 4/this.world.scale.x);
-				this.fireDot.endFill();
-			}
+			this.fireDot.beginFill(0xFF0000);
+			this.fireDot.drawCircle(nearestPoint.pos.x, nearestPoint.pos.y, 4/this.world.scale.x);
+			this.fireDot.endFill();
 		},
 		drawFireLine: function () {
 			this.fireLine.clear();
-			if (this.clientShip.firePoint) {
-				this.fireLine.clear();
-				this.fireLine.lineStyle(2/this.world.scale.x, 0x000000, 1);
-				this.fireLine.moveTo(this.clientShip.firePoint.x, this.clientShip.firePoint.y);
-				this.fireLine.lineTo(this.fireDestinationLineTo.x, this.fireDestinationLineTo.y);
-			}
+			this.fireLine.lineStyle(2/this.world.scale.x, 0x000000, 1);
+			this.fireLine.moveTo(this.clientShip.firePoint.x, this.clientShip.firePoint.y);
+			this.fireLine.lineTo(this.fireDestinationLineTo.x, this.fireDestinationLineTo.y);
 		},
 		setMove: function () {
 				
@@ -125,11 +119,11 @@ define([
 			this.fireDestination.x = this.possibleFireDestination.x;
 			this.fireDestination.y = this.possibleFireDestination.y;
 		
-			var angle = Math.atan2(this.clientShip.firePoint.y-this.fireDestination.y, this.clientShip.firePoint.x-this.fireDestination.x)+Math.PI;
+			var angle = Math.atan2(this.clientShip.firePoint.y-this.fireDestination.y, this.clientShip.firePoint.x-this.fireDestination.x)+Math.PI; // Add PI so that it goes from 0 to 2PI rather than -PI to PI
 			console.log("angle from t point in radians is " + angle);
 			this.clientShip.angle = angle;
 			
-			this.clientShip.drawBullet();
+			this.clientShip.drawBullet(); // remove soon, just used for testing
 			
 			this.fireDestinationSet = true;
 			

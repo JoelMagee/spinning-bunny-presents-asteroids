@@ -31,7 +31,7 @@ define([
 			} else if (data.originalEvent.which === 3 || data.originalEvent.which === 2) { //Right click
 				self.ui.startDrag(data);
 			} else if (data.originalEvent.which === 1) {
-				
+				// do nothing
 			}
 		};
 		
@@ -64,6 +64,11 @@ define([
 		this.ships.forEach(function(ship) {
 			ship.update(timeDiff);
 		});
+		
+		// Possible stuff to do for each bullet
+		// this.bullets.forEach(function(bullet) {
+			// bullet.update(timeDiff);
+		// });
 	};
 	
 	AnimationPhase.prototype.onEnd = function () {

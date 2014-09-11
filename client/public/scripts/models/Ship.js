@@ -98,6 +98,7 @@ define([
 		},
 		drawGhost: function (x, y) {
 			
+			this.ghostGraphics.clear();
 			this.ghostGraphics.beginFill(this.color, this.ghostAlpha);
 			this.ghostGraphics.moveTo(0-this.width/4, 0);
 			this.ghostGraphics.lineTo(0-this.width/2, 0-this.width/2);
@@ -114,6 +115,9 @@ define([
 			delta.y = delta.y-prevPos.y;
 			this.ghostGraphics.rotation = Math.atan2(delta.y, delta.x);
 			
+		},
+		clearGhost: function () {
+			this.ghostGraphics.clear();
 		},
 		destroy: function () {
 			//ship gets destroyed

@@ -24,7 +24,7 @@ define([
 			} else if (data.originalEvent.which === 3 || data.originalEvent.which === 2) { //Right click
 				self.ui.startDrag(data);
 			} else if (data.originalEvent.which === 1) {
-				
+				// do nothing
 			}
 		};
 		
@@ -42,6 +42,8 @@ define([
 		// console.log("Waiting phase is drawing");
 		
 		if (this.ui.moveSet) {
+			this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
+			
 			this.ui.clearMovementLine();
 			this.ui.drawMovementLine();
 		}
@@ -63,6 +65,8 @@ define([
 	
 	WaitingPhase.prototype.onEnd = function () {
 		console.log("Waiting phase has ended");
+		
+		this.ui.clientShip.clearGhost();
 		
 		this.ui.clearMovementLine();
 		this.ui.clearFirePoint();
