@@ -7,6 +7,7 @@ var Bullet = function(source, originPosition, direction, startT) {
 	this.source = source;
 	//Position of the player when shot
 	this.position = originPosition;
+	this.originPosition = originPosition;
 	//Angle bullet was fired, with down being 0, increasing counter clockwise
 	this.direction = direction;
 

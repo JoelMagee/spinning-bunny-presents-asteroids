@@ -157,8 +157,8 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 
 		//Check all the bullets waiting to be fired, add new ones as necessary
 		newBullets.forEach(function(bullet) {
-			console.log("Adding new bullet");
 			if ((bullet.t < t) && (bullet.player.alive())) {
+				console.log("Adding new bullet");
 				var newBullet = new Bullet(bullet.player, bullet.player.getPositionOnArc(bullet.t), bullet.direction, bullet.t);
 				self.bullets.push(newBullet);
 				self.allBullets.push(newBullet);
