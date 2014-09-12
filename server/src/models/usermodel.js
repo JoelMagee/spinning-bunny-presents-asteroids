@@ -45,6 +45,11 @@ module.exports = function(_mongoose) {
 			type: Number,
 			required: true,
 			default: 0
+		},
+		totalScore: {
+			type: Number,
+			required: true,
+			default: 0
 		}
 	});
 
