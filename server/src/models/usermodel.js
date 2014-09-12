@@ -21,16 +21,6 @@ module.exports = function(_mongoose) {
 			type: String,
 			required: true
 		},
-		shipKills: {
-			type: Number,
-			required: true,
-			default: 0
-		},
-		shipLosses: {
-			type: Number,
-			required: true,
-			default: 0
-		},
 		gamesStarted: {
 			type: Number,
 			required: true,
@@ -47,6 +37,17 @@ module.exports = function(_mongoose) {
 			default: 0
 		},
 		totalScore: {
+			type: Number,
+			required: true,
+			default: 0
+		},
+		killStats: [{ username:  String, count:  Number }],
+		totalKills: {
+			type: Number,
+			required: true,
+			default: 0
+		},
+		highestScore: {
 			type: Number,
 			required: true,
 			default: 0
@@ -80,13 +81,38 @@ module.exports = function(_mongoose) {
 		});
 	};
 
+	UserSchema.methods.addKills = function(kills) {
+		var self = this;
+
+		kills.forEach(function(kill) {
+			var found = false;
+
+			self.killStats.forEach(function(stat) {
+				if (stat.username === kill) {
+					found = true;
+					stat.count++;
+				}
+			});
+
+			if (!found) {
+				self.killStats.push({
+					username: kill,
+					count: 1
+				});
+			}
+		});
+	};
+
 	UserSchema.methods.getPublicData = function() {
 		return {
 			username: this.username,
-			shipKills: this.shipKills,
-			shipLosses: this.shipLosses,
+			totalKills: this.totalKills,
+			killStats: this.killStats,
+			totalScore: this.totalScore,
+			gamesWon: this.gamesWon,
 			gamesStarted: this.gamesStarted,
-			gamesFinished: this.gamesFinished
+			gamesFinished: this.gamesFinished,
+			highestScore: this.highestScore
 		}
 	}
 

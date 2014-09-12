@@ -2,9 +2,9 @@
 
 var Bullet = require('./bullet')();
 
-var TURN_TICKS = 1000;
+var TURN_TICKS = 5000;
 
-var COLLISION_DISTANCE = 40;
+var COLLISION_DISTANCE = 100;
 
 var POINTS_PER_ROUND = 2;
 var POINTS_PER_KILL = 10;
@@ -193,11 +193,13 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 					return; //We don't want to check collisions against the player who fired the bullet
 				}
 
+
 				if (player.distanceTo(bullet) < COLLISION_DISTANCE) {
 					console.log("Player " + player.username + " was hit by a bullet");
 					player.addCollision(t);
 					bullet.setDestroyed(t);
 					bullet.getSource().score+= POINTS_PER_KILL;
+					bullet.getSource().destroyedPlayer(player);
 				} 
 			});
 		});

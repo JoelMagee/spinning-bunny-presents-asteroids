@@ -15,7 +15,7 @@ var Bullet = function(source, originPosition, direction, startT) {
 	//Angle bullet was fired, with down being 0, increasing counter clockwise
 	this.direction = direction;
 
-	this.turnStartPositon = {
+	this.turnStartPosition = {
 
 	};
 
@@ -27,13 +27,13 @@ var Bullet = function(source, originPosition, direction, startT) {
 
 Bullet.prototype.updateTurnStartPosition = function() {
 	this.startT = 0;
-	this.turnStartPositon.x = this.position.x;
-	this.turnStartPositon.y = this.position.y;
+	this.turnStartPosition.x = this.position.x;
+	this.turnStartPosition.y = this.position.y;
 }
 
 Bullet.prototype.update = function(dt) {
-	var dx = Math.cos(this.direction) * dt * SPEED_FACTOR;
-	var dy = Math.sin(this.direction) * dt * SPEED_FACTOR;
+	var dx = Math.sin(this.direction) * dt * SPEED_FACTOR;
+	var dy = Math.cos(this.direction) * dt * SPEED_FACTOR;
 
 	//Fix later to +=
 	this.position.x -= dx;
@@ -69,7 +69,7 @@ Bullet.prototype.getCurrentPosition = function() {
 Bullet.prototype.getBulletInfo = function() {
 	return {
 		startT: this.startT,
-		turnStartPositon: this.turnStartPositon,
+		turnStartPosition: this.turnStartPosition,
 		originPosition: this.originPosition,
 		destroyed: this.destroyed,
 		destroyedAt: this.destroyedAt,

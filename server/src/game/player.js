@@ -22,6 +22,8 @@ var Player = function(username) {
 	this.destroyed = false;
 
 	this.score = 0;
+
+	this.killedPlayers = [];
 };
 
 Player.prototype.alive = function() {
@@ -132,6 +134,11 @@ Player.prototype.getCurrentPosition = function() {
 		y: this.position.y
 	};
 };
+
+
+Player.prototype.destroyedPlayer = function(player) {
+	this.killedPlayers.push(player.username);
+}
 
 module.exports = function() {
 	return Player;

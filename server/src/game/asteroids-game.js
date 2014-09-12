@@ -246,9 +246,24 @@ AsteroidsGame.prototype.getWinners = function() {
 	var winners = [];
 
 	var orderedPlayers = this.players.splice();
+
 	orderedPlayers.sort(function(playerOne, playerTwo) {
-		return player.score;
+		return playerOne.score - playerTwo.score;
 	});
+
+	if (orderedPlayers.length === 0) {
+		return [];
+	};
+
+	var highest = orderedPlayers[0].score;
+
+	orderedPlayers.forEach(function(player) {
+		if (player.score === highest) {
+			winners.push(player);
+		}
+	});
+
+	return winners;
 }
 
 module.exports = function(_AsteroidsLogic) {

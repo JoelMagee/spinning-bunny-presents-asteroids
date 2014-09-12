@@ -80,16 +80,27 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 
 			var player = game.getPlayer(username);
 
-
 			//Send response to user
 			self._sendResponse(sessionID, "game end", { 
-				gameInfo: game.getInfo(),
 				endData: endData 
 			});
+
+			var winners = game.getWinners();
 
 			//Update users stats
 			user.gamesFinished++;
 			user.totalScore += player.score;
+			user.addKills(player.killedPlayers);
+			user.totalKills += player.killedPlayers.length;
+
+			if (user.highestScore < player.score) {
+				user.highestScore = player.score;
+			}
+
+			if (winners.indexOf(player) !== -1) {
+				user.gamesWon++;
+			}
+
 			user.save();
 
 			//Cleanup
