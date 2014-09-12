@@ -1,6 +1,6 @@
 /*jslint node: true, white: true */
 
-var SPEED_FACTOR = 1;
+var SPEED_FACTOR = 400;
 
 var Bullet = function(source, originPosition, direction, startT) {
 	//Player that the bullet originated from
@@ -31,8 +31,9 @@ Bullet.prototype.update = function(dt) {
 	var dx = Math.cos(this.direction) * dt * SPEED_FACTOR;
 	var dy = Math.sin(this.direction) * dt * SPEED_FACTOR;
 
-	this.position.x += dx;
-	this.position.y += dy;
+	//Fix later to +=
+	this.position.x -= dx;
+	this.position.y -= dy;
 };
 
 Bullet.prototype.setDestroyed = function(t) {
