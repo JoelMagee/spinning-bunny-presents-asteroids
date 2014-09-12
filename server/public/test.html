@@ -81,7 +81,7 @@
 					$statusArea.prepend("<p>" + message + "</p>");
 				};
 
-				var delayTime = 200;
+				var delayTime = 500;
 
 				var delay = function(fn) {
 					setTimeout(fn,delayTime);
@@ -196,12 +196,18 @@
 
 						if (!dead) {
 							updateStatus("Adding game turn - " + x + ", " + y);
-							socket1.emit('game turn', {
-								destination: {
-									x: x,
-									y: y
-								}
-							});
+
+							var fires = (Math.random() > 0.5);
+							var direction = (Math.random() * Math.PI);
+							var t = Math.random();
+
+							if (fires) {
+								socket1.emit('game turn', { destination: { x: x, y: y }, shot: {direction: direction, t: t } });
+							} else {
+								socket1.emit('game turn', { destination: { x: x, y: y } });
+							}
+
+							
 						} else {
 							updateStatus("<strong>I am dead</strong> Not sending move data");
 						}
