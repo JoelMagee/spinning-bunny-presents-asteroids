@@ -4,7 +4,7 @@ define([
 	'pixi',
 	'jsBezier',
     'models/Ship',
-	'models/Asteroid',
+	'models/Bullet',
 	'models/Helper',
 	'models/UI',
 	'models/PhaseManager',
@@ -14,8 +14,9 @@ define([
 	'models/Phases/FireDirectionPhase',
 	'models/Phases/WaitingPhase',
 	'models/Phases/AnimationPhase',
+	'models/Phases/DeadPhase',
 	'models/Phases/GameEndPhase'
-], function (ko, $, PIXI, jsBezier, Ship, Asteroid, Helper, UI, PhaseManager, LoadingPhase, MovementPhase, FirePointPhase, FireDirectionPhase, WaitingPhase, AnimationPhase, GameEndPhase) {
+], function(ko, $, PIXI, jsBezier, Ship, Bullet, Helper, UI, PhaseManager, LoadingPhase, MovementPhase, FirePointPhase, FireDirectionPhase, WaitingPhase, AnimationPhase, DeadPhase, GameEndPhase) {
     'use strict';
 	
 	/*jslint browser: true*/
@@ -25,6 +26,10 @@ define([
 		var setMovementPhase = function() {
 			self.phaseManager.setCurrentPhase(self.movementPhase);
 			self.waiting(false);
+		};
+		
+		var setDeadPhase = function() {
+			self.phaseManager.setCurrentPhase(self.deadPhase);
 		};
 
 		var self = this;
@@ -45,17 +50,18 @@ define([
 		
 		this.clientShip = undefined;
 		this.ships = [];
+		this.bullets = [];
 	
 		this.SCREEN_WIDTH = $(window).width();
 		this.SCREEN_HEIGHT = $(window).height();
 				
 		// create an new instance of a pixi stage
-		var stage = new PIXI.Stage(0x66FF99);
+		var stage = new PIXI.Stage(0x000000);
 		
 		var createMouse = function(world, stage) {
 		
-			var mouseX = function () { return (stage.getMousePosition().x-world.pannedAmountX)/world.scaledAmount; };
-			var mouseY = function () { return (stage.getMousePosition().y-world.pannedAmountY)/world.scaledAmount; };
+			var mouseX = function() { return (stage.getMousePosition().x-world.pannedAmountX)/world.scaledAmount; };
+			var mouseY = function() { return (stage.getMousePosition().y-world.pannedAmountY)/world.scaledAmount; };
 		
 			return {"x": mouseX, "y": mouseY};
 		};
@@ -76,8 +82,9 @@ define([
 		this.fireDirectionPhase = new FireDirectionPhase(stage, mouse, this.UI, this.ships);
 
 		this.waitingPhase = new WaitingPhase(this.UI, stage, mouse);
-		this.animationPhase = new AnimationPhase(this.UI, this.ships, stage, mouse);
-		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.socket);
+		this.animationPhase = new AnimationPhase(this.UI, this.ships, this.bullets, stage, mouse);
+		this.deadPhase = new DeadPhase(this.UI, stage, mouse);
+		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.bullets, this.socket);
 
 		this.phaseManager = new PhaseManager();
 
@@ -122,10 +129,10 @@ define([
 		
 		stage.addChild(this.world);
 
-		var updateLogic = function () {
+		var updateLogic = function() {
 			var time = Date.now();
 			var prevTime = time;
-			return function (cb) {
+			return function(cb) {
 				prevTime = time;
 				time = Date.now();
 				
@@ -146,8 +153,10 @@ define([
 				self.phaseManager.currentPhase.draw();
 				
 				border.clear();
-				border.lineStyle(2/self.world.scale.x, 0x000000, 1);
+				// border.lineStyle(2/self.world.scale.x, 0x000000, 1);
+				border.beginFill(0x222222);
 				border.drawRect(0, 0, 10000, 10000);
+				border.endFill();
 				
 			}
 			
@@ -188,8 +197,10 @@ define([
 		
 		this.socket.on('start turn', function() {
 			console.log("start turn");
-			self.animationPhase.off('animation finished', setMovementPhase);
-			self.animationPhase.once('animation finished', setMovementPhase);
+			if (!self.clientShip.dead) {
+				self.animationPhase.off('animation finished', setMovementPhase);
+				self.animationPhase.once('animation finished', setMovementPhase);
+			}
 		});
 		
 		this.socket.on('game turn', function(response) {
@@ -205,30 +216,51 @@ define([
 		});
 		
 		this.socket.on('turn result', function(response) {
+			console.log('turn result');
 			console.log(response);
 			
-			self.phaseManager.setCurrentPhase(self.animationPhase);
-						
+			console.log(self.ships);
+			
 			self.ships.forEach(function(ship) {
 				var shipResult = undefined;
 				
-				if (response.turnResult.hasOwnProperty(ship.username)) {
-					shipResult = response.turnResult[ship.username];
+				if (response.turnResult.players.hasOwnProperty(ship.username)) {
+					shipResult = response.turnResult.players[ship.username];
+					ship.setDestination(shipResult.destination, shipResult.prediction);
+					
+					if (response.turnResult.players[ship.username].collisions.length > 0) {
+						ship.addCollisions(response.turnResult.players[ship.username].collisions);
+						
+						//Is this our ship
+						if (ship.username === self.clientShip.username) {
+							self.animationPhase.off('animation finished', setMovementPhase);
+							self.animationPhase.on('animation finished', setDeadPhase);
+						}
+					}
 				}
 				
-				if (shipResult === undefined) {
-					console.error("Player has no result");
-					return;
-				}
-			
-				ship.setDestination(shipResult.position, shipResult.prediction);
 			});
+			
+			//remove previous bullets here
+			var numOfNoneBulletGraphics = 4+self.ships.length*3; // 4 for the border and ui graphics and 3 for each ship in the game
+			if (self.world.children.length > numOfNoneBulletGraphics) {
+			self.world.removeChildren(numOfNoneBulletGraphics);
+			}
+			
+			for (var i in response.turnResult.bullets) {
+				var bullet = new Bullet(response.turnResult.bullets[i]);
+				self.bullets.push(bullet);
+				self.world.addChild(bullet.graphics);
+			}
+			
+			self.phaseManager.setCurrentPhase(self.animationPhase);
 			
 		});
 		
 		this.socket.on('game end', function(response) {
 		
 			self.animationPhase.off('animation finished', setMovementPhase);
+			self.animationPhase.off('animation finished', setDeadPhase);
 			self.animationPhase.once('animation finished', function() {
 				console.log(response);
 				self.phaseManager.setCurrentPhase(self.gameEndPhase);
@@ -241,12 +273,12 @@ define([
     };
 	
     GameVM3.prototype = {
-		endGame: function () {
+		endGame: function() {
 			
 			alert('work in progress');
 			
 		},
-		endTurn: function () {
+		endTurn: function() {
 			var self = this;
 
 			console.log("turn submitted");
@@ -268,12 +300,12 @@ define([
 			}
 			
 		},
-		undo: function () {
+		undo: function() {
 			this.phaseManager.setCurrentPhase(this.movementPhase);
 		},
 
-		_zoomIn: function (mouseX, mouseY) {
-			if (this.world.scaledAmount < 2) {
+		_zoomIn: function(mouseX, mouseY) {
+			if (this.world.scaledAmount < 1) {
 			
 				console.log("zooming in");
 				this.world.scale.x *= 2;
@@ -293,8 +325,8 @@ define([
 			
 			}
 		},
-		_zoomOut: function (mouseX, mouseY) {
-			if (this.world.scaledAmount > 1/32) {
+		_zoomOut: function(mouseX, mouseY) {
+			if (this.world.scaledAmount > 1/16) {
 			
 				console.log("zooming out");
 				this.world.scale.x /= 2;
@@ -314,12 +346,11 @@ define([
 			
 			}
 		},
-		createShip: function (username) {
+		createShip: function(username) {
 			var ship = new Ship(username);
 			this.world.addChild(ship.graphics);
 			this.world.addChild(ship.text);
 			this.world.addChild(ship.ghostGraphics);
-			this.world.addChild(ship.bulletGraphics);
 			if (username === this.session.username) {
 				this.clientShip = ship;
 				this.UI.setClientShip(ship);

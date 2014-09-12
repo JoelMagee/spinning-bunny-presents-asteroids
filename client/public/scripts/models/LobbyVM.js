@@ -93,6 +93,14 @@ define([
 			}
 		});
 		
+		this.socket.on('launch game', function(response) {
+			if (response.success) {
+				console.log(response.message);
+			} else {
+				alert(response.message);
+			}
+		});
+		
 		this.socket.on('start game' , function(response) {
 			if (response.success) {
 				$('#lobbyListScreen').hide();

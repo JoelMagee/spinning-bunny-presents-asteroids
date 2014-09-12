@@ -1,25 +1,23 @@
 define([
 	'pixi',
 	'models/Helper'
-], function (PIXI, Helper) {
+], function(PIXI, Helper) {
     'use strict';
 
     var Ship = function Ship(username) {
-	
-		var colors = [0x0000FF, 0xFFFF00, 0xFF0000];
 		
 		this.width = 200;
-		this.color = colors[Math.floor(Math.random()*3)];
-		this.color = colors[0];
+		this.color = 0xF05800;
 		this.graphics = new PIXI.Graphics();
 		this.ghostGraphics = new PIXI.Graphics();
-		this.bulletGraphics = new PIXI.Graphics();
-		this.text = new PIXI.Text(username, {font: '100px Verdana'});
+		this.text = new PIXI.Text(username, {font: '100px Verdana', fill: '#FFFFFF'});
 		this.username = username;
 		this.text.anchor.x = 0.5;
 		this.text.anchor.y = 0.5;
 		this.ghostAlpha = 0.5;
 		this.rotation = 0;
+		
+		this.animateTurn = false;
 		
 		this.startPosition = {}; //Start position for each turn
 		this.position = {}; //Current position
@@ -35,39 +33,46 @@ define([
     };
 	
     Ship.prototype = {
-		draw: function () {	
-			this.graphics.clear();
-			this.graphics.beginFill(this.color);
-			this.graphics.moveTo(0-this.width/4, 0);
-			this.graphics.lineTo(0-this.width/2, 0-this.width/2);
-			this.graphics.lineTo(0+this.width/2, 0);
-			this.graphics.lineTo(0-this.width/2, 0+this.width/2);
-			this.graphics.endFill();
-			
-			this.graphics.x = this.position.x;
-			this.graphics.y = this.position.y;
-			
-			this.text.x = this.position.x;
-			this.text.y = this.position.y-this.width;
-			
-			this.graphics.rotation = this.rotation;
+		draw: function() {
+				this.graphics.clear();
+				this.graphics.beginFill(this.color);
+				this.graphics.moveTo(0-this.width/4, 0);
+				this.graphics.lineTo(0-this.width/2, 0-this.width/2);
+				this.graphics.lineTo(0+this.width/2, 0);
+				this.graphics.lineTo(0-this.width/2, 0+this.width/2);
+				this.graphics.endFill();
+				
+				this.graphics.x = this.position.x;
+				this.graphics.y = this.position.y;
+				
+				this.text.x = this.position.x;
+				this.text.y = this.position.y-this.width;
+				
+				this.graphics.rotation = this.rotation;
 		},
-		update: function (timeDif) {	
-			this.timeElapsed += timeDif;
-			
-			var t = 1;
-			
-			if (this.timeElapsed <= this.replayTime) {
-				t = this.timeElapsed/this.replayTime;
+		update: function(timeDif) {
+			if (this.animateTurn) {
+				this.timeElapsed += timeDif;
+				
+				var t = 1;
+				
+				if (this.timeElapsed <= this.replayTime) {
+					t = this.timeElapsed/this.replayTime;
+				}
+				
+				if (this.dead && t > this.collideT) {
+					t = this.collideT;
+				}
+				
+				this.position = Helper.getBezier(t, this.startPosition, this.previousPrediction, this.destination);
+				var delta = Helper.getBezier(t+0.001, this.startPosition, this.previousPrediction, this.destination);
+				delta.x = delta.x-this.position.x;
+				delta.y = delta.y-this.position.y;
+				this.rotation = Math.atan2(delta.y, delta.x);
 			}
-			
-			this.position = Helper.getBezier(t, this.startPosition, this.previousPrediction, this.destination);
-			var delta = Helper.getBezier(t+0.001, this.startPosition, this.previousPrediction, this.destination);
-			delta.x = delta.x-this.position.x;
-			delta.y = delta.y-this.position.y;
-			this.rotation = Math.atan2(delta.y, delta.x);
 		},
 		setDestination: function(destination, prediction) {
+			this.animateTurn = true;
 			console.log("[Ship] Setting destination to: " + destination.x + ", " + destination.y + " and prediction to: " + prediction.x + ", " + prediction.y);
 			this.startPosition = this.position;
 			this.destination = destination;
@@ -86,17 +91,16 @@ define([
 			this.currentMove.x = x;
 			this.currentMove.y = y;
 		},
-		drawBullet: function () {
-			this.bulletGraphics.clear();
-			this.bulletGraphics.beginFill(0xFFFF00);
-			this.bulletGraphics.drawRect(0+this.width/2, 0-this.width/8, this.width/4, this.width/4);
-			this.bulletGraphics.endFill();
-			
-			this.bulletGraphics.x = this.position.x;
-			this.bulletGraphics.y = this.position.y;
-			this.bulletGraphics.rotation = this.angle;
+		addCollisions: function(collisionData) {
+			var self = this;
+			collisionData.forEach(function(collision) {
+				if (collision.livesLeft === 0) {
+					self.dead = true;
+				}
+				self.collideT = collision.t;
+			});
 		},
-		drawGhost: function (x, y) {
+		drawGhost: function(x, y) {
 			
 			this.ghostGraphics.clear();
 			this.ghostGraphics.beginFill(this.color, this.ghostAlpha);
@@ -116,14 +120,14 @@ define([
 			this.ghostGraphics.rotation = Math.atan2(delta.y, delta.x);
 			
 		},
-		clearGhost: function () {
+		clearGhost: function() {
 			this.ghostGraphics.clear();
 		},
-		destroy: function () {
+		destroy: function() {
 			//ship gets destroyed
 			
 			var self = this;
-			var interval = setInterval(function () {
+			var interval = setInterval(function() {
 				if (self.graphics.alpha > 0) {
 					self.graphics.alpha -= 0.25;
 				} else {

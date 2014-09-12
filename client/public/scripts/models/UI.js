@@ -68,7 +68,7 @@ define([
 		},
 		drawMovementLine: function () {
 			this.movementLine.clear();
-			this.movementLine.lineStyle(2/this.world.scale.x, 0x000000, 1);
+			this.movementLine.lineStyle(2/this.world.scale.x, 0xFFFFFF, 1);
 			this.movementLine.moveTo(this.clientShip.position.x, this.clientShip.position.y);
 			this.movementLine.quadraticCurveTo(this.clientShip.prediction.x, this.clientShip.prediction.y, this.movementPosition.x, this.movementPosition.y);
 			
@@ -79,13 +79,13 @@ define([
 			var nearestPoint = Helper.bezierHelper.findNearestPoint(this.firePoint.x, this.firePoint.y);
 			
 			this.fireDot.clear();
-			this.fireDot.beginFill(0xFF0000);
+			this.fireDot.beginFill(0xF05800);
 			this.fireDot.drawCircle(nearestPoint.pos.x, nearestPoint.pos.y, 4/this.world.scale.x);
 			this.fireDot.endFill();
 		},
 		drawFireLine: function () {
 			this.fireLine.clear();
-			this.fireLine.lineStyle(2/this.world.scale.x, 0x000000, 1);
+			this.fireLine.lineStyle(2/this.world.scale.x, 0xFFFFFF, 1);
 			this.fireLine.moveTo(this.clientShip.firePoint.x, this.clientShip.firePoint.y);
 			this.fireLine.lineTo(this.fireDestinationLineTo.x, this.fireDestinationLineTo.y);
 		},
@@ -122,8 +122,6 @@ define([
 			var angle = Math.atan2(this.clientShip.firePoint.y-this.fireDestination.y, this.clientShip.firePoint.x-this.fireDestination.x)+Math.PI; // Add PI so that it goes from 0 to 2PI rather than -PI to PI
 			console.log("angle from t point in radians is " + angle);
 			this.clientShip.angle = angle;
-			
-			this.clientShip.drawBullet(); // remove soon, just used for testing
 			
 			this.fireDestinationSet = true;
 			

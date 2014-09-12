@@ -44,10 +44,14 @@ define([
 	
 	MovementPhase.prototype.draw = function () {
 		// console.log("Movement phase is drawing");
-		this.ui.clearMovementLine();
-		this.ui.drawMovementLine();
+		if (this.mouse.x() >= 0 && this.mouse.x() <= 10000 && this.mouse.y() >= 0 && this.mouse.y() <= 10000) {
 		
-		this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
+			this.ui.clearMovementLine();
+			this.ui.drawMovementLine();
+			
+			this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
+			
+		}
 		
 		this.ships.forEach(function(ship) {
 			ship.draw();

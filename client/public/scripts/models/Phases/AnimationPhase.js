@@ -4,9 +4,10 @@ define([
 ], function ($, Phase) {
     'use strict';
 		
-	var AnimationPhase = function(ui, ships, stage, mouse) {
+	var AnimationPhase = function(ui, ships, bullets, stage, mouse) {
 		this.ui = ui;
 		this.ships = ships;
+		this.bullets = bullets;
 		this.stage = stage;
 		this.mouse = mouse;
 	};
@@ -51,6 +52,10 @@ define([
 			ship.draw();
 		});
 		
+		this.bullets.forEach(function(bullet) {
+			bullet.draw();
+		});
+		
 		if (this.elapsedTime >= 2000) {
 			this.emitEvent('animation finished');
 		}
@@ -66,13 +71,17 @@ define([
 		});
 		
 		// Possible stuff to do for each bullet
-		// this.bullets.forEach(function(bullet) {
-			// bullet.update(timeDiff);
-		// });
+		this.bullets.forEach(function(bullet) {
+			bullet.update(timeDiff);
+		});
 	};
 	
 	AnimationPhase.prototype.onEnd = function () {
 		console.log("Animation phase has ended");
+		
+		this.ships.forEach(function(ship) {
+			ship.animateTurn = false;
+		});
 		
 	};
 	
