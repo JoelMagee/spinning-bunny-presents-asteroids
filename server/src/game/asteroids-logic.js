@@ -205,7 +205,7 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 		//Remove expired bullets from the list
 		this.bullets.forEach(function(bullet, i) {
 			if (bullet.isDestroyed()) {
-				self.bullets.splice(bullets.indexOf(bullet), 1);
+				self.bullets.splice(self.bullets.indexOf(bullet), 1);
 			}
 		});
 	}
