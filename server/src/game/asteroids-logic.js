@@ -130,7 +130,8 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 			var position = bullet.getCurrentPosition();
 
 			if (position.x < 0 || position.x > self.world.getWidth() || position.y < 0 || position.y > self.world.getHeight()) {
-				bullet.destroyed(t);
+				console.log("Bullet out of bounds");
+				bullet.setDestroyed(t);
 			}
 		});
 

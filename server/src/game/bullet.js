@@ -1,6 +1,6 @@
 /*jslint node: true, white: true */
 
-var SPEED_FACTOR = 400;
+var SPEED_FACTOR = 2500;
 
 var Bullet = function(source, originPosition, direction, startT) {
 	//Player that the bullet originated from
