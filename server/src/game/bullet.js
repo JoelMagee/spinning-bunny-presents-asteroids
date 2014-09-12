@@ -10,11 +10,13 @@ var Bullet = function(source, originPosition, direction, startT) {
 	//Angle bullet was fired, with down being 0, increasing counter clockwise
 	this.direction = direction;
 
-	this.turnStartPositon = {};
+	this.turnStartPositon = {
+
+	};
 
 	this.startT = startT;
 
-	this.alive = true;
+	this.destroyed = false;
 	this.destroyedAt = -1;
 };
 
@@ -32,13 +34,13 @@ Bullet.prototype.update = function(dt) {
 	this.position.y += dy;
 };
 
-Bullet.prototype.destroyed = function(t) {
+Bullet.prototype.setDestroyed = function(t) {
 	this.destroyedAt = t;
-	this.alive = false;
+	this.destroyed = true;
 }
 
-Bullet.prototype.isAlive = function() {
-	return this.alive;
+Bullet.prototype.isDestroyed = function() {
+	return this.destroyed;
 }
 
 Bullet.prototype.getSource = function() {
@@ -62,7 +64,8 @@ Bullet.prototype.getBulletInfo = function() {
 	return {
 		startT: this.startT,
 		turnStartPositon: this.turnStartPositon,
-		destroyed: this.alive,
+		originPosition: this.originPosition,
+		destroyed: this.destroyed,
 		destroyedAt: this.destroyedAt,
 		direction: this.direction
 	}

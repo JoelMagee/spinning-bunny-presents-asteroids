@@ -20,6 +20,8 @@ var Player = function(username) {
 	this.currentTurnCollisions = [];
 
 	this.destroyed = false;
+
+	this.score = 0;
 };
 
 Player.prototype.alive = function() {
@@ -102,7 +104,8 @@ Player.prototype.getTurnData = function() {
 		oldPrediction: this.oldPrediction,
 		position: this.position,
 		prediction: this.prediction,
-		destination: this.destination
+		destination: this.destination,
+		score: this.score
 	}
 }
 

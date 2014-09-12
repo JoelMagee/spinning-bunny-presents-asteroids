@@ -6,6 +6,9 @@ var TURN_TICKS = 1000;
 
 var COLLISION_DISTANCE = 40;
 
+var POINTS_PER_ROUND = 2;
+var POINTS_PER_KILL = 10;
+
 var positionOnBezier = function(p0, p1, p2, t) {
 	return {
 		x: (1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x,
@@ -71,6 +74,11 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 				}
 			}
 		}
+	});
+
+	//Update player scores
+	this.players.forEach(function(player) {
+		player.score+= POINTS_PER_ROUND;
 	});
 
 	//Update move information
@@ -141,16 +149,20 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 					console.log("collision between " + playerOne.username + " and " + playerTwo.username);
 					playerOne.addCollision(t);
 					playerTwo.addCollision(t);
+					playerOne.score+= POINTS_PER_KILL;
+					playerTwo.score+= POINTS_PER_KILL;
 				}
 			});
 		});		
 
 		//Check all the bullets waiting to be fired, add new ones as necessary
 		newBullets.forEach(function(bullet) {
+			console.log("Adding new bullet");
 			if ((bullet.t < t) && (bullet.player.alive())) {
 				var newBullet = new Bullet(bullet.player, bullet.player.getPositionOnArc(bullet.t), bullet.direction, bullet.t);
 				self.bullets.push(newBullet);
 				self.allBullets.push(newBullet);
+				newBullets.splice(newBullets.indexOf(bullet), 1);
 			}
 		});
 
@@ -163,8 +175,8 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 				}
 
 				if (firstBullet.distanceTo(secondBullet) < COLLISION_DISTANCE) {
-					firstBullet.destroyed(t);
-					secondBullet.destroyed(t);
+					firstBullet.setDestroyed(t);
+					secondBullet.setDestroyed(t);
 				}
 			});
 		});
@@ -183,15 +195,16 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 				if (player.distanceTo(bullet) < COLLISION_DISTANCE) {
 					console.log("Player " + player.username + " was hit by a bullet");
 					player.addCollision(t);
-					bullet.destroyed(t);
+					bullet.setDestroyed(t);
+					bullet.getSource().score+= POINTS_PER_KILL;
 				} 
 			});
 		});
 
 		//Remove expired bullets from the list
-		this.bullets.forEach(function(bullet, i, bullets) {
-			if (!bullet.isAlive()) {
-				bullets.splice(bullets.indexOf(bullet), 1);
+		this.bullets.forEach(function(bullet, i) {
+			if (bullet.isDestroyed()) {
+				self.bullets.splice(bullets.indexOf(bullet), 1);
 			}
 		});
 	}
