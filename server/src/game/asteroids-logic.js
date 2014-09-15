@@ -2,9 +2,14 @@
 
 var Bullet = require('./bullet')();
 
-var TURN_TICKS = 1000;
+var TURN_TICKS = 5000;
 
-var COLLISION_DISTANCE = 40;
+var COLLISION_DISTANCE = 100;
+
+var BULLET_SPEED_FACTOR = 5000;
+
+var POINTS_PER_ROUND = 2;
+var POINTS_PER_KILL = 10;
 
 var positionOnBezier = function(p0, p1, p2, t) {
 	return {
@@ -73,6 +78,11 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 		}
 	});
 
+	//Update player scores
+	this.players.forEach(function(player) {
+		player.score+= POINTS_PER_ROUND;
+	});
+
 	//Update move information
 	this.players.forEach(function(player) {
 		if (!player.alive()) {
@@ -88,6 +98,10 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 
 	for (var j = 1; j <= TURN_TICKS; j++) {
 		var t = j/TURN_TICKS;
+
+		if (j === TURN_TICKS) {
+			t = 1;
+		}
 
 		//Update all player positions
 		this.players.forEach(function(player) {
@@ -122,7 +136,8 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 			var position = bullet.getCurrentPosition();
 
 			if (position.x < 0 || position.x > self.world.getWidth() || position.y < 0 || position.y > self.world.getHeight()) {
-				bullet.destroyed(t);
+				console.log("Bullet out of bounds");
+				bullet.setDestroyed(t);
 			}
 		});
 
@@ -141,16 +156,20 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 					console.log("collision between " + playerOne.username + " and " + playerTwo.username);
 					playerOne.addCollision(t);
 					playerTwo.addCollision(t);
+					playerOne.score+= POINTS_PER_KILL;
+					playerTwo.score+= POINTS_PER_KILL;
 				}
 			});
 		});		
 
 		//Check all the bullets waiting to be fired, add new ones as necessary
 		newBullets.forEach(function(bullet) {
-			if ((bullet.t < t) && (bullet.player.alive())) {
-				var newBullet = new Bullet(bullet.player, bullet.player.getPositionOnArc(bullet.t), bullet.direction, bullet.t);
+			if ((bullet.t <= t) && (bullet.player.alive())) {
+				console.log("Adding new bullet");
+				var newBullet = new Bullet(bullet.player, bullet.player.getPositionOnArc(bullet.t), bullet.direction, BULLET_SPEED_FACTOR, bullet.t);
 				self.bullets.push(newBullet);
 				self.allBullets.push(newBullet);
+				newBullets.splice(newBullets.indexOf(bullet), 1);
 			}
 		});
 
@@ -163,8 +182,8 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 				}
 
 				if (firstBullet.distanceTo(secondBullet) < COLLISION_DISTANCE) {
-					firstBullet.destroyed(t);
-					secondBullet.destroyed(t);
+					firstBullet.setDestroyed(t);
+					secondBullet.setDestroyed(t);
 				}
 			});
 		});
@@ -176,22 +195,25 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 			}
 
 			self.bullets.forEach(function(bullet) {
-				if (bullet.getSource() === player) {
-					return; //We don't want to check collisions against the player who fired the bullet
-				}
+				// if (bullet.getSource() === player) {
+				// 	return; //We don't want to check collisions against the player who fired the bullet
+				// }
+
 
 				if (player.distanceTo(bullet) < COLLISION_DISTANCE) {
 					console.log("Player " + player.username + " was hit by a bullet");
 					player.addCollision(t);
-					bullet.destroyed(t);
+					bullet.setDestroyed(t);
+					bullet.getSource().score+= POINTS_PER_KILL;
+					bullet.getSource().destroyedPlayer(player);
 				} 
 			});
 		});
 
 		//Remove expired bullets from the list
-		this.bullets.forEach(function(bullet, i, bullets) {
-			if (!bullet.isAlive()) {
-				bullets.splice(bullets.indexOf(bullet), 1);
+		this.bullets.forEach(function(bullet, i) {
+			if (bullet.isDestroyed()) {
+				self.bullets.splice(self.bullets.indexOf(bullet), 1);
 			}
 		});
 	}

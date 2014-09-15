@@ -18,9 +18,6 @@ var GameManager = function(models) {
 	this.gameIDMap = {};
 	this.models = models;
 
-	console.log("MODELS");
-	console.dir(models);
-
 	this.outputPub = redis.createClient();
 };
 
@@ -81,33 +78,28 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 		var gameEnd = function(endData) {
 			console.log("[Game Manager] Game ended");
 
+			var player = game.getPlayer(username);
+
 			//Send response to user
 			self._sendResponse(sessionID, "game end", { 
-				gameInfo: game.getInfo(),
 				endData: endData 
 			});
 
+			var winners = game.getWinners();
+
 			//Update users stats
 			user.gamesFinished++;
+			user.totalScore += player.score;
+			user.addKills(player.killedPlayers);
+			user.totalKills += player.killedPlayers.length;
 
-			if (endData.type === 'win') {
-				//A single player is left alive
-				if (user.username === endData.winner) {
-					user.gamesWon++;
-				}
-			} else if (endData.type === 'draw') {
-				//Draw case happens when turns run out or all players are destroyed on the same turn
-				if (endData.winner.indexOf(user.username) !== -1) {
-					user.gamesDrawn++;
-				}
-			} else if (endData.type === 'default') {
-				//Default case happens when all but one players leave
-				if (user.username === endData.winner) {
-					user.gamesWon++;
-				}
+			if (user.highestScore < player.score) {
+				user.highestScore = player.score;
 			}
 
-
+			if (winners.indexOf(player) !== -1) {
+				user.gamesWon++;
+			}
 
 			user.save();
 

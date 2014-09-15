@@ -12,6 +12,7 @@ define([
 		this.originPosition = bullet.originPosition;
 		this.startT = bullet.startT;
 		this.turnStartPosition = bullet.turnStartPosition;
+		this.speed = bullet.speed;
 		
 		this.width = 50;
 		this.color = 0x00F0EE;
@@ -24,11 +25,7 @@ define([
 		}
 		
 		this.timeElapsed = 0; // Time elapsed in ms in current replay
-		this.replayTime = 2000; 
-		
-		this.SPEED_FACTOR = 2500;
-		
-		
+		this.replayTime = 2000;		
     };
 	
     Bullet.prototype = {
@@ -65,8 +62,8 @@ define([
 				return;
 			}
 
-			var dx = Math.cos(this.direction) * dt * this.SPEED_FACTOR;
-			var dy = Math.sin(this.direction) * dt * this.SPEED_FACTOR;
+			var dx = Math.cos(this.direction) * dt * this.speed;
+			var dy = Math.sin(this.direction) * dt * this.speed;
 
 			this.position.x += dx;
 			this.position.y += dy;

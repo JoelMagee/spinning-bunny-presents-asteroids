@@ -56,6 +56,10 @@ Lobby.prototype.startGame = function(game) {
 	this.close();
 };
 
+Lobby.prototype.getPlayerCount = function() {
+	return this.users.length;
+}
+
 module.exports = function() {
 	return Lobby;
 };
