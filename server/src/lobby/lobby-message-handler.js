@@ -164,6 +164,9 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 		if (lobby.getLeader() !== username) {
 			//This user is not the lobby leader, they cannot destroy the lobby
 			return self.sendResponse(sessionID, "launch game", { success: false, message: "You don't have permission to start this game" });
+		} else if (lobby.getPlayerCount < 2) {
+			//You can't start a game with just one player
+			return self.sendResponse(sessionID, "launch game", { success: false, message: "You cannot start a lobby with just yourself" });
 		} else {
 			self.sendResponse(sessionID, "launch game", { success: true, message: "Game is launching" });
 			self.emit('launch game', lobby);

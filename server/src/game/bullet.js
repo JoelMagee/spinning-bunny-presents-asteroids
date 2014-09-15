@@ -1,18 +1,24 @@
 /*jslint node: true, white: true */
 
-var SPEED_FACTOR = 2500;
+var SPEED_FACTOR = 4000;
+var BULLET_START_DISTANCE = 120; //Distance from ship a bullet will spawn so ship doesn't collide with it when shooting
 
 var Bullet = function(source, originPosition, direction, startT) {
 	//Player that the bullet originated from
 	this.source = source;
-	//Position of the player when shot
+
+	//Position of the bullet when shot
+	var dx = Math.cos(direction) * BULLET_START_DISTANCE;
+	var dy = Math.sin(direction) * BULLET_START_DISTANCE;
+
+	//Move the bullet so it doesn't hit the shooting ship
 	this.originPosition = {};
-	this.originPosition.x = originPosition.x;
-	this.originPosition.y = originPosition.y;
+	this.originPosition.x = originPosition.x + dx;
+	this.originPosition.y = originPosition.y + dy;
 
 	this.position = {};
-	this.position.x = originPosition.x;
-	this.position.y = originPosition.y;
+	this.position.x = originPosition.x + dx;
+	this.position.y = originPosition.y + dy;
 
 	//Angle bullet was fired, with down being 0, increasing counter clockwise
 	this.direction = direction;

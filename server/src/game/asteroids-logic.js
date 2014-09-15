@@ -174,10 +174,10 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 		//Check collisions between projectiles
 		this.bullets.forEach(function(firstBullet) {
 			self.bullets.forEach(function(secondBullet) {
-				if (firstBullet === secondBullet) {
-					//We don't want to check collisions between the same bullet
-					return;
-				}
+				// if (firstBullet === secondBullet) {
+				// 	//We don't want to check collisions between the same bullet
+				// 	return;
+				// }
 
 				if (firstBullet.distanceTo(secondBullet) < COLLISION_DISTANCE) {
 					firstBullet.setDestroyed(t);
