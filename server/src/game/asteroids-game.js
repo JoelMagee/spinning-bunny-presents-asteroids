@@ -234,14 +234,36 @@ AsteroidsGame.prototype.getStartData = function() {
 	return this.asteroidsLogic.getPlayerPositions();
 };
 
-AsteroidsGame.prototype.gameEnd = function(type, winner, reason) {
-
-
-	this.emit('game end', { type: type, winner: winner, reason: reason });
+AsteroidsGame.prototype.gameEnd = function(reason) {
+	this.emit('game end', reason);
 };
 
-AsteroidsGame.prototype.getInfo = function() {
-	return {};
+AsteroidsGame.prototype.getPlayers = function() {
+	return this.players;
+}
+
+AsteroidsGame.prototype.getWinners = function() {
+	var winners = [];
+
+	var orderedPlayers = this.players.splice();
+
+	orderedPlayers.sort(function(playerOne, playerTwo) {
+		return playerOne.score - playerTwo.score;
+	});
+
+	if (orderedPlayers.length === 0) {
+		return [];
+	};
+
+	var highest = orderedPlayers[0].score;
+
+	orderedPlayers.forEach(function(player) {
+		if (player.score === highest) {
+			winners.push(player);
+		}
+	});
+
+	return winners;
 }
 
 module.exports = function(_AsteroidsLogic) {

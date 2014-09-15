@@ -29,21 +29,29 @@ var UserInfo = function(_User) {
 					userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user info', data: { success: true, message: "Successfully retrieved single user", user: user.getPublicData() }}));
 				});
 			} else {
-				User.find({}, function(err, users) {
-					if (err) {
-						userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user info', data: { success: false, message: "Unknown error getting user information, please try again!"}}));
-					}
+				var lim = request.message.limit || 25;
+				var pg = request.message.page || 1;
+				var sort = request.message.sort || { username: 'asc' };
 
-					userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user info', 
-						data: { 
-							success: true,
-							message: "Successfully retrieved single user",
-							users: users.map( function(user) { return user.getPublicData(); } )
-					 	}
-					}));
-				});
+				User.find({}).limit(lim)
+					.skip((pg - 1) * lim)
+					.sort(sort)
+					.exec(function(err, users) {
+						if (err) {
+							userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user info', data: { success: false, message: "Unknown error getting user information, please try again!"}}));
+						}
+
+						userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user info', 
+							data: { 
+								success: true,
+								message: "Successfully retrieved single user",
+								users: users.map( function(user) { return user.getPublicData(); } )
+						 	}
+						}));
+					});
 			}
 		} catch (e) {
+			console.error(e);
 			userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user info', data: { success: false, message: "Unknown error getting user information, please try again!"}}));
 		}
 
