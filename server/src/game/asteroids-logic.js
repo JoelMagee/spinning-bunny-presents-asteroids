@@ -6,6 +6,8 @@ var TURN_TICKS = 5000;
 
 var COLLISION_DISTANCE = 100;
 
+var BULLET_SPEED_FACTOR = 5000;
+
 var POINTS_PER_ROUND = 2;
 var POINTS_PER_KILL = 10;
 
@@ -164,7 +166,7 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 		newBullets.forEach(function(bullet) {
 			if ((bullet.t <= t) && (bullet.player.alive())) {
 				console.log("Adding new bullet");
-				var newBullet = new Bullet(bullet.player, bullet.player.getPositionOnArc(bullet.t), bullet.direction, bullet.t);
+				var newBullet = new Bullet(bullet.player, bullet.player.getPositionOnArc(bullet.t), bullet.direction, BULLET_SPEED_FACTOR, bullet.t);
 				self.bullets.push(newBullet);
 				self.allBullets.push(newBullet);
 				newBullets.splice(newBullets.indexOf(bullet), 1);
@@ -174,10 +176,10 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 		//Check collisions between projectiles
 		this.bullets.forEach(function(firstBullet) {
 			self.bullets.forEach(function(secondBullet) {
-				// if (firstBullet === secondBullet) {
-				// 	//We don't want to check collisions between the same bullet
-				// 	return;
-				// }
+				if (firstBullet === secondBullet) {
+					//We don't want to check collisions between the same bullet
+					return;
+				}
 
 				if (firstBullet.distanceTo(secondBullet) < COLLISION_DISTANCE) {
 					firstBullet.setDestroyed(t);
@@ -193,9 +195,9 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 			}
 
 			self.bullets.forEach(function(bullet) {
-				if (bullet.getSource() === player) {
-					return; //We don't want to check collisions against the player who fired the bullet
-				}
+				// if (bullet.getSource() === player) {
+				// 	return; //We don't want to check collisions against the player who fired the bullet
+				// }
 
 
 				if (player.distanceTo(bullet) < COLLISION_DISTANCE) {

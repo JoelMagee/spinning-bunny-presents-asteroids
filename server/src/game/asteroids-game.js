@@ -14,6 +14,7 @@ var defaultOptions = {
 }
 
 
+
 var AsteroidsGame = function(id, expectedPlayers, opts) {
 	opts = opts || {};
 
