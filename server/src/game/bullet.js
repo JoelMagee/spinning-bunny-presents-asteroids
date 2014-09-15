@@ -6,7 +6,9 @@ var Bullet = function(source, originPosition, direction, startT) {
 	//Player that the bullet originated from
 	this.source = source;
 	//Position of the player when shot
-	this.originPosition = originPosition;
+	this.originPosition = {};
+	this.originPosition.x = originPosition.x;
+	this.originPosition.y = originPosition.y;
 
 	this.position = {};
 	this.position.x = originPosition.x;
@@ -15,9 +17,7 @@ var Bullet = function(source, originPosition, direction, startT) {
 	//Angle bullet was fired, with down being 0, increasing counter clockwise
 	this.direction = direction;
 
-	this.turnStartPosition = {
-
-	};
+	this.turnStartPosition = { };
 
 	this.startT = startT;
 
@@ -32,12 +32,12 @@ Bullet.prototype.updateTurnStartPosition = function() {
 }
 
 Bullet.prototype.update = function(dt) {
-	var dx = Math.sin(this.direction) * dt * SPEED_FACTOR;
-	var dy = Math.cos(this.direction) * dt * SPEED_FACTOR;
+	var dx = Math.cos(this.direction) * dt * SPEED_FACTOR;
+	var dy = Math.sin(this.direction) * dt * SPEED_FACTOR;
 
 	//Fix later to +=
-	this.position.x -= dx;
-	this.position.y -= dy;
+	this.position.x += dx;
+	this.position.y += dy;
 };
 
 Bullet.prototype.setDestroyed = function(t) {
