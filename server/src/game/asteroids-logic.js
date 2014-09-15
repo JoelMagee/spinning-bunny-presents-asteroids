@@ -97,6 +97,10 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 	for (var j = 1; j <= TURN_TICKS; j++) {
 		var t = j/TURN_TICKS;
 
+		if (j === TURN_TICKS) {
+			t = 1;
+		}
+
 		//Update all player positions
 		this.players.forEach(function(player) {
 			if (!player.alive()) {
@@ -158,7 +162,7 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 
 		//Check all the bullets waiting to be fired, add new ones as necessary
 		newBullets.forEach(function(bullet) {
-			if ((bullet.t < t) && (bullet.player.alive())) {
+			if ((bullet.t <= t) && (bullet.player.alive())) {
 				console.log("Adding new bullet");
 				var newBullet = new Bullet(bullet.player, bullet.player.getPositionOnArc(bullet.t), bullet.direction, bullet.t);
 				self.bullets.push(newBullet);
