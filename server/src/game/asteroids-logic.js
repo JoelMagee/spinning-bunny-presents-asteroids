@@ -1,5 +1,7 @@
 /*jslint white: true, node: true */
 
+var Bullet = require('./bullet')();
+
 var TURN_TICKS = 1000;
 
 var COLLISION_DISTANCE = 40;
@@ -98,7 +100,7 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 
 		//Update all projectile positions
 		this.bullets.forEach(function(bullet) {
-			bullet.updatePosition(1/TURN_TICKS);
+			bullet.update(1/TURN_TICKS);
 		});
 
 		//Check for players going out of bounds
@@ -146,7 +148,7 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 		//Check all the bullets waiting to be fired, add new ones as necessary
 		newBullets.forEach(function(bullet) {
 			if ((bullet.t < t) && (bullet.player.alive())) {
-				var newBullet = new Bullet(bullet.player, player.getPositionOnArc(t), bullet.direction, t);
+				var newBullet = new Bullet(bullet.player, bullet.player.getPositionOnArc(bullet.t), bullet.direction, bullet.t);
 				self.bullets.push(newBullet);
 				self.allBullets.push(newBullet);
 			}
@@ -179,6 +181,7 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 				}
 
 				if (player.distanceTo(bullet) < COLLISION_DISTANCE) {
+					console.log("Player " + player.username + " was hit by a bullet");
 					player.addCollision(t);
 					bullet.destroyed(t);
 				} 

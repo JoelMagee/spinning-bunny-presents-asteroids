@@ -24,7 +24,7 @@ Bullet.prototype.updateTurnStartPosition = function() {
 	this.turnStartPositon.y = this.position.y;
 }
 
-Bullet.prototype.move = function(dt) {
+Bullet.prototype.update = function(dt) {
 	var dx = Math.cos(this.direction) * dt * SPEED_FACTOR;
 	var dy = Math.sin(this.direction) * dt * SPEED_FACTOR;
 
