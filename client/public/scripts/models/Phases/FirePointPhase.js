@@ -4,11 +4,12 @@ define([
 ], function ($, Phase) {
     'use strict';
 
-	var FirePointPhase = function(stage, mouse, ui, ships) {
+	var FirePointPhase = function(stage, mouse, ui, ships, phaseTitle) {
 		this.stage = stage;
 		this.mouse = mouse;
 		this.ui = ui;
 		this.ships = ships;
+		this.phaseTitle = phaseTitle;
 	};
 	
 	FirePointPhase.prototype = $.extend(true, {}, Phase.prototype);
@@ -17,6 +18,8 @@ define([
 		console.log("Fire Point phase has started");
 		
 		var self = this;
+		
+		this.phaseTitle('Select your firing start point');
 		
 		this.stage.mousedown = function (data) {
 
@@ -65,6 +68,8 @@ define([
 	
 	FirePointPhase.prototype.onEnd = function () {
 		console.log("Fire Point phase has ended");
+		
+		this.phaseTitle('');
 		
 		this.ui.clientShip.clearGhost();
 		

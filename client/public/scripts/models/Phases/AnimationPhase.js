@@ -4,12 +4,13 @@ define([
 ], function ($, Phase) {
     'use strict';
 		
-	var AnimationPhase = function(ui, ships, bullets, stage, mouse) {
+	var AnimationPhase = function(ui, ships, bullets, stage, mouse, phaseTitle) {
 		this.ui = ui;
 		this.ships = ships;
 		this.bullets = bullets;
 		this.stage = stage;
 		this.mouse = mouse;
+		this.phaseTitle = phaseTitle;
 	};
 	
 	AnimationPhase.prototype = $.extend(true, {}, Phase.prototype);
@@ -18,6 +19,8 @@ define([
 		console.log("Animation phase has started");
 		
 		var self = this;
+		
+		this.phaseTitle('Animating');
 		
 		this.startTime = Date.now();
 		this.elapsedTime = 0;
@@ -78,6 +81,8 @@ define([
 	
 	AnimationPhase.prototype.onEnd = function () {
 		console.log("Animation phase has ended");
+		
+		this.phaseTitle('');
 		
 		this.ships.forEach(function(ship) {
 			ship.animateTurn = false;

@@ -34,21 +34,21 @@ define([
 	
     Ship.prototype = {
 		draw: function() {
-				this.graphics.clear();
-				this.graphics.beginFill(this.color);
-				this.graphics.moveTo(0-this.width/4, 0);
-				this.graphics.lineTo(0-this.width/2, 0-this.width/2);
-				this.graphics.lineTo(0+this.width/2, 0);
-				this.graphics.lineTo(0-this.width/2, 0+this.width/2);
-				this.graphics.endFill();
-				
-				this.graphics.x = this.position.x;
-				this.graphics.y = this.position.y;
-				
-				this.text.x = this.position.x;
-				this.text.y = this.position.y-this.width;
-				
-				this.graphics.rotation = this.rotation;
+			this.graphics.clear();
+			this.graphics.beginFill(this.color);
+			this.graphics.moveTo(0-this.width/4, 0);
+			this.graphics.lineTo(0-this.width/2, 0-this.width/2);
+			this.graphics.lineTo(0+this.width/2, 0);
+			this.graphics.lineTo(0-this.width/2, 0+this.width/2);
+			this.graphics.endFill();
+			
+			this.graphics.x = this.position.x;
+			this.graphics.y = this.position.y;
+			
+			this.text.x = this.position.x;
+			this.text.y = this.position.y-this.width;
+			
+			this.graphics.rotation = this.rotation;
 		},
 		update: function(timeDif) {
 			if (this.animateTurn) {

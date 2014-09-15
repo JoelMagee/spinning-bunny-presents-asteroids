@@ -30,6 +30,7 @@ define([
 				self.username("");
 				self.password("");
 				$('#loginScreen').hide();
+				$('#nav').show();
 				$('#lobbyListScreen').show();
 			} else {
 				console.log(response.message);

@@ -4,11 +4,12 @@ define([
 ], function ($, Phase) {
     'use strict';
 		
-	var WaitingPhase = function(ui, stage, mouse, ships) {
+	var WaitingPhase = function(ui, stage, mouse, ships, phaseTitle) {
 		this.ui = ui;
 		this.stage = stage;
 		this.mouse = mouse;
 		this.ships = ships;
+		this.phaseTitle = phaseTitle;
 	};
 	
 	WaitingPhase.prototype = $.extend(true, {}, Phase.prototype);
@@ -17,6 +18,8 @@ define([
 		console.log("Waiting phase has started");
 		
 		var self = this;
+		
+		this.phaseTitle('Waiting for all players to submit moves');
 		
 		this.stage.mousedown = function (data) {
 
@@ -70,6 +73,8 @@ define([
 	
 	WaitingPhase.prototype.onEnd = function () {
 		console.log("Waiting phase has ended");
+		
+		this.phaseTitle('');
 		
 		this.ui.clientShip.clearGhost();
 		

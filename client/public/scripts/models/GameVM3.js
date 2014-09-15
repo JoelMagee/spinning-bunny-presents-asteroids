@@ -44,9 +44,24 @@ define([
 		this.world.pannedAmountX = 0;
 		this.world.pannedAmountY = 0;
 		this.world.scaledAmount = 1;
-			
+		
+		// these lines zoom out to show the full map
+		this.world.scale.x /= 16;
+		this.world.scale.y /= 16;
+		this.world.scaledAmount /= 16;
+		
+		// these lines centre the map
+		// $(window).width()/2: moves the x point to the middle of the window
+		// -10000/32: offsets it by the size of the playable world with the zoom factor applied and halved
+		this.world.x += $(window).width()/2-10000/32;
+		this.world.pannedAmountX += $(window).width()/2-10000/32;
+		this.world.y += $(window).height()/2-10000/32;
+		this.world.pannedAmountY += $(window).height()/2-10000/32;
+
 		this.started = false;
 		this.waiting = ko.observable(false);
+		
+		this.phaseTitle = ko.observable('observable');
 		
 		this.clientShip = undefined;
 		this.ships = [];
@@ -77,13 +92,13 @@ define([
 		this.world.addChild(this.UI.fireLine);
 		
 		this.loadingPhase = new LoadingPhase();
-		this.movementPhase = new MovementPhase(stage, mouse, this.UI, this.ships);
-		this.firePointPhase = new FirePointPhase(stage, mouse, this.UI, this.ships);
-		this.fireDirectionPhase = new FireDirectionPhase(stage, mouse, this.UI, this.ships);
+		this.movementPhase = new MovementPhase(stage, mouse, this.UI, this.ships, this.phaseTitle);
+		this.firePointPhase = new FirePointPhase(stage, mouse, this.UI, this.ships, this.phaseTitle);
+		this.fireDirectionPhase = new FireDirectionPhase(stage, mouse, this.UI, this.ships, this.phaseTitle);
 
-		this.waitingPhase = new WaitingPhase(this.UI, stage, mouse, this.ships);
-		this.animationPhase = new AnimationPhase(this.UI, this.ships, this.bullets, stage, mouse);
-		this.deadPhase = new DeadPhase(this.UI, stage, mouse, this.ships);
+		this.waitingPhase = new WaitingPhase(this.UI, stage, mouse, this.ships, this.phaseTitle);
+		this.animationPhase = new AnimationPhase(this.UI, this.ships, this.bullets, stage, mouse, this.phaseTitle);
+		this.deadPhase = new DeadPhase(this.UI, stage, mouse, this.ships, this.phaseTitle);
 		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.bullets, this.socket);
 
 		this.phaseManager = new PhaseManager();

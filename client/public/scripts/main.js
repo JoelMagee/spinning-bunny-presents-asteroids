@@ -24,6 +24,11 @@ define([
 	        });
 	    }
 	};
+	
+	$('#scoreboard a').click(function (e) {
+		e.preventDefault()
+		$(this).tab('show')
+	})
 
 	var socket = io('http://sl-ws-230:8500/');
 	socket.emit('session', {});

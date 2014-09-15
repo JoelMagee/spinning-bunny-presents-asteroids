@@ -4,11 +4,12 @@ define([
 ], function ($, Phase) {
     'use strict';
 
-	var MovementPhase = function(stage, mouse, ui, ships) {
+	var MovementPhase = function(stage, mouse, ui, ships, phaseTitle) {
 		this.stage = stage;
 		this.mouse = mouse;
 		this.ui = ui;
 		this.ships = ships;
+		this.phaseTitle = phaseTitle;
 	};
 	
 	MovementPhase.prototype = $.extend(true, {}, Phase.prototype);
@@ -17,6 +18,8 @@ define([
 		console.log("Movement phase has started");
 		
 		var self = this;
+		
+		this.phaseTitle('Select your destination');
 		
 		this.stage.mousedown = function (data) {
 
@@ -67,6 +70,8 @@ define([
 			
 	MovementPhase.prototype.onEnd = function () {
 		console.log("Movement phase has ended");
+		
+		this.phaseTitle('');
 		
 		this.ui.clientShip.clearGhost();
 		

@@ -6458,3 +6458,11 @@ body {
   margin: 5px;
   padding: 0;
 }
+.phase-title {
+  margin: auto;
+  left: 0;
+  position: absolute;
+  text-align: center;
+  right: 0;
+  color: red;
+}

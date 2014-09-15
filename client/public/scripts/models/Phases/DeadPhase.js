@@ -4,11 +4,12 @@ define([
 ], function ($, Phase) {
     'use strict';
 		
-	var DeadPhase = function(ui, stage, mouse, ships) {
+	var DeadPhase = function(ui, stage, mouse, ships, phaseTitle) {
 		this.ui = ui;
 		this.stage = stage;
 		this.mouse = mouse;
 		this.ships = ships;
+		this.phaseTitle = phaseTitle;
 	};
 	
 	DeadPhase.prototype = $.extend(true, {}, Phase.prototype);
@@ -17,6 +18,8 @@ define([
 		console.log("Dead phase has started");
 		
 		var self = this;
+		
+		this.phaseTitle('You are dead!');
 		
 		this.stage.mousedown = function (data) {
 
@@ -70,6 +73,8 @@ define([
 	
 	DeadPhase.prototype.onEnd = function () {
 		console.log("Dead phase has ended");
+		
+		this.phaseTitle('');
 		
 		// this.ui.clientShip.clearGhost();
 		

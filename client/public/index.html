@@ -187,8 +187,10 @@
 		</div>
 		<div id="gameScreen" class="screen" oncontextmenu="return false;">
 			<div id="asteroidsUI">
+				<p class="phase-title" data-bind="text: phaseTitle"></p>
 				<button id="endTurnButton" class="btn btn-danger" data-bind="click: endTurn, disable: waiting">End Turn</button>
 				<button id="undoButton" class="btn btn-danger" data-bind="click: undo, disable: waiting">Undo</button>
+				
 				<button id="endGameButton" class="btn btn-danger" data-bind="click: endGame">Leave game</button>
 			</div>
 			<!--<div id="guessingGame">
