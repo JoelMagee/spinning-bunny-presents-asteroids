@@ -81,9 +81,9 @@ define([
 		this.firePointPhase = new FirePointPhase(stage, mouse, this.UI, this.ships);
 		this.fireDirectionPhase = new FireDirectionPhase(stage, mouse, this.UI, this.ships);
 
-		this.waitingPhase = new WaitingPhase(this.UI, stage, mouse);
+		this.waitingPhase = new WaitingPhase(this.UI, stage, mouse, this.ships);
 		this.animationPhase = new AnimationPhase(this.UI, this.ships, this.bullets, stage, mouse);
-		this.deadPhase = new DeadPhase(this.UI, stage, mouse);
+		this.deadPhase = new DeadPhase(this.UI, stage, mouse, this.ships);
 		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.bullets, this.socket);
 
 		this.phaseManager = new PhaseManager();
@@ -247,12 +247,13 @@ define([
 			self.world.removeChildren(numOfNoneBulletGraphics);
 			}
 			
+			self.bullets.length = 0;
 			for (var i in response.turnResult.bullets) {
 				var bullet = new Bullet(response.turnResult.bullets[i]);
 				self.bullets.push(bullet);
 				self.world.addChild(bullet.graphics);
 			}
-			
+
 			self.phaseManager.setCurrentPhase(self.animationPhase);
 			
 		});

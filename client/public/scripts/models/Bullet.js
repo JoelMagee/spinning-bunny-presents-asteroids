@@ -16,15 +16,14 @@ define([
 		this.width = 50;
 		this.color = 0x00F0EE;
 		this.graphics = new PIXI.Graphics();
-		this.rotation = this.direction-Math.PI; // might work
+		this.rotation = this.direction-Math.PI;
 		if (!bullet.turnStartPosition.hasOwnProperty('x')) {
 			this.position = this.originPosition;
 		} else {
-			console.log("set turn start rather than origin");
 			this.position = this.turnStartPosition;
 		}
 		
-		this.timeElapsed = 0; //Time elapsed in ms in current replay
+		this.timeElapsed = 0; // Time elapsed in ms in current replay
 		this.replayTime = 2000; 
 		
 		this.SPEED_FACTOR = 2500;

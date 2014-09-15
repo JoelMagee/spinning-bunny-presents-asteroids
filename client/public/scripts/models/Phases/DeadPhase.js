@@ -4,10 +4,11 @@ define([
 ], function ($, Phase) {
     'use strict';
 		
-	var DeadPhase = function(ui, stage, mouse) {
+	var DeadPhase = function(ui, stage, mouse, ships) {
 		this.ui = ui;
 		this.stage = stage;
 		this.mouse = mouse;
+		this.ships = ships;
 	};
 	
 	DeadPhase.prototype = $.extend(true, {}, Phase.prototype);
@@ -41,22 +42,26 @@ define([
 	DeadPhase.prototype.draw = function () {
 		// console.log("Waiting phase is drawing");
 		
-		if (this.ui.moveSet) {
-			this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
+		this.ships.forEach(function(ship) {
+			ship.draw();
+		});
+		
+		// if (this.ui.moveSet) {
+			// this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
 			
-			this.ui.clearMovementLine();
-			this.ui.drawMovementLine();
-		}
+			// this.ui.clearMovementLine();
+			// this.ui.drawMovementLine();
+		// }
 		
-		if (this.ui.firePointSet) {
-			this.ui.clearFirePoint();
-			this.ui.drawFirePoint();
-		}
+		// if (this.ui.firePointSet) {
+			// this.ui.clearFirePoint();
+			// this.ui.drawFirePoint();
+		// }
 		
-		if (this.ui.fireDestinationSet) {
-			this.ui.clearFireLine();
-			this.ui.drawFireLine();
-		}
+		// if (this.ui.fireDestinationSet) {
+			// this.ui.clearFireLine();
+			// this.ui.drawFireLine();
+		// }
 	};
 	
 	DeadPhase.prototype.update = function () {
@@ -66,18 +71,18 @@ define([
 	DeadPhase.prototype.onEnd = function () {
 		console.log("Dead phase has ended");
 		
-		this.ui.clientShip.clearGhost();
+		// this.ui.clientShip.clearGhost();
 		
-		this.ui.clearMovementLine();
-		this.ui.clearFirePoint();
-		this.ui.clearFireLine();
+		// this.ui.clearMovementLine();
+		// this.ui.clearFirePoint();
+		// this.ui.clearFireLine();
 		
-		this.ui.clientShip.t = null;
-		this.ui.clientShip.angle = null;
+		// this.ui.clientShip.t = null;
+		// this.ui.clientShip.angle = null;
 		
-		this.ui.moveSet = false;
-		this.ui.firePointSet = false;
-		this.ui.fireDestinationSet = false;
+		// this.ui.moveSet = false;
+		// this.ui.firePointSet = false;
+		// this.ui.fireDestinationSet = false;
 	};
 	
 	return DeadPhase;

@@ -4,10 +4,11 @@ define([
 ], function ($, Phase) {
     'use strict';
 		
-	var WaitingPhase = function(ui, stage, mouse) {
+	var WaitingPhase = function(ui, stage, mouse, ships) {
 		this.ui = ui;
 		this.stage = stage;
 		this.mouse = mouse;
+		this.ships = ships;
 	};
 	
 	WaitingPhase.prototype = $.extend(true, {}, Phase.prototype);
@@ -57,6 +58,10 @@ define([
 			this.ui.clearFireLine();
 			this.ui.drawFireLine();
 		}
+		
+		this.ships.forEach(function(ship) {
+			ship.draw();
+		});
 	};
 	
 	WaitingPhase.prototype.update = function () {
