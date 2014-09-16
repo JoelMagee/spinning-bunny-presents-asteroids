@@ -4,10 +4,12 @@ define([
 ], function ($, Phase) {
     'use strict';
 		
-	var AnimationPhase = function(ui, ships, bullets, stage, mouse, phaseTitle) {
+	var AnimationPhase = function(ui, ships, bullets, explosions, stage, mouse, phaseTitle) {
 		this.ui = ui;
 		this.ships = ships;
 		this.bullets = bullets;
+		this.explosions = explosions;
+		this.startedExplosions = [];
 		this.stage = stage;
 		this.mouse = mouse;
 		this.phaseTitle = phaseTitle;
@@ -32,7 +34,7 @@ define([
 
 			if (self.mouse.x() < 0 || self.mouse.x() > 10000 || self.mouse.y() < 0 || self.mouse.y() > 10000) {
 				return false;
-			} else if (data.originalEvent.which === 3 || data.originalEvent.which === 2) { //Right click
+			} else if (data.originalEvent.which === 3 || data.originalEvent.which === 2) {
 				self.ui.startDrag(data);
 			} else if (data.originalEvent.which === 1) {
 				// do nothing
@@ -59,6 +61,10 @@ define([
 			bullet.draw();
 		});
 		
+		this.startedExplosions.forEach(function(explosion) {
+			explosion.draw();
+		});
+		
 		if (this.elapsedTime >= 2000) {
 			this.emitEvent('animation finished');
 		}
@@ -67,15 +73,28 @@ define([
 	AnimationPhase.prototype.update = function (timeDiff) {
 		// console.log("Animation phase is updating");
 		
+		var self = this;
+		
 		this.elapsedTime += timeDiff;
 		
 		this.ships.forEach(function(ship) {
 			ship.update(timeDiff);
 		});
 		
-		// Possible stuff to do for each bullet
 		this.bullets.forEach(function(bullet) {
 			bullet.update(timeDiff);
+		});
+		
+		this.explosions.forEach(function(explosion) {
+			if (self.elapsedTime >= explosion.startAnimation) {
+				self.startedExplosions.push(explosion);
+				self.explosions.splice(self.explosions.indexOf(explosion), 1);
+			}
+		});
+		
+		this.startedExplosions.forEach(function(explosion) {
+			console.log("startedExplosions update");
+			explosion.update();
 		});
 	};
 	

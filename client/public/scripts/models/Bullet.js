@@ -43,7 +43,6 @@ define([
 		},
 		update: function (timeDif) {
 			
-			// possible stuff to do for bullet update
 			this.timeElapsed += timeDif;
 			
 			var t = 1;

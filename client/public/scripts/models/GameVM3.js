@@ -6,6 +6,7 @@ define([
     'models/Ship',
 	'models/Bullet',
 	'models/Asteroid',
+	'models/Explosion',
 	'models/Helper',
 	'models/UI',
 	'models/PhaseManager',
@@ -17,7 +18,7 @@ define([
 	'models/Phases/AnimationPhase',
 	'models/Phases/DeadPhase',
 	'models/Phases/GameEndPhase'
-], function(ko, $, PIXI, jsBezier, Ship, Bullet, Asteroid, Helper, UI, PhaseManager, LoadingPhase, MovementPhase, FirePointPhase, FireDirectionPhase, WaitingPhase, AnimationPhase, DeadPhase, GameEndPhase) {
+], function(ko, $, PIXI, jsBezier, Ship, Bullet, Asteroid, Explosion, Helper, UI, PhaseManager, LoadingPhase, MovementPhase, FirePointPhase, FireDirectionPhase, WaitingPhase, AnimationPhase, DeadPhase, GameEndPhase) {
     'use strict';
 	
 	/*jslint browser: true*/
@@ -41,6 +42,8 @@ define([
 		this.worldObects = {"ships": [], "asteroids": []};
 		
 		this.world = new PIXI.DisplayObjectContainer();
+		this.bulletGraphics = new PIXI.DisplayObjectContainer();
+		this.world.addChild(this.bulletGraphics);
 		
 		this.world.pannedAmountX = 0;
 		this.world.pannedAmountY = 0;
@@ -68,6 +71,7 @@ define([
 		this.ships = [];
 		this.bullets = [];
 		this.asteroids = [];
+		this.explosions = [];
 	
 		this.SCREEN_WIDTH = $(window).width();
 		this.SCREEN_HEIGHT = $(window).height();
@@ -86,7 +90,7 @@ define([
 		var mouse = createMouse(this.world, stage);
 		
 		var border = new PIXI.Graphics();
-		this.world.addChild(border);
+		this.world.addChildAt(border, 0);
 		
 		this.UI = new UI(this.world, mouse);
 		this.world.addChild(this.UI.movementLine);
@@ -99,9 +103,9 @@ define([
 		this.fireDirectionPhase = new FireDirectionPhase(stage, mouse, this.UI, this.ships, this.phaseTitle);
 
 		this.waitingPhase = new WaitingPhase(this.UI, stage, mouse, this.ships, this.phaseTitle);
-		this.animationPhase = new AnimationPhase(this.UI, this.ships, this.bullets, stage, mouse, this.phaseTitle);
+		this.animationPhase = new AnimationPhase(this.UI, this.ships, this.bullets, this.explosions, stage, mouse, this.phaseTitle);
 		this.deadPhase = new DeadPhase(this.UI, stage, mouse, this.ships, this.phaseTitle);
-		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.bullets, this.asteroids, this.socket);
+		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.bullets, this.asteroids, this.explosions, this.socket);
 
 		this.phaseManager = new PhaseManager();
 
@@ -170,7 +174,6 @@ define([
 				self.phaseManager.currentPhase.draw();
 				
 				border.clear();
-				// border.lineStyle(2/self.world.scale.x, 0x000000, 1);
 				border.beginFill(0x222222);
 				border.drawRect(0, 0, 10000, 10000);
 				border.endFill();
@@ -193,7 +196,7 @@ define([
 			console.log(response);
 			self.started = true;
 
-			if (self.world.children.length > 1) {
+			if (self.world.children.length > 2) {
 				self.world.removeChild(self.UI.movementLine);
 				self.world.removeChild(self.UI.fireDot);
 				self.world.removeChild(self.UI.fireLine);
@@ -257,6 +260,10 @@ define([
 					if (response.turnResult.players[ship.username].collisions.length > 0) {
 						ship.addCollisions(response.turnResult.players[ship.username].collisions);
 						
+						var explosion = new Explosion(ship.getPositionOnArc(ship.collideT), ship.collideT);
+						self.explosions.push(explosion);
+						self.world.addChild(explosion.graphics);
+						
 						//Is this our ship
 						if (ship.username === self.clientShip.username) {
 							self.animationPhase.off('animation finished', setMovementPhase);
@@ -268,16 +275,16 @@ define([
 			});
 			
 			//remove previous bullets here
-			var numOfNoneBulletGraphics = 4+self.ships.length*4+self.asteroids.length; // 4 for the border and ui graphics and 3 for each ship in the game and 1 for each asteroid in the game
-			if (self.world.children.length > numOfNoneBulletGraphics) {
-			self.world.removeChildren(numOfNoneBulletGraphics);
+			if (self.bulletGraphics.children.length > 0) {
+				self.bulletGraphics.removeChildren();
 			}
-			
 			self.bullets.length = 0;
+			
+			
 			for (var i in response.turnResult.bullets) {
 				var bullet = new Bullet(response.turnResult.bullets[i]);
 				self.bullets.push(bullet);
-				self.world.addChild(bullet.graphics);
+				self.bulletGraphics.addChild(bullet.graphics);
 			}
 
 			self.phaseManager.setCurrentPhase(self.animationPhase);
@@ -376,7 +383,6 @@ define([
 		createShip: function(username) {
 			var ship = new Ship(username);
 			
-			this.world.addChild(ship.explosionGraphics);
 			this.world.addChild(ship.graphics);
 			this.world.addChild(ship.text);
 			this.world.addChild(ship.ghostGraphics);

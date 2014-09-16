@@ -26,7 +26,7 @@ define([
 
 			if (self.mouse.x() < 0 || self.mouse.x() > 10000 || self.mouse.y() < 0 || self.mouse.y() > 10000) {
 				return false;
-			} else if (data.originalEvent.which === 3 || data.originalEvent.which === 2) { //Right click
+			} else if (data.originalEvent.which === 3 || data.originalEvent.which === 2) {
 				self.ui.startDrag(data);
 			} else if (data.originalEvent.which === 1) {
 				if (self.ui.setMove()) {
@@ -44,6 +44,9 @@ define([
 		};
 		
 		this.ui.clientShip.currentMove = {};
+		this.ui.clientShip.angle = null;
+		this.ui.firePointSet = false;
+		this.ui.fireDestinationSet = false;
 		
 		
 	};

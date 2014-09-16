@@ -4,11 +4,12 @@ define([
 ], function ($, Phase) {
     'use strict';
 	
-	var GameEndPhase = function(world, ships, bullets, asteroids, socket) {
+	var GameEndPhase = function(world, ships, bullets, asteroids, explosions, socket) {
 		this.world = world;
 		this.ships = ships;
 		this.bullets = bullets;
 		this.asteroids = asteroids;
+		this.explosions = explosions;
 		this.socket = socket;
 	};
 	
@@ -21,10 +22,11 @@ define([
 		this.socket.emit('info lobby', {});
 		
 
-		this.world.removeChildren(1); // removes children from index 1 to the end
+		this.world.removeChildren(2); // removes children from index 2 to the end
 		this.ships.length = 0;
 		this.bullets.length = 0;
 		this.asteroids.length = 0;
+		this.explosions.length = 0;
 		
 		$('#gameScreen').hide();
 		$('#lobbyListScreen').show();

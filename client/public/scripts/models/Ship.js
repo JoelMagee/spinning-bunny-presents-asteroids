@@ -10,8 +10,6 @@ define([
 		this.color = 0xF05800;
 		this.graphics = new PIXI.Graphics();
 		this.ghostGraphics = new PIXI.Graphics();
-		this.explosionGraphics = new PIXI.Graphics();
-		// this.explosionGraphics.alpha = 0;
 		this.explosionWidth = 0;
 		this.text = new PIXI.Text(username, {font: '100px Verdana', fill: '#FFFFFF'});
 		this.username = username;
@@ -37,14 +35,6 @@ define([
 	
     Ship.prototype = {
 		draw: function() {
-
-			this.explosionGraphics.clear();
-			this.explosionGraphics.lineStyle(20, 0xFFFFFF, 1);
-			this.explosionGraphics.drawCircle(0, 0, this.explosionWidth);
-			// this.explosionGraphics.lineStyle(20, 0xFF00FF, 1);
-			// this.explosionGraphics.drawCircle(0, 0, this.explosionWidth/2);
-			// this.explosionGraphics.lineStyle(20, 0x00FFFF, 1);
-			// this.explosionGraphics.drawCircle(0, 0, this.explosionWidth/3);
 			
 			this.graphics.clear();
 			this.graphics.beginFill(this.color);
@@ -56,9 +46,6 @@ define([
 			
 			this.graphics.x = this.position.x;
 			this.graphics.y = this.position.y;
-			
-			this.explosionGraphics.x = this.position.x;
-			this.explosionGraphics.y = this.position.y;
 			
 			this.text.x = this.position.x;
 			this.text.y = this.position.y-this.width;
@@ -78,8 +65,8 @@ define([
 				
 				if (this.dead && t > this.collideT) {
 					t = this.collideT;
-					// this.explosionGraphics.alpha = 1;
-					this.explosionWidth += 10;
+					this.graphics.alpha = 0;
+					this.text.alpha = 0;
 				}
 				
 				this.position = Helper.getBezier(t, this.startPosition, this.previousPrediction, this.destination);
@@ -87,10 +74,7 @@ define([
 				delta.x = delta.x-this.position.x;
 				delta.y = delta.y-this.position.y;
 				this.rotation = Math.atan2(delta.y, delta.x);
-			} else {
-				this.explosionWidth += 10;
-			}
-			
+			}			
 		},
 		setDestination: function(destination, prediction) {
 			this.animateTurn = true;
@@ -121,6 +105,9 @@ define([
 				self.collideT = collision.t;
 			});
 		},
+		getPositionOnArc: function(t) {
+			return Helper.getBezier(t, this.startPosition, this.previousPrediction, this.destination);
+		},
 		drawGhost: function(x, y) {
 			
 			this.ghostGraphics.clear();
@@ -143,19 +130,6 @@ define([
 		},
 		clearGhost: function() {
 			this.ghostGraphics.clear();
-		},
-		destroy: function() {
-			//ship gets destroyed
-			
-			var self = this;
-			var interval = setInterval(function() {
-				if (self.graphics.alpha > 0) {
-					self.graphics.alpha -= 0.25;
-				} else {
-					clearInterval(interval);
-				}
-			}, 500);
-				
 		}
     };
 
