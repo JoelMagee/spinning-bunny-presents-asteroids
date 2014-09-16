@@ -12,8 +12,8 @@ var BULLET_SPEED_FACTOR = 5000;
 var POINTS_PER_ROUND = 2;
 var POINTS_PER_KILL = 10;
 
-var MIN_AST = 5;
-var MAX_AST = 20;
+var MIN_AST = 12;
+var MAX_AST = 30;
 
 var MAX_AST_RADIUS = 500;
 var MIN_AST_RADIUS = 20;
