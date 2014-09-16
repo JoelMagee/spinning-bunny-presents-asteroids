@@ -5,6 +5,7 @@ define([
 	'jsBezier',
     'models/Ship',
 	'models/Bullet',
+	'models/Asteroid',
 	'models/Helper',
 	'models/UI',
 	'models/PhaseManager',
@@ -16,7 +17,7 @@ define([
 	'models/Phases/AnimationPhase',
 	'models/Phases/DeadPhase',
 	'models/Phases/GameEndPhase'
-], function(ko, $, PIXI, jsBezier, Ship, Bullet, Helper, UI, PhaseManager, LoadingPhase, MovementPhase, FirePointPhase, FireDirectionPhase, WaitingPhase, AnimationPhase, DeadPhase, GameEndPhase) {
+], function(ko, $, PIXI, jsBezier, Ship, Bullet, Asteroid, Helper, UI, PhaseManager, LoadingPhase, MovementPhase, FirePointPhase, FireDirectionPhase, WaitingPhase, AnimationPhase, DeadPhase, GameEndPhase) {
     'use strict';
 	
 	/*jslint browser: true*/
@@ -61,11 +62,12 @@ define([
 		this.started = false;
 		this.waiting = ko.observable(false);
 		
-		this.phaseTitle = ko.observable('observable');
+		this.phaseTitle = ko.observable('');
 		
 		this.clientShip = undefined;
 		this.ships = [];
 		this.bullets = [];
+		this.asteroids = [];
 	
 		this.SCREEN_WIDTH = $(window).width();
 		this.SCREEN_HEIGHT = $(window).height();
@@ -92,14 +94,14 @@ define([
 		this.world.addChild(this.UI.fireLine);
 		
 		this.loadingPhase = new LoadingPhase();
-		this.movementPhase = new MovementPhase(stage, mouse, this.UI, this.ships, this.phaseTitle);
+		this.movementPhase = new MovementPhase(stage, mouse, this.UI, this.ships, this.asteroids, this.phaseTitle);
 		this.firePointPhase = new FirePointPhase(stage, mouse, this.UI, this.ships, this.phaseTitle);
 		this.fireDirectionPhase = new FireDirectionPhase(stage, mouse, this.UI, this.ships, this.phaseTitle);
 
 		this.waitingPhase = new WaitingPhase(this.UI, stage, mouse, this.ships, this.phaseTitle);
 		this.animationPhase = new AnimationPhase(this.UI, this.ships, this.bullets, stage, mouse, this.phaseTitle);
 		this.deadPhase = new DeadPhase(this.UI, stage, mouse, this.ships, this.phaseTitle);
-		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.bullets, this.socket);
+		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.bullets, this.asteroids, this.socket);
 
 		this.phaseManager = new PhaseManager();
 
@@ -200,10 +202,19 @@ define([
 			self.world.addChild(self.UI.fireDot);
 			self.world.addChild(self.UI.fireLine);
 			
-			for (var username in response.data) {
-				var position = response.data[username].position;
+			for (var username in response.data.players) {
+				var position = response.data.players[username].position;
 				var ship = self.createShip(username);
 				ship.setInitialPosition(position);
+			}
+			
+			for (var i in response.data.asteroids) {
+				var position = response.data.asteroids[i].position;
+				var radius = response.data.asteroids[i].radius;
+				var asteroid = new Asteroid(position, radius);
+				self.world.addChild(asteroid.graphics);
+				self.asteroids.push(asteroid);
+				
 			}
 			
 			self.phaseManager.setCurrentPhase(self.movementPhase);
@@ -257,7 +268,7 @@ define([
 			});
 			
 			//remove previous bullets here
-			var numOfNoneBulletGraphics = 4+self.ships.length*3; // 4 for the border and ui graphics and 3 for each ship in the game
+			var numOfNoneBulletGraphics = 4+self.ships.length*4+self.asteroids.length; // 4 for the border and ui graphics and 3 for each ship in the game and 1 for each asteroid in the game
 			if (self.world.children.length > numOfNoneBulletGraphics) {
 			self.world.removeChildren(numOfNoneBulletGraphics);
 			}
@@ -364,9 +375,12 @@ define([
 		},
 		createShip: function(username) {
 			var ship = new Ship(username);
+			
+			this.world.addChild(ship.explosionGraphics);
 			this.world.addChild(ship.graphics);
 			this.world.addChild(ship.text);
 			this.world.addChild(ship.ghostGraphics);
+
 			if (username === this.session.username) {
 				this.clientShip = ship;
 				this.UI.setClientShip(ship);

@@ -4,11 +4,12 @@ define([
 ], function ($, Phase) {
     'use strict';
 
-	var MovementPhase = function(stage, mouse, ui, ships, phaseTitle) {
+	var MovementPhase = function(stage, mouse, ui, ships, asteroids, phaseTitle) {
 		this.stage = stage;
 		this.mouse = mouse;
 		this.ui = ui;
 		this.ships = ships;
+		this.asteroids = asteroids;
 		this.phaseTitle = phaseTitle;
 	};
 	
@@ -42,6 +43,8 @@ define([
 			self.ui.stopDrag();
 		};
 		
+		this.ui.clientShip.currentMove = {};
+		
 		
 	};
 	
@@ -58,6 +61,10 @@ define([
 		
 		this.ships.forEach(function(ship) {
 			ship.draw();
+		});
+		
+		this.asteroids.forEach(function(asteroid) {
+			asteroid.draw();
 		});
 	};
 	
