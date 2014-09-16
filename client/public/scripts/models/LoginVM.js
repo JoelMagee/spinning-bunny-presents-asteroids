@@ -27,11 +27,11 @@ define([
 				self.showError(false);
 				console.log("logged in as " + self.username() + " with password " + self.password());
 				self.session.username = self.username();
+				
 				self.username("");
 				self.password("");
-				$('#loginScreen').hide();
-				$('#nav').show();
-				$('#lobbyListScreen').show();
+				$('.screen').hide();
+				$('#dashboard-screen').show();
 			} else {
 				console.log(response.message);
 				self.errorMessage(response.message);

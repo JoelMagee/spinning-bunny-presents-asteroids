@@ -232,7 +232,10 @@ AsteroidsGame.prototype.turnEnd = function() {
 };
 
 AsteroidsGame.prototype.getStartData = function() {
-	return this.asteroidsLogic.getPlayerPositions();
+	return {
+		players: this.asteroidsLogic.getPlayerPositions(),
+		asteroids: this.asteroidsLogic.getAsteroids()
+	}
 };
 
 AsteroidsGame.prototype.gameEnd = function(reason) {

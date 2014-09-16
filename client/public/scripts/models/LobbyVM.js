@@ -5,6 +5,8 @@ define([
 ], function (ko, $, Lobby) {
     'use strict';
 	
+	var MAX_CHAT_HISTORY = 100;
+	
     var LobbyVM = function LobbyVM(socket) {
 	
 		var self = this;
@@ -15,17 +17,16 @@ define([
 		this.message = ko.observable();
 		this.messages = ko.observableArray();
 		
+
+		//Chat observables
+		this.chatMessage = ko.observable();
+		this.chatHistory = ko.observableArray();
+
 		this.socket = socket;
 		
 		this.socket.on('info lobby', function(response) {
 			if (response.success) {
-
-				if (response.lobbyData instanceof Array) {
-					
-					//ignore
-					
-				} else {
-			
+				if (!(response.lobbyData instanceof Array)) {		
 					//Just the one sir
 					console.log("Information for a single lobby received");
 					console.log(response.lobbyData);
@@ -37,8 +38,8 @@ define([
 					
 					console.log("joined lobby #" + response.lobbyData.id);
 			
-					$('#lobbyListScreen').hide();
-					$('#lobbyScreen').show();
+					$('.screen').hide();
+					$('#lobby-screen').show();
 					
 				}
 
@@ -47,25 +48,14 @@ define([
 			}
 		});
 		
-		this.socket.on('leave lobby', function(response) {
-			
-				console.log(response);
-			
-				console.log(response.message);
-				
-				$('#lobbyScreen').hide();
-				$('#lobbyListScreen').show();
+		this.socket.on('leave lobby', function(response) {			
+				$('.screen').hide();
+				$('#dashboard-screen').show();
 				
 				self.socket.emit('info lobby', {});
-				
 		});
 		
-		this.socket.on('join lobby', function(response) {
-			if (response.success) {
-				console.log(response.message);
-				this.emit('info lobby', { id: response.id });
-			}
-		});
+
 		
 		this.socket.on('user join lobby', function(response) {
 			console.log("Player joined: " + response.username);
@@ -79,7 +69,10 @@ define([
 		
 		this.socket.on('close lobby', function(response) {
 			if (response.success) {
-				console.log(response.message);
+				$('.screen').hide();
+				$('#dashboard-screen').show();
+				
+				self.socket.emit('info lobby', {});
 			} else {
 				console.log(response.message);
 				alert(response.message);
@@ -96,17 +89,20 @@ define([
 		
 		this.socket.on('start game' , function(response) {
 			if (response.success) {
-				$('#lobbyListScreen').hide();
-				$('#lobbyScreen').hide();
-				console.log(response.message);
-				$('#gameScreen').show();
+				$('.screen').hide();
+				$('#game-screen').show();
 			} else {
 				console.log(response.message);
 			}
 			
 		});
 		
-		// this.lobby = undefined;
+		this.socket.on('global message', function(response) {
+			self.chatHistory.unshift({content: response.message.content, time: new Date(), username: response.message.username });
+			if(self.chatHistory().length > MAX_CHAT_HISTORY) {
+				self.chatHistory.pop(); //Remove old messages
+			}
+		});
 		
     };
 	
@@ -132,6 +128,10 @@ define([
 		},
 		closeLobby: function () {
 			this.socket.emit('close lobby', {});
+		},
+		sendGlobalMessage: function() {
+			this.socket.emit('global message', { content: this.chatMessage() });
+			this.chatMessage("");
 		}
     };
   

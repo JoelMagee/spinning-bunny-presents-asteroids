@@ -1,6 +1,7 @@
 /*jslint white: true, node: true */
 
 var Bullet = require('./bullet')();
+var Asteroid = require('./asteroid')();
 
 var TURN_TICKS = 5000;
 
@@ -10,6 +11,13 @@ var BULLET_SPEED_FACTOR = 5000;
 
 var POINTS_PER_ROUND = 2;
 var POINTS_PER_KILL = 10;
+
+var MIN_AST = 12;
+var MAX_AST = 30;
+
+var MAX_AST_RADIUS = 500;
+var MIN_AST_RADIUS = 20;
+
 
 var positionOnBezier = function(p0, p1, p2, t) {
 	return {
@@ -22,6 +30,8 @@ var AsteroidsLogic = function(players, world) {
 	this.players = players;
 	this.world = world;
 
+	this.asteroids = [];
+
 	this.bullets = [];
 	this.allBullets = [];
 
@@ -29,18 +39,67 @@ var AsteroidsLogic = function(players, world) {
 };
 
 AsteroidsLogic.prototype.initState = function() {
-	//Give each player a starting position
-	for (var i = 0; i < this.players.length; i++) {
-		var position = this.generateStartingPosition();
-		for (var j = 0; j < i; j++) {
-			if (Math.sqrt(Math.pow(position.x-this.players[j].position.x, 2) + Math.pow(position.y - this.players[j].position.y)) < 700) {
-				console.log("Player is starting close to another player");
-				position = this.generateStartingPosition();
-				j = 0;
-			}
-		}
-		this.players[i].setInitialPosisiton(position.x, position.y);
+	var self = this;
+
+	//Add Asteroids
+	var numAsteroids = MIN_AST + Math.floor(Math.random() * (MAX_AST - MIN_AST));
+
+	for (var i = 0; i < numAsteroids; i++) {
+		var x = Math.random() * this.world.getWidth();
+		var y = Math.random() * this.world.getHeight();
+		var radius = MIN_AST_RADIUS + Math.random() * (MAX_AST_RADIUS - MIN_AST_RADIUS);
+
+		var ast = new Asteroid(x, y, radius);
+
+		this.asteroids.push(ast);
 	}
+
+	var failCount = 0;
+
+	this.players.forEach(function(playerOne, i) {
+		var positionFound = false;
+
+		do {
+			var temp = {};
+			temp.position = self.generateStartingPosition();
+
+			var playerOk = true;
+
+			for (var j = 0; j < i; j++) {
+				var playerTwo = self.players[j]; 
+				if ((playerTwo.distanceTo(temp) < 700)) {
+					console.log("Failed creating position - another player");
+					playerOk = false;
+					break;
+				}
+			}
+
+			if (!playerOk) {
+				failCount++;
+				continue;
+			}
+
+			var asteroidsOk = true;
+
+			for (var k = 0; k < self.asteroids.length; k++) {
+				if (self.asteroids[k].distanceTo(playerOne) <= 0) {
+					console.log("Failed creating position - asteroid");
+					asteroidsOk = false;
+					break;
+				}
+			}
+
+			if (!asteroidsOk) {
+				failCount++;
+				continue;
+			}
+
+			positionFound = true;
+			playerOne.setInitialPosisiton(temp.position.x, temp.position.y);
+		} while (!positionFound);
+	});
+
+	console.log("All player positions set, there were: " + failCount + " suggested positions which failed");
 };
 
 AsteroidsLogic.prototype.generateStartingPosition = function() {
@@ -162,6 +221,21 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 			});
 		});		
 
+		//Check for collisions between players and asteroids
+		
+		this.players.forEach(function(player) {
+			self.asteroids.forEach(function(asteroid) {
+				if (!player.alive()) {
+					return; //We don't want to check collisions if either player has been destroyed
+				}
+
+				if (asteroid.distanceTo(player) <= COLLISION_DISTANCE/2) {
+					console.log("Player: " + player.username + " was rekt by an asteroid");
+					player.addCollision(t);
+				}
+			});
+		});
+
 		//Check all the bullets waiting to be fired, add new ones as necessary
 		newBullets.forEach(function(bullet) {
 			if ((bullet.t <= t) && (bullet.player.alive())) {
@@ -210,6 +284,16 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 			});
 		});
 
+		//Check collisions between projectiles and asteroids
+		this.asteroids.forEach(function(asteroid) {
+			self.bullets.forEach(function(bullet) {
+				if (asteroid.distanceTo(bullet) <= 0) {
+					console.log("Bullet sent by: " + bullet.getSource().username + " was rekt by an asteroid!");
+					bullet.setDestroyed(t);
+				}
+			});
+		});
+
 		//Remove expired bullets from the list
 		this.bullets.forEach(function(bullet, i) {
 			if (bullet.isDestroyed()) {
@@ -252,6 +336,10 @@ AsteroidsLogic.prototype.getPlayerPositions = function() {
 
 	return playerPositions;
 };
+
+AsteroidsLogic.prototype.getAsteroids = function() {
+	return this.asteroids;
+}
 
 AsteroidsLogic.prototype.endTurnCleanup = function() {
 

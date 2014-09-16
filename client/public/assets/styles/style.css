@@ -6422,6 +6422,7 @@ body {
 .chat-input input {
   display: block;
   width: 100%;
+  border: 1px solid #eee;
 }
 .chat-area {
   background-color: #fff;
@@ -6442,4 +6443,46 @@ body {
   text-align: center;
   right: 0;
   color: red;
+}
+.tab {
+  display: none;
+}
+.tab.active {
+  display: block;
+}
+.tabs ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tabs ul li {
+  display: inline-block;
+  cursor: pointer;
+  padding: 5px 10px;
+  margin: 0;
+  background-color: #333;
+  color: #fff;
+}
+.tabs ul li:hover {
+  background-color: #444;
+}
+.tabs ul li.active {
+  background-color: #555;
+}
+.lobbyleader {
+  font-weight: 600;
+}
+.update-text {
+  font-weight: 300;
+  color: #f05800;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 10px;
+}
+.update-text:hover {
+  color: #ff6e19;
+}
+hr.primary {
+  border: none;
+  border-bottom: 1px solid #f05800;
 }

@@ -28,8 +28,8 @@ define([
 		this.asteroids.length = 0;
 		this.explosions.length = 0;
 		
-		$('#gameScreen').hide();
-		$('#lobbyListScreen').show();
+		$('.screen').hide();
+		$('#dashboard-screen').show();
 	};
 	
 	GameEndPhase.prototype.draw = function () {

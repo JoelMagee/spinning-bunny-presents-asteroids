@@ -14,7 +14,7 @@
 		<script data-main="scripts/main" src="scripts/libs/require.js"></script>
 	</head>
 	<body>
-		<div id="loginScreen" class="container">
+		<section id="login-screen" class="screen">
 			<header class="header">
 				<div class="row">
 					<div class="col-xs-12">
@@ -22,262 +22,254 @@
 					</div>
 				</div>
 			</header>
-			<div class="row">
-				<div class="col-md-4 col-md-offset-4">
-					<div class="panel panel-primary">
-						<div class="panel-heading">Login</div>
-						<div class="panel-body">
-							<form role="form" data-bind="submit: login">
-								<div class="form-group">
-									<label for="usernameInput">Username</label>
-									<input type="text" class="form-control" id="usernameInput" data-bind="value: username" autofocus>
-								</div>
-								<div class="form-group">
-									<label for="passwordInput">Password</label>
-									<input type="password" class="form-control" id="passwordInput" data-bind="value: password">
-								</div>
+			<div class="container">
+				<div class="row">
+					<div class="col-md-4 col-md-offset-4">
+						<div class="panel panel-primary">
+							<div class="panel-heading">Login</div>
+							<div class="panel-body">
+								<form role="form" data-bind="submit: login">
+									<div class="form-group">
+										<label for="username-input">Username</label>
+										<input type="text" class="form-control" id="username-input" data-bind="value: username" autofocus>
+									</div>
+									<div class="form-group">
+										<label for="password-input">Password</label>
+										<input type="password" class="form-control" id="password-input" data-bind="value: password">
+									</div>
+									<hr>
+									<button type="submit" class="btn btn-primary btn-block">Login</button>
+								</form>	
 								<hr>
-								<button type="submit" class="btn btn-primary btn-block">Login</button>
-							</form>	
-							<hr>
-							<p>Not registered? <a data-toggle="modal" data-target="#registerModal" style="cursor: pointer" data-bind="click: clearModal">Register here</a></p>
-							<div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-								<div class="modal-dialog">
-									<div class="modal-content">
-										<div class="modal-header">
-											<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-											<h4 class="modal-title" id="modalLabel">Register</h4>
+								<p>Not registered? <a data-toggle="modal" data-target="#register-modal" style="cursor: pointer" data-bind="click: clearModal">Register here</a></p>
+								<div class="modal fade" id="register-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+												<h4 class="modal-title" id="modalLabel">Register</h4>
+											</div>
+											<div class="modal-body">
+												<p>Register as a new user with a username and a password.</p>
+												<form role="form">
+													<div class="form-group">
+														<label for="usernameInputModal">Username</label>
+														<input type="text" class="form-control" id="usernameInputModal" data-bind="value: usernameModal">
+													</div>
+													<div class="form-group">
+														<label for="passwordInputModal">Password</label>
+														<input type="password" class="form-control" id="passwordInputModal" data-bind="value: passwordModal">
+													</div>
+												</form>	
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+												<button type="button" class="btn btn-primary" data-bind="click: register" >Submit</button>
+											</div>
 										</div>
-										<div class="modal-body">
-											<p>Register as a new user with a username and a password.</p>
-											<form role="form">
-												<div class="form-group">
-													<label for="usernameInputModal">Username</label>
-													<input type="text" class="form-control" id="usernameInputModal" data-bind="value: usernameModal">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="alert alert-danger fade in hidden" role="alert" data-bind="visible: showError, css: {hidden: false}">
+							<button type="button" class="close" data-bind="click: hideAlert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+							<p data-bind="text: errorMessage"></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section id="dashboard-screen" class="screen">
+			<div class="container">
+				<header class="header">
+					<div class="row">
+						<div class="col-xs-12">
+							<img src="/assets/images/asteroids.png" alt="">
+						</div>
+					</div>
+				</header>
+				<hr class="primary">
+				<div class="row">
+					<div class="col-xs-12">
+						<nav class="tabs">
+							<ul>
+								<li data-bind="click: function() { activateTab('lobbies'); }">Lobbies</li>
+								<li data-bind="click: function() { activateTab('profile'); updateProfile(); }">Profile</li>
+								<li data-bind="click: function() { activateTab('scoreboard'); updateScoreboard(); }">Scoreboard</li>
+								<li data-bind="click: function() { activateTab('help'); }">Help</li>
+							</ul>
+						</nav>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-8">
+						<div class="tabs-content">
+							<div class="tab" id="lobbies-tab" data-bind="css: { active: activeTabName() === 'lobbies' }">
+								<div class="panel panel-primary">
+									<div class="panel-heading">Open Lobbies
+										<span class="update-text" data-bind="click: refreshLobbies">Update list</span>
+										<input class="pull-right" placeholder="Lobby Name" data-bind="executeOnEnter: createLobby, value: lobbyName, valueUpdate: 'keydown'">
+										<button class="btn btn-link lobby-link pull-right" data-bind="click: createLobby"><i class="fa fa-plus"></i></button>
+									</div>
+									<div class="panel-body lobby-panel">
+										<div data-bind="foreach: lobbies">
+											<div class="lobby-row">
+												<p class="lobby-name"><span data-bind="text: name"></span> (<span data-bind="text: players().length"></span>)</p>
+												<p class="hidden" data-bind="text: id"></p>
+												<div class="lobby-info">
+													<h4>Players: <span class="light" data-bind="text: players().join(', ')"></span></h4>
+													<button class="join-button btn btn-primary" data-bind="click: function () {$parent.joinLobby($data)}">Join Lobby</button>
 												</div>
-												<div class="form-group">
-													<label for="passwordInputModal">Password</label>
-													<input type="password" class="form-control" id="passwordInputModal" data-bind="value: passwordModal">
-												</div>
-											</form>	
+											</div>
 										</div>
-										<div class="modal-footer">
-											<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-											<button type="button" class="btn btn-primary" data-bind="click: register" >Submit</button>
+										<div data-bind="if: lobbies().length === 0">
+											<h4 class="text-center">No lobbies are currently available</h4>
 										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-					</div>
-					<div class="alert alert-danger fade in hidden" role="alert" data-bind="visible: showError, css: {hidden: false}">
-						<button type="button" class="close" data-bind="click: hideAlert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-						<p data-bind="text: errorMessage"></p>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div id="lobbyListScreen" class="screen container">
-			<header class="header">
-				<div class="row">
-					<div class="col-xs-12">
-						<img src="/assets/images/asteroids.png" alt="">
-					</div>
-				</div>
-			</header>
-			<div class="row">
-				<div class="col-xs-12">
-					<div class="page-header">
-						<button type="button" class="btn btn-default pull-right" data-bind="click: logout">Logout</button>
-						<h1>Game Lobbies </h1>
-						<small>For all your game lobby needs</small>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-xs-12">
-					<ul class="nav nav-tabs" role="tablist">
-					  <li class="active"><a href="#">Lobbies</a></li>
-					  <li data-bind="click: showScoreboard"><a href="#">Scoreboard</a></li>
-					  <li data-bind="click: showHelp"><a href="#">Help</a></li>
-					</ul>
-					<div class="panel panel-primary">
-						<div class="panel-heading">Open Lobbies
-							<button class="btn btn-link lobby-link pull-right" data-bind="click: refreshLobbies"><i class="fa fa-refresh"></i></button>
-							<input class="pull-right" data-bind="executeOnEnter: createLobby, value: lobbyName, valueUpdate: 'keydown'">
-							<button class="btn btn-link lobby-link pull-right" data-bind="click: createLobby"><i class="fa fa-plus"></i></button>
-						</div>
-						<div class="panel-body lobby-panel">
-							<div data-bind="foreach: lobbies">
-								<div class="lobby-row">
-									<p class="lobby-name"><span data-bind="text: name"></span> (<span data-bind="text: players().length"></span>)</p>
-									<p class="hidden" data-bind="text: id"></p>
-									<div class="lobby-info">
-										<h4>Players: <span class="light" data-bind="text: players().join(', ')"></span></h4>
-										<button class="join-button btn btn-primary" data-bind="click: function () {$parent.joinLobby($data)}">Join Lobby</button>
+							<div class="tab" id="profile-tab" data-bind="css: {  active: activeTabName() === 'profile' }">
+								<div class="panel panel-primary">
+									<div class="panel-heading">
+										Stats for <span data-bind='text: profile.username'></span>
+									</div>
+									<div class="panel-body">
+										<p>Number of games started: <strong data-bind="text: profile.gamesStarted"></strong></p>
+										<p>Number of games finished: <strong data-bind="text: profile.gamesFinished"></strong></p>
+										<hr>
+										<p>Number of games won: <strong data-bind="text: profile.gamesWon"></strong></p>
+										<p>Start/Win ratio: <strong data-bind="text: (profile.gamesWon/profile.gamesFinished)"></strong></p>
+										<hr>
+										<p>Total Kills: <strong data-bind="text: profile.totalKills"></strong></p>
+										<hr>
+										<p>Total Score: <strong data-bind="text: profile.totalScore"></strong></p>
+										<p>Highest Score: <strong data-bind="text: profile.highestScore"></strong></p>
+										<hr>
+										<h4>Kill Stats</h4>
+										<div data-bind="foreach: profile.killStats">
+											<p><span data-bind="text: username"></span> - <span data-bind="text: count"></span></p>
+										</div>
 									</div>
 								</div>
 							</div>
-							<div data-bind="if: lobbies().length === 0">
-								<h4 class="text-center">No lobbies are currently available</h4>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-xs-12">
-					<hr class="primary">
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-xs-12">
-					<div class="panel panel-primary">
-						<div class="panel-heading">Global Chat</div>
-						<div class="panel-body chat-panel">
-							<div class="chat-input">
-								<input type="text" data-bind="executeOnEnter: sendGlobalMessage, value: chatMessage, valueUpdate: 'keydown'">
-							</div>
-							<div class="chat-area" data-bind="foreach: chatHistory">
-								<p><span data-bind="text: moment(time).format('HH:mm:ss') "></span> <strong data-bind="text: username"></strong> - <span data-bind="text: content"></span></p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div id="scoreboardScreen" class="screen container">
-			<header class="header">
-				<div class="row">
-					<div class="col-xs-12">
-						<img src="/assets/images/asteroids.png" alt="">
-					</div>
-				</div>
-			</header>
-			<div class="row">
-				<div class="col-xs-12">
-					<div class="page-header">
-						<button type="button" class="btn btn-default pull-right" data-bind="click: logout">Logout</button>
-						<h1>Game Lobbies </h1>
-						<small>For all your game lobby needs</small>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-xs-12">
-					<ul class="nav nav-tabs" role="tablist">
-					  <li  data-bind="click: showLobbies"><a href="#">Lobbies</a></li>
-					  <li class="active"><a href="#">Scoreboard</a></li>
-					  <li  data-bind="click: showHelp"><a href="#">Help</a></li>
-					</ul>
-					<div class="panel panel-primary">
-						<div class="panel-body lobby-panel">
-							<p>scoreboard</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div id="helpScreen" class="screen container">
-			<header class="header">
-				<div class="row">
-					<div class="col-xs-12">
-						<img src="/assets/images/asteroids.png" alt="">
-					</div>
-				</div>
-			</header>
-			<div class="row">
-				<div class="col-xs-12">
-					<div class="page-header">
-						<button type="button" class="btn btn-default pull-right" data-bind="click: logout">Logout</button>
-						<h1>Game Lobbies </h1>
-						<small>For all your game lobby needs</small>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-xs-12">
-					<ul class="nav nav-tabs" role="tablist">
-					  <li data-bind="click: showLobbies"><a href="#">Lobbies</a></li>
-					  <li data-bind="click: showScoreboard"><a href="#">Scoreboard</a></li>
-					  <li class="active"><a href="#">Help</a></li>
-					</ul>
-					<div class="panel panel-primary">
-						<div class="panel-body lobby-panel">
-							<p>help</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div id="lobbyScreen" class="screen container">
-			<header class="header">
-				<div class="row">
-					<div class="col-xs-12">
-						<img src="/assets/images/asteroids.png" alt="">
-					</div>
-				</div>
-			</header>
-			<div class="row">
-				<div class="col-xs-12">
-					<div class="page-header">
-						<h1>Your Lobby</h1>
-						<small>You're country needs you!</small>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<br/>
-				<div class="col-xs-12">
-					<div class="panel panel-primary">
-						<div class="panel-heading" data-bind="text: name">Lobby name</div>
-						<div class="panel-body">
-							<div class="row">
-								<div class="col-sm-6">
-									<div class="well">
-										<h3>Players</h3>
-										<ul class="list-group" data-bind="foreach: players">
-											<li class="list-group-item" data-bind="text: name"></li>
-										</ul>
+							<div class="tab" id="scoreboard-tab" data-bind="css: {  active: activeTabName() === 'scoreboard' }">
+								<div class="panel panel-primary">
+									<div class="panel-heading">
+										Scoreboard - showing page <span data-bind="text: scoreboardPage"></span> of <span data-bind="text: userCount"></span> users.
 									</div>
-
+									<div class="panel-body">
+										<table class="table table-striped">
+											<tr>
+												<th>Username</th>
+												<th>Total Score</th>
+												<th>Highest Score</th>
+												<th>Games Started</th>
+												<th>Games Finished</th>
+												<th>Games Won</th>
+											</tr>
+											<tbody data-bind="foreach: scoreboardInformation">
+												<tr>
+													<td data-bind="text: username"></td>
+													<td data-bind="text: totalScore"></td>
+													<td data-bind="text: highestScore"></td>
+													<td data-bind="text: gamesStarted"></td>
+													<td data-bind="text: gamesFinished"></td>
+													<td data-bind="text: gamesWon"></td>
+												</tr>
+											</tbody>
+										</table>
+										<hr>
+										<p class="pull-left nav-text" data-bind="click: function() { if (scoreboardPage() > 1) { scoreboardPage(scoreboardPage() - 1); updateScoreboard(); }, css: { nav-enabled: (scoreboardPage() > 1) { scoreboardPage(scoreboardPage() - 1) }">
+											Previous
+										</p>
+										<p class="pull-right nav-text" data-bind="click: function() { if (scoreboardPage() <= userCount()/25) { scoreboardPage(scoreboardPage() + 1); updateScoreboard(); }, css: { nav-enabled: (scoreboardPage() <= userCount()/25) }">
+											Next
+										</p>
+									</div>
 								</div>
-								<div class="col-sm-6">
-									<button type="button" class="btn btn-success" data-bind="click: startLobby">Start</button>
-									<button class="btn btn-warning" data-bind="click: leaveLobby">Leave</button>
-									<button class="btn btn-danger" data-bind="click: closeLobby">Close lobby</button>
+							</div>
+							<div class="tab" id="help-tab" data-bind="css: {  active: activeTabName() === 'help' }">
+								<div class="panel panel-primary">
+									<div class="panel-heading">Help</div>
+									<div class="panel-body">
+										<p>Help meh</p>
+									</div>
 								</div>
 							</div>
 						</div>
-
+					</div>
+					<div class="col-sm-4">
+						<div class="panel panel-primary">
+							<div class="panel-heading">Global Chat</div>
+							<div class="panel-body chat-panel">
+								<div class="chat-input">
+									<input type="text" data-bind="executeOnEnter: sendGlobalMessage, value: chatMessage, valueUpdate: 'keydown'">
+								</div>
+								<div class="chat-area" data-bind="foreach: chatHistory">
+										<p><span data-bind="text: moment(time).format('HH:mm:ss') "></span> <strong data-bind="text: username"></strong> - <span data-bind="text: content"></span></p>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div id="gameScreen" class="screen" oncontextmenu="return false;">
-			<div id="asteroidsUI">
+		</section>
+		<section id="lobby-screen" class="screen">
+			<div class="container">
+				<header class="header">
+					<div class="row">
+						<div class="col-xs-12">
+							<img src="/assets/images/asteroids.png" alt="">
+						</div>
+					</div>
+				</header>
+				<hr class="primary">
+				<div class="row">
+					<div class="col-md-6">
+						<div class="panel panel-primary">
+							<div class="panel-heading"><span data-bind="text: name">Lobby name</span> <button class="btn btn-default" data-bind="click: leaveLobby">Leave</button><button class="btn btn-danger pull-right" data-bind="click: closeLobby">Close</button></div>
+							<div class="panel-body">
+								<div class="row">
+									<div class="col-xs-12">
+											<p>Players</p>
+											<ul class="list-group" data-bind="foreach: players">
+												<li class="list-group-item" data-bind="css: { lobbyleader: ($index() === 0) }"> <span data-bind="text: name"></span><span class="pull-right" data-bind="visible: ($index() === 0)"><i class="fa fa-star"></i></span></li>
+											</ul>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-xs-12">
+										<button type="button" class="btn btn-primary btn-block btn-lg" data-bind="click: startLobby">Start <i class="fa fa-chevron-right"></i></button>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="panel panel-primary">
+							<div class="panel-heading">Global Chat</div>
+							<div class="panel-body chat-panel">
+								<div class="chat-input">
+									<input type="text" data-bind="executeOnEnter: sendGlobalMessage, value: chatMessage, valueUpdate: 'keydown'">
+								</div>
+								<div class="chat-area" data-bind="foreach: chatHistory">
+									<p><span data-bind="text: moment(time).format('HH:mm:ss') "></span> <strong data-bind="text: username"></strong> - <span data-bind="text: content"></span></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section id="game-screen" class="screen">
+			<div id="asteroids-ui">
 				<p class="phase-title" data-bind="text: phaseTitle"></p>
-				<button id="endTurnButton" class="btn btn-danger" data-bind="click: endTurn, disable: waiting">End Turn</button>
-				<button id="undoButton" class="btn btn-danger" data-bind="click: undo, disable: waiting">Undo</button>
+				<button id="end-turn-button" class="btn btn-danger" data-bind="click: endTurn, disable: waiting">End Turn</button>
+				<button id="undo-button" class="btn btn-danger" data-bind="click: undo, disable: waiting">Undo</button>
 				
-				<button id="endGameButton" class="btn btn-danger" data-bind="click: endGame">Leave game</button>
+				<button id="end-game-button" class="btn btn-danger" data-bind="click: endGame">Leave game</button>
 			</div>
-			<!--<div id="guessingGame">
-				<h1>Guess an integer between 1-100</h1>
-				<div class="col-md-3">
-					<p>Guess a number: <input data-bind="value: guess"></p>
-					<button data-bind="click: sendGuess">Send guess</button>
-					<p data-bind="visible: waiting">----------- Waiting for all guesses -----------</p>
-				</div>
-				<div class="col-md-3">
-					<p>The number was: <span data-bind="text: number"></span></p>
-					<p>The winner was: <span data-bind="text: winner"></span></p>
-					<p>The current closest is: <span data-bind="text: closest"></span></p>
-				</div>
-				<div class="col-md-3">
-					<p>Winner guessed: <span data-bind="text: winnerGuess"></span></p>
-				</div>
-			</div>-->
-		</div>
+		</section>
 	</body>
 </html>
