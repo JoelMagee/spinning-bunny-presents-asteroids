@@ -100,19 +100,6 @@ AsteroidsLogic.prototype.initState = function() {
 	});
 
 	console.log("All player positions set, there were: " + failCount + " suggested positions which failed");
-
-	// //Give each player a starting position
-	// for (var i = 0; i < this.players.length; i++) {
-	// 	var position = this.generateStartingPosition();
-	// 	for (var j = 0; j < i; j++) {
-	// 		if (Math.sqrt(Math.pow(position.x-this.players[j].position.x, 2) + Math.pow(position.y - this.players[j].position.y)) < 700) {
-	// 			console.log("Player is starting close to another player");
-	// 			position = this.generateStartingPosition();
-	// 			j = 0;
-	// 		}
-	// 	}
-	// 	this.players[i].setInitialPosisiton(position.x, position.y);
-	// }
 };
 
 AsteroidsLogic.prototype.generateStartingPosition = function() {
@@ -242,7 +229,7 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 					return; //We don't want to check collisions if either player has been destroyed
 				}
 
-				if (asteroid.distanceTo(player) <= 0) {
+				if (asteroid.distanceTo(player) <= COLLISION_DISTANCE/2) {
 					console.log("Player: " + player.username + " was rekt by an asteroid");
 					player.addCollision(t);
 				}
