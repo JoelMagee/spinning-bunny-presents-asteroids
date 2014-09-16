@@ -46,6 +46,8 @@ define([
 			if (response.success) {
 				console.log("logged out");
 				$('#lobbyListScreen').hide();
+				$('#scoreboardScreen').hide();
+				$('#helpScreen').hide();
 				$('#loginScreen').show();
 			} else {
 				console.log(response.message);
@@ -93,7 +95,7 @@ define([
 		
 			if (!response.success) {
 				alert(response.message);
-				self.lobbies.remove(function(item) { return item.id === response.id; });
+				self.socket.emit('info lobby', {});
 			}
 			
 		});
@@ -145,6 +147,14 @@ define([
 		},
 		logout: function () {
 			this.socket.emit('logout', {});
+		},
+		showScoreboard: function() {
+			$('#lobbyListScreen').hide();
+			$('#scoreboardScreen').show();
+		},
+		showHelp: function() {
+			$('#lobbyListScreen').hide();
+			$('#helpScreen').show();
 		},
 		sendGlobalMessage: function() {
 			this.socket.emit('global message', { content: this.chatMessage() });

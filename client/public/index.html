@@ -96,6 +96,11 @@
 			</div>
 			<div class="row">
 				<div class="col-xs-12">
+					<ul class="nav nav-tabs" role="tablist">
+					  <li class="active"><a href="#">Lobbies</a></li>
+					  <li data-bind="click: showScoreboard"><a href="#">Scoreboard</a></li>
+					  <li data-bind="click: showHelp"><a href="#">Help</a></li>
+					</ul>
 					<div class="panel panel-primary">
 						<div class="panel-heading">Open Lobbies
 							<button class="btn btn-link lobby-link pull-right" data-bind="click: refreshLobbies"><i class="fa fa-refresh"></i></button>
@@ -136,6 +141,70 @@
 							<div class="chat-area" data-bind="foreach: chatHistory">
 								<p><span data-bind="text: moment(time).format('HH:mm:ss') "></span> <strong data-bind="text: username"></strong> - <span data-bind="text: content"></span></p>
 							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="scoreboardScreen" class="screen container">
+			<header class="header">
+				<div class="row">
+					<div class="col-xs-12">
+						<img src="/assets/images/asteroids.png" alt="">
+					</div>
+				</div>
+			</header>
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="page-header">
+						<button type="button" class="btn btn-default pull-right" data-bind="click: logout">Logout</button>
+						<h1>Game Lobbies </h1>
+						<small>For all your game lobby needs</small>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
+					<ul class="nav nav-tabs" role="tablist">
+					  <li  data-bind="click: showLobbies"><a href="#">Lobbies</a></li>
+					  <li class="active"><a href="#">Scoreboard</a></li>
+					  <li  data-bind="click: showHelp"><a href="#">Help</a></li>
+					</ul>
+					<div class="panel panel-primary">
+						<div class="panel-body lobby-panel">
+							<p>scoreboard</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="helpScreen" class="screen container">
+			<header class="header">
+				<div class="row">
+					<div class="col-xs-12">
+						<img src="/assets/images/asteroids.png" alt="">
+					</div>
+				</div>
+			</header>
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="page-header">
+						<button type="button" class="btn btn-default pull-right" data-bind="click: logout">Logout</button>
+						<h1>Game Lobbies </h1>
+						<small>For all your game lobby needs</small>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
+					<ul class="nav nav-tabs" role="tablist">
+					  <li data-bind="click: showLobbies"><a href="#">Lobbies</a></li>
+					  <li data-bind="click: showScoreboard"><a href="#">Scoreboard</a></li>
+					  <li class="active"><a href="#">Help</a></li>
+					</ul>
+					<div class="panel panel-primary">
+						<div class="panel-body lobby-panel">
+							<p>help</p>
 						</div>
 					</div>
 				</div>
