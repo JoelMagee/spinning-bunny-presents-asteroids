@@ -30,7 +30,7 @@ define([
 		$(this).tab('show')
 	})
 
-	var socket = io('http://sl-ws-230:5000/');
+	var socket = io('http://sl-ws-230:8500/');
 	socket.emit('session', {});
 	
 	socket.on('connect', function() {

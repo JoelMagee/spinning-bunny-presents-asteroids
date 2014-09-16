@@ -8,8 +8,6 @@ define([
     var LobbyVM = function LobbyVM(socket) {
 	
 		var self = this;
-		
-		var started = false;
 	
 		this.name = ko.observable("Lobby name");
 		this.players = ko.observableArray();
@@ -50,8 +48,6 @@ define([
 		});
 		
 		this.socket.on('leave lobby', function(response) {
-		
-			if (!started) {
 			
 				console.log(response);
 			
@@ -61,9 +57,6 @@ define([
 				$('#lobbyListScreen').show();
 				
 				self.socket.emit('info lobby', {});
-			
-			}
-			started = false;
 				
 		});
 		
@@ -107,7 +100,6 @@ define([
 				$('#lobbyScreen').hide();
 				console.log(response.message);
 				$('#gameScreen').show();
-				started = true;
 			} else {
 				console.log(response.message);
 			}
