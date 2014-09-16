@@ -117,7 +117,7 @@ define([
 		var renderer = PIXI.autoDetectRenderer(this.SCREEN_WIDTH, this.SCREEN_HEIGHT, null, false, true); //width, height, view, transparent, antialias
 		
 		// add the renderer view element to the DOM
-		$('#gameScreen').append(renderer.view);
+		$('#game-screen').append(renderer.view);
 
 		// simple resize listener - can be expanded upon
 		$(window).resize(resizeRenderer);
@@ -130,7 +130,7 @@ define([
 		}
 		
 		// mousewheel event handler for zooming in and out
-		$('#gameScreen').on('mousewheel', function(e) {
+		$('#game-screen').on('mousewheel', function(e) {
 			if(e.originalEvent.wheelDelta < 0) {
 				//scroll down
 				self._zoomOut(e.clientX, e.clientY);

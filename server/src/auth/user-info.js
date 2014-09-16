@@ -63,14 +63,14 @@ var UserInfo = function(_User) {
 	userCountSub.on('pmessage', function(channelPattern, actualChannel, requestString) {
 		var request = JSON.parse(requestString);
 		var sessionID = request.sessionID;
-
+		console.log("Processing user count request");
 		try {
 			User.count({}, function(err, count) {
 				if (err) {
 					return  userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user count', data: { success: false, message: "Unknown error getting user information, please try again!"}}));
 				}
 
-				userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user info', 
+				userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user count', 
 					data: { 
 						success: true,
 						message: "Successfully retrieved user count",
@@ -84,7 +84,7 @@ var UserInfo = function(_User) {
 		}
 	});
 
-	userCountSub.subscribe('user count:*');
+	userCountSub.psubscribe('user count:*');
 };
 
 module.exports = function(_redis) {

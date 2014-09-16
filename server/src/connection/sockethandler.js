@@ -1,4 +1,4 @@
-/*jslint white: true */
+/*jslint white: true, node: true*/
 
 //Module dependencies
 var redis;
@@ -218,10 +218,32 @@ SocketHandler.prototype.setUpValidators = function() {
 	this.userInfoValidator = new MessageValidator();
 
 	this.userInfoValidator
-		.requirement(self.sessionValidator.hasSession())
+		.requirement(self.sessionValidator.hasSession());
 
 	this.userInfoValidator.on('success', function(request) {
 		self.inputPublisher.publish('user info:' + request.sessionID, JSON.stringify(request));
+	});
+
+	/*
+	 * User count
+	 */
+	
+	this.userCountValidator = new MessageValidator();
+	this.userCountValidator
+		.requirement(self.sessionValidator.hasSession());
+
+	this.userCountValidator.on('success', function(request) {
+		console.log("Count request validated");
+		self.inputPublisher.publish('user count:' + request.sessionID, JSON.stringify(request));
+	});
+
+	this.userCountValidator.on('fail', function(request) {
+		console.error("Count request failed");
+	});
+
+	this.userCountValidator.on('error', function(err, request) {
+		console.error("Error on count request");
+		console.dir(err);
 	});
 }
 
@@ -348,8 +370,13 @@ SocketHandler.prototype.clientConnected = function(connection) {
 
 	connection.on('user info', function(message) {
 		console.log("Received user info message");
-		self.userInfoValidator.validate({ sessionID: sessionID, message: message});
+		self.userInfoValidator.validate({ sessionID: sessionID, message: message });
 	})
+
+	connection.on('user count', function(message) {
+		console.log("Recieved user count message");
+		self.userCountValidator.validate({ sessionID: sessionID, message: message });
+	});
 };
 
 var SocketClient = function(sessionID, connection) {

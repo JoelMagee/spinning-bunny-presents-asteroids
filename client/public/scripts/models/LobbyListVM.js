@@ -148,14 +148,6 @@ define([
 		logout: function () {
 			this.socket.emit('logout', {});
 		},
-		showScoreboard: function() {
-			$('#lobbyListScreen').hide();
-			$('#scoreboardScreen').show();
-		},
-		showHelp: function() {
-			$('#lobbyListScreen').hide();
-			$('#helpScreen').show();
-		},
 		sendGlobalMessage: function() {
 			this.socket.emit('global message', { content: this.chatMessage() });
 			this.chatMessage("");

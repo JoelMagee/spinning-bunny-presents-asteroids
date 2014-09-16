@@ -26,8 +26,8 @@ define([
 		this.bullets.length = 0;
 		this.asteroids.length = 0;
 		
-		$('#gameScreen').hide();
-		$('#lobbyListScreen').show();
+		$('.screen').hide();
+		$('#dashboard-screen').show();
 	};
 	
 	GameEndPhase.prototype.draw = function () {
