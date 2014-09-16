@@ -42,7 +42,7 @@ AsteroidsLogic.prototype.initState = function() {
 	var self = this;
 
 	//Add Asteroids
-	var numAsteroids = MIN_AST + Math.floor(Math.random() * MAX_AST - MIN_AST);
+	var numAsteroids = MIN_AST + Math.floor(Math.random() * (MAX_AST - MIN_AST));
 
 	for (var i = 0; i < numAsteroids; i++) {
 		var x = Math.random() * this.world.getWidth();
