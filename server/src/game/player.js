@@ -14,6 +14,8 @@ var Player = function(username) {
 	this.oldPrediction = {};
 	this.destination = {};
 
+	this.positionSet = false;
+
 	this.lives = 1;
 	this.collisionHistory = [];
 
@@ -22,6 +24,7 @@ var Player = function(username) {
 	this.destroyed = false;
 
 	this.score = 0;
+
 
 	this.killedPlayers = [];
 };
@@ -46,6 +49,8 @@ Player.prototype.setInitialPosisiton = function(x, y) {
 
 	this.oldPrediction.x = x;
 	this.oldPrediction.y = y;
+
+	this.positionSet = true;
 };
 
 Player.prototype.setDestination = function(destinationX, destinationY) {
@@ -123,7 +128,7 @@ Player.prototype.getUsername = function() {
 };
 
 Player.prototype.distanceTo = function(obj) {
-	var objectsPosition = obj.getCurrentPosition();
+	var objectsPosition = obj.getCurrentPosition && obj.getCurrentPosition() || obj.position;
 
 	return Math.sqrt(Math.pow(objectsPosition.x - this.position.x, 2) + Math.pow(objectsPosition.y - this.position.y, 2));
 };

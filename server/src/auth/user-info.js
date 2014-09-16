@@ -6,6 +6,7 @@ var UserInfo = function(_User) {
 	var User = _User;
 
 	var userInfoSub = redis.createClient();
+	var userCountSub = redis.createClient();
 
 	var userPub = redis.createClient();
 
@@ -38,7 +39,7 @@ var UserInfo = function(_User) {
 					.sort(sort)
 					.exec(function(err, users) {
 						if (err) {
-							userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user info', data: { success: false, message: "Unknown error getting user information, please try again!"}}));
+							return userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user info', data: { success: false, message: "Unknown error getting user information, please try again!"}}));
 						}
 
 						userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user info', 
@@ -58,6 +59,32 @@ var UserInfo = function(_User) {
 	});
 
 	userInfoSub.psubscribe('user info:*');
+
+	userCountSub.on('pmessage', function(channelPattern, actualChannel, requestString) {
+		var request = JSON.parse(requestString);
+		var sessionID = request.sessionID;
+
+		try {
+			User.count({}, function(err, count) {
+				if (err) {
+					return  userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user count', data: { success: false, message: "Unknown error getting user information, please try again!"}}));
+				}
+
+				userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user info', 
+					data: { 
+						success: true,
+						message: "Successfully retrieved user count",
+						count: count
+				 	}
+				}));
+			});
+		} catch (e) {
+			console.error(e);
+			userPub.publish('output message:' + sessionID, JSON.stringify({ channel: 'user count', data: { success: false, message: "Unknown error getting user information, please try again!"}}));
+		}
+	});
+
+	userCountSub.subscribe('user count:*');
 };
 
 module.exports = function(_redis) {

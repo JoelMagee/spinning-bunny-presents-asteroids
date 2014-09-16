@@ -263,7 +263,7 @@
 				socket1.on('user join lobby', function(e) {
 					if (createdLobby) {
 						joinCount++;
-						if (joinCount === 5) {
+						if (joinCount === 2) {
 							updateStatus("Another user has joined, starting game");
 							socket1.emit('launch game', {});			
 						} else {

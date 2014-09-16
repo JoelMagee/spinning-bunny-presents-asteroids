@@ -71,8 +71,7 @@ define([
 			if (response.success) {
 				self.waiting(true);
 			}
-		});
-        
+		}); 
     };
 	
     GameVM.prototype = {
