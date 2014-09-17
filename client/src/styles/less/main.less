@@ -126,6 +126,65 @@ body {
   overflow-y:scroll;
 }
 
+
+hr {
+  &.primary {
+    border: none;
+    border-bottom: 1px solid @primary-color;
+  }
+}
+
+.btn {
+  border-radius: 0px;
+
+}
+
+.btn-default {
+
+}
+
+.btn-primary {
+
+}
+
+#game-ui {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  background-color: rgba(0,0,0, 0.6);
+  text-align: center;
+
+  .btn {
+    padding: 5px 10px;
+    margin: 10px;
+    margin-left: 10px;
+    margin-right: 0;
+  }
+}
+
+
+.phase-title {
+  display: inline-block;
+  color: #fff;
+  padding: 5px 10px;
+  margin: 10px;
+  font-weight: 300;
+  text-shadow: 0 1px 0 #333;
+}
+
+#game-right-buttons {
+  float: right;
+
+  .btn {
+    margin-right: 10px;
+  }
+}
+
+#game-left-buttons {
+  float: left;
+}
+
 .light {
   font-weight: 300;
 }
@@ -220,15 +279,6 @@ body {
   }
 }
 
-.phase-title {
-	margin: auto;
-	left: 0;
-	position: absolute;
-	text-align: center;
-	right: 0;
-	color: red;
-}
-
 .tab {
   display: none;
 
@@ -273,12 +323,5 @@ body {
   margin-left: 10px;
   &:hover {
     color: @primary-offset-1;
-  }
-}
-
-hr {
-  &.primary {
-    border: none;
-    border-bottom: 1px solid @primary-color;
   }
 }

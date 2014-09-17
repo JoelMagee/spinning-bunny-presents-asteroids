@@ -263,12 +263,15 @@
 			</div>
 		</section>
 		<section id="game-screen"class="screen" oncontextmenu="return false;">
-			<div id="asteroids-ui">
+			<div id="game-ui">
 				<p class="phase-title" data-bind="text: phaseTitle"></p>
-				<button id="end-turn-button" class="btn btn-danger" data-bind="click: endTurn, disable: waiting">End Turn</button>
-				<button id="undo-button" class="btn btn-danger" data-bind="click: undo, disable: waiting">Undo</button>
-				
-				<button id="end-game-button" class="btn btn-danger" data-bind="click: endGame">Leave game</button>
+				<div class="game-buttons" id="game-left-buttons">
+					<button id="end-turn-button" class="btn btn-primary" data-bind="click: endTurn, disable: waiting">End Turn</button>
+					<button id="undo-button" class="btn btn-primary" data-bind="click: undo, disable: waiting">Undo</button>
+				</div>
+				<div class="game-buttons" id="game-right-buttons">
+					<button id="end-game-button" class="btn btn-defautl" data-bind="click: endGame">Leave game</button>
+				</div>
 			</div>
 		</section>
 	</body>

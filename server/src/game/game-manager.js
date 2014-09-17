@@ -75,14 +75,30 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 			self._sendResponse(sessionID, "turn result", { turnResult: turnResult });
 		};
 
-		var gameEnd = function(endData) {
+
+		var getPlayersScores = function(players) {
+			var scores = {};
+
+			players.forEach(function(player) {
+				scores[player.username] = {
+					score: player.score,
+					kills: player.killedPlayers.length,
+					destroyed: !player.alive()
+				};
+			});
+
+			return scores;
+		}
+
+		var gameEnd = function(reason) {
 			console.log("[Game Manager] Game ended");
 
 			var player = game.getPlayer(username);
 
 			//Send response to user
 			self._sendResponse(sessionID, "game end", { 
-				endData: endData 
+				reason: reason,
+				scores: getPlayersScores(game.getPlayers())
 			});
 
 			var winners = game.getWinners();

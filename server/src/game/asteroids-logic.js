@@ -82,7 +82,7 @@ AsteroidsLogic.prototype.initState = function() {
 			var asteroidsOk = true;
 
 			for (var k = 0; k < self.asteroids.length; k++) {
-				if (self.asteroids[k].distanceTo(playerOne) <= 0) {
+				if (self.asteroids[k].distanceTo(temp) <= COLLISION_DISTANCE) {
 					console.log("Failed creating position - asteroid");
 					asteroidsOk = false;
 					break;
