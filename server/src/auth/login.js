@@ -48,12 +48,14 @@ var Login = function(sessionManager, User) {
 
 							loginSessionPub.publish('output message:' + sessionID, JSON.stringify(response));
 
-
 							var newMessageObj = {};
 							newMessageObj.message = {};
 							newMessageObj.message.content = username + " has just logged in";
 							newMessageObj.message.username = "Server";
 							loginSessionPub.publish('output message', JSON.stringify({sessionID: sessionID, channel: "global message", data:newMessageObj }));
+
+							// Horrible horrible code from here out
+
 							loginUsernamePub.publish('login:' + username, "{'o':'o'}");
 
 							var logoutListener = redis.createClient();

@@ -251,13 +251,22 @@ SocketHandler.prototype.setUpValidators = function() {
 	 */
 	
 	this.leaveGameValidator = new MessageValidator();
+
 	this.leaveGameValidator
-		.requirement(self.sessionValidator.hasSession)
+		.requirement(self.sessionValidator.hasSession())
 		.requirement(self.sessionValidator.hasProperty('username'));
 
 	this.leaveGameValidator.on('success', function(request) {
 		console.log("Leave game request validated");
 		self.inputPublisher.publish('leave game:' + request.sessionID, JSON.stringify(request));
+	});
+
+	this.leaveGameValidator.on('fail', function(request) {
+		console.log("Failed leave game request validation");
+	});
+
+	this.leaveGameValidator.on('error', function(err, request) {
+		console.log("Error on leave game request validation: " + err);
 	});
 }
 
