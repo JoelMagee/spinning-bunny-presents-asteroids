@@ -3,7 +3,7 @@ define([
 ], function (PIXI) {
     'use strict';
 
-    var Explosion = function Explosion(position, collideT, alphaRate) {
+    var Explosion = function Explosion(position, collideT, alphaRate, muted) {
         this.midX = position.x;
         this.midY = position.y;
 		this.color = 0xFFFFFF;
@@ -14,6 +14,9 @@ define([
 		this.animationTime = 2000;
 		this.startAnimation = collideT*this.animationTime;
 		this.elapsedTime = 0;
+		
+		this.sound = new Audio("../../assets/sounds/explosion2.wav");
+		this.muted = muted;
 		
     };
 	
@@ -26,6 +29,9 @@ define([
 		update: function() {
 			this.radius += 10;
 			this.alpha -= this.alphaRate;
+		},
+		playSound: function() {
+			this.sound.play();
 		}
     };
 

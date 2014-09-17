@@ -39,7 +39,7 @@ define([
 		this.socket = socket;
 		this.session = session;
 		
-		this.worldObects = {"ships": [], "asteroids": []};
+		this.muted = ko.observable(false);
 		
 		this.world = new PIXI.DisplayObjectContainer();
 		this.bulletGraphics = new PIXI.DisplayObjectContainer();
@@ -260,7 +260,7 @@ define([
 					if (response.turnResult.players[ship.username].collisions.length > 0) {
 						ship.addCollisions(response.turnResult.players[ship.username].collisions);
 						
-						var explosion = new Explosion(ship.getPositionOnArc(ship.collideT), ship.collideT, 0.01);
+						var explosion = new Explosion(ship.getPositionOnArc(ship.collideT), ship.collideT, 0.01, self.muted);
 						self.explosions.push(explosion);
 						self.world.addChild(explosion.graphics);
 						
@@ -281,12 +281,12 @@ define([
 			self.bullets.length = 0;
 			
 			for (var i in response.turnResult.bullets) {
-				var bullet = new Bullet(response.turnResult.bullets[i]);
+				var bullet = new Bullet(response.turnResult.bullets[i], self.muted);
 				self.bullets.push(bullet);
 				self.bulletGraphics.addChild(bullet.graphics);
 				
 				if(response.turnResult.bullets[i].destroyed) {
-					var explosion = new Explosion(bullet.getPositionOnLine(), response.turnResult.bullets[i].destroyedAt, 0.04);
+					var explosion = new Explosion(bullet.getPositionOnLine(), response.turnResult.bullets[i].destroyedAt, 0.04, self.muted);
 					self.explosions.push(explosion);
 					self.world.addChild(explosion.graphics);
 				}
@@ -399,6 +399,9 @@ define([
 			this.ships.push(ship);
 			
 			return ship;
+		},
+		toggleMute: function() {
+			this.muted(!this.muted());
 		}
     };
 	

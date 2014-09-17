@@ -6,8 +6,6 @@ define([
 
     var ScoreboardVM = function ScoreboardVM(socket) {
 	
-		var self = this;
-		
 		this.socket = socket;
 
     };

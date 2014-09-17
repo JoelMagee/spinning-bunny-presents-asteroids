@@ -23,7 +23,7 @@ define([
 		
 		this.socket.on('login', function(response) {
 			if (response.success) {
-				self.socket.emit('info lobby', {}); // request the lobbies will logging in
+				self.socket.emit('info lobby', {}); // request the lobbies while logging in
 				self.showError(false);
 				console.log("logged in as " + self.username() + " with password " + self.password());
 				self.session.username = self.username();
@@ -45,7 +45,7 @@ define([
 				console.log("registered as " + self.usernameModal() + " with password " + self.passwordModal());
 				self.usernameModal("");
 				self.passwordModal("");
-				$('#registerModal').modal('hide');
+				$('#register-modal').modal('hide');
 			} else {
 				console.log(response.message);
 				self.errorMessage(response.message);

@@ -1,8 +1,7 @@
 define([
     'knockout',
-    'jquery',
-	'models/Lobby'
-], function (ko, $, Lobby) {
+    'jquery'
+], function (ko, $) {
     'use strict';
 	
 	var MAX_CHAT_HISTORY = 100;
@@ -12,11 +11,7 @@ define([
 		var self = this;
 	
 		this.name = ko.observable("Lobby name");
-		this.players = ko.observableArray();
-	
-		this.message = ko.observable();
-		this.messages = ko.observableArray();
-		
+		this.players = ko.observableArray();		
 
 		//Chat observables
 		this.chatMessage = ko.observable();
@@ -107,19 +102,6 @@ define([
     };
 	
     LobbyVM.prototype = {
-		displayLobby: function (lobby) {
-			
-			// this.lobby = lobby;
-			// this.name(lobby.name);
-		},
-		sendMessage: function () {
-			if (this.message()) {
-				this.messages.push(this.message());
-				console.log("message sent");
-				this.message("");
-				$("#chatbody")[0].scrollTop = $("#chatbody")[0].scrollHeight;
-			}
-		},
 		startLobby: function () {
 			this.socket.emit('launch game', {});
 		},

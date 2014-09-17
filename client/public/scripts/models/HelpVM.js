@@ -5,9 +5,7 @@ define([
     'use strict';
 
     var HelpVM = function HelpVM(socket) {
-	
-		var self = this;
-		
+			
 		this.socket = socket;		
     };
 	

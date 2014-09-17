@@ -41,7 +41,8 @@ define([
 		//Chat observables
 		this.chatMessage = ko.observable();
 		this.chatHistory = ko.observableArray();
-
+		
+		//This may need to be changed to hide the relevant pages
 		this.socket.on('logout', function(response) {
 			if (response.success) {
 				console.log("logged out");
