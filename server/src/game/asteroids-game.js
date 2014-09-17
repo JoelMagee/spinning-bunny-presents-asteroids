@@ -267,6 +267,9 @@ AsteroidsGame.prototype.getWinners = function() {
 		}
 	});
 
+	console.log("Winners:");
+	console.dir(winners);
+
 	return winners;
 }
 
