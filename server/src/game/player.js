@@ -16,7 +16,7 @@ var Player = function(username) {
 
 	this.positionSet = false;
 
-	this.lives = 1;
+	this.lives = 5;
 	this.collisionHistory = [];
 
 	this.currentTurnCollisions = [];
