@@ -75,8 +75,10 @@ AsteroidsGame.prototype.removePlayer = function(username) {
 
 	for (var i = 0; i < this.players.length; i++) {
 		if (this.players[i].getUsername() === username) {
+			console.log("Player left, destryoing");
 			player = this.players[i];
 			//this.players.splice(i, 1);
+			player.moveToSelf();
 			player.addCollision(0);
 			break;
 		}
