@@ -44,6 +44,13 @@ var Login = function(sessionManager, User) {
 							response.data.success = true;
 							response.data.message = "Successfully logged in";
 							loginPub.publish('output message:' + sessionID, JSON.stringify(response));
+
+							var newMessageObj = {};
+							newMessageObj.message = {};
+							newMessageObj.message.content = username + " has just logged in";
+							newMessageObj.message.username = "Server";
+							loginPub.publish('output message', JSON.stringify({sessionID: sessionID, channel: "global message", data:newMessageObj }));
+
 						} else{
 							response.data.success = false;
 							response.data.message = "Invalid password";

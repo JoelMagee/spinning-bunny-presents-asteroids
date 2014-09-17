@@ -76,13 +76,15 @@ AsteroidsGame.prototype.removePlayer = function(username) {
 	for (var i = 0; i < this.players.length; i++) {
 		if (this.players[i].getUsername() === username) {
 			player = this.players[i];
-			this.players.splice(i, 1);
+			//this.players.splice(i, 1);
+			player.addCollision(0);
 			break;
 		}
 	}
 
 	if (this.expectedPlayers.indexOf(username) !== -1) {
 		this.expectedPlayers.splice(this.expectedPlayers.indexOf(username), 1);
+
 	}
 
 	this.emit('player leave', player);

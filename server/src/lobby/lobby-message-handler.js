@@ -175,7 +175,7 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 };
 
 LobbyMessageHandler.prototype.infoMessageReceived = function(sessionID, messageData) {
-	if (messageData.hasOwnProperty('id')) {
+	if (messageData && messageData.hasOwnProperty('id')) {
 		//Lobby info for a specific lobby
 		if (!this.lobbyManager.lobbyExists(messageData.id)) {
 			this.sendResponse(sessionID, 'info lobby', { success: false, message: 'No lobby with this ID'});

@@ -16,10 +16,12 @@ SessionStorage.prototype.disconnect = function() {
 
 SessionStorage.prototype.create = function(id) {
 	this.store.hmset("session_" + id, { __d : "d" });
+	this.setExpire(id);
 };
 
 SessionStorage.prototype.get = function(id, cb) {
 	this.store.hgetall("session_" + id, cb);
+	this.setExpire(id);
 };
 
 SessionStorage.prototype.hasProperty = function(id, property, cb) {
@@ -36,6 +38,7 @@ SessionStorage.prototype.hasProperty = function(id, property, cb) {
 
 		cb(null, true);
 	});
+	this.setExpire(id);
 };
 
 SessionStorage.prototype.getProperty = function(id, property, cb) {
@@ -52,6 +55,7 @@ SessionStorage.prototype.getProperty = function(id, property, cb) {
 
 		cb(null, result[0]);
 	});
+	this.setExpire(id);
 };
 
 SessionStorage.prototype.exists = function(id, cb) {
@@ -63,11 +67,13 @@ SessionStorage.prototype.exists = function(id, cb) {
 			cb(null, false);
 		}
 	});
+	this.setExpire(id);
 };
 
 
 SessionStorage.prototype.set = function(id, obj) {
 	this.store.hmset("session_" + id, obj);
+	this.setExpire(id);
 };
 
 SessionStorage.prototype.setProperty = function(id, property, value) {
@@ -76,7 +82,12 @@ SessionStorage.prototype.setProperty = function(id, property, value) {
 
 SessionStorage.prototype.clear = function(id) {
 	this.store.hmset("session_" + id, { __d : "d" });
+	this.setExpire(id);
 };
+
+SessionStorage.prototype.setExpire = function(id) {
+	this.store.expire("session_" + id, 60 * 60 * 60); //60 minutes
+}
 
 module.exports = function(_redis) {
 	redis = _redis;
