@@ -260,7 +260,7 @@ define([
 					if (response.turnResult.players[ship.username].collisions.length > 0) {
 						ship.addCollisions(response.turnResult.players[ship.username].collisions);
 						
-						var explosion = new Explosion(ship.getPositionOnArc(ship.collideT), ship.collideT);
+						var explosion = new Explosion(ship.getPositionOnArc(ship.collideT), ship.collideT, 0.01);
 						self.explosions.push(explosion);
 						self.world.addChild(explosion.graphics);
 						
@@ -273,18 +273,23 @@ define([
 				}
 				
 			});
-			
+
 			//remove previous bullets here
 			if (self.bulletGraphics.children.length > 0) {
 				self.bulletGraphics.removeChildren();
 			}
 			self.bullets.length = 0;
 			
-			
 			for (var i in response.turnResult.bullets) {
 				var bullet = new Bullet(response.turnResult.bullets[i]);
 				self.bullets.push(bullet);
 				self.bulletGraphics.addChild(bullet.graphics);
+				
+				if(response.turnResult.bullets[i].destroyed) {
+					var explosion = new Explosion(bullet.getPositionOnLine(), response.turnResult.bullets[i].destroyedAt, 0.04);
+					self.explosions.push(explosion);
+					self.world.addChild(explosion.graphics);
+				}
 			}
 
 			self.phaseManager.setCurrentPhase(self.animationPhase);

@@ -18,19 +18,6 @@ define([
 			this.graphics.beginFill(this.color);
 			this.graphics.drawCircle(this.midX, this.midY, this.radius);
 			this.graphics.endFill();
-		},
-		destroy: function () {
-				// asteroid gets destroyed
-				
-				var self = this;
-				var interval = setInterval(function () {
-					if (self.graphics.alpha > 0) {
-						self.graphics.alpha -= 0.25;
-					} else {
-						clearInterval(interval);
-					}
-				}, 500);
-				
 		}
     };
 

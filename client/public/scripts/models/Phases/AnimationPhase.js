@@ -92,8 +92,11 @@ define([
 			}
 		});
 		
+		console.log(this.startedExplosions.length);
 		this.startedExplosions.forEach(function(explosion) {
-			console.log("startedExplosions update");
+			if (explosion.alpha < 0 ) {
+				self.startedExplosions.splice(self.startedExplosions.indexOf(explosion), 1);
+			}
 			explosion.update();
 		});
 	};

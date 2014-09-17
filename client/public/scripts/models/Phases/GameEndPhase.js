@@ -23,6 +23,10 @@ define([
 		
 
 		this.world.removeChildren(2); // removes children from index 2 to the end
+		var bulletGraphics = this.world.getChildAt(1);
+		if (bulletGraphics.children.length > 0) {
+			bulletGraphics.removeChildren();
+		}
 		this.ships.length = 0;
 		this.bullets.length = 0;
 		this.asteroids.length = 0;

@@ -29,7 +29,7 @@ define([
     };
 	
     Bullet.prototype = {
-		draw: function () {	
+		draw: function() {	
 			if (this.timeElapsed/this.replayTime >= this.startT) {
 				this.graphics.clear();
 				this.graphics.beginFill(this.color);
@@ -41,7 +41,7 @@ define([
 				this.graphics.rotation = this.rotation;
 			}
 		},
-		update: function (timeDif) {
+		update: function(timeDif) {
 			
 			this.timeElapsed += timeDif;
 			
@@ -58,6 +58,7 @@ define([
 			}
 			
 			if (this.destroyed && t > this.destroyedAt) {
+				this.graphics.alpha = 0;
 				return;
 			}
 
@@ -68,18 +69,17 @@ define([
 			this.position.y += dy;
 			
 		},
-		destroy: function () {
-			//bullet gets destroyed
-			
-			var self = this;
-			var interval = setInterval(function () {
-				if (self.graphics.alpha > 0) {
-					self.graphics.alpha -= 0.25;
-				} else {
-					clearInterval(interval);
-				}
-			}, 500);
-				
+		getPositionOnLine: function() {
+			var position = {};
+			position.x = this.position.x;
+			position.y = this.position.y;
+
+			var dx = Math.cos(this.direction) * (this.destroyedAt-this.startT) * this.speed;
+			var dy = Math.sin(this.direction) * (this.destroyedAt-this.startT) * this.speed;
+
+			position.x += dx;
+			position.y += dy;
+			return position;
 		}
     };
 
