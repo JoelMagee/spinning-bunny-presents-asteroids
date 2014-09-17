@@ -122,6 +122,7 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 		if (player.alive()) {
 			if (!turnData.hasOwnProperty(player.username)) {
 				//If player doesn't have a turn submission, make it attempt to return to the same point
+				turnData[player.username].destination = {};
 				turnData[player.username].destination.x = player.position.x;
 				turnData[player.username].destination.y = player.position.y;
 			} else {

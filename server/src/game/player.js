@@ -79,7 +79,9 @@ Player.prototype.moveOnCurrentArc = function(t) {
 };
 
 Player.prototype.addCollision = function(t) {
+	console.log("Adding collision for player: " + this.username);
 	this.lives--;
+	this.score-=5;
 
 	if (this.lives < 0) {
 		this.lives = 0;
@@ -143,6 +145,10 @@ Player.prototype.getCurrentPosition = function() {
 
 Player.prototype.destroyedPlayer = function(player) {
 	this.killedPlayers.push(player.username);
+}
+
+Player.prototype.moveToSelf = function() {
+	this.setDestination(this.position.x, this.position.y);
 }
 
 module.exports = function() {
