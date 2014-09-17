@@ -44,7 +44,7 @@ if (program.dev) {
 	console.log(clc.red("Running development"));
 
 	//Static directory for test files
-	console.log("Using __dirname/public as static file directory");
+	console.log("Using " + __dirname + "/public as static file directory");
 	app.use(express.static(__dirname + '/public'));
 
 	// Set up morgan for logging
@@ -59,6 +59,7 @@ var models = require('./src/models/models');
 
 // Load main internal modules
 var sessionManager = new SessionManager(SessionStorage);
+sessionManager.clearAll();
 var socketHandler = new SocketHandler(io, sessionManager);
 var globalChat = new GlobalChat(sessionManager);
 

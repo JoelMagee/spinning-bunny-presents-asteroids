@@ -89,6 +89,10 @@ SessionStorage.prototype.setExpire = function(id) {
 	this.store.expire("session_" + id, 60 * 60 * 60); //60 minutes
 }
 
+SessionStorage.prototype.clearAll = function() {
+	this.store.flushall();
+}
+
 module.exports = function(_redis) {
 	redis = _redis;
 

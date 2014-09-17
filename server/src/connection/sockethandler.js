@@ -245,6 +245,20 @@ SocketHandler.prototype.setUpValidators = function() {
 		console.error("Error on count request");
 		console.dir(err);
 	});
+
+	/*
+	 * Leave game
+	 */
+	
+	this.leaveGameValidator = new MessageValidator();
+	this.leaveGameValidator
+		.requirement(self.sessionValidator.hasSession)
+		.requirement(self.sessionValidator.hasProperty('username'));
+
+	this.leaveGameValidator.on('success', function(request) {
+		console.log("Leave game request validated");
+		self.inputPublisher.publish('leave game:' + request.sessionID, JSON.stringify(request));
+	});
 }
 
 SocketHandler.prototype.clientConnected = function(connection) {
@@ -366,6 +380,11 @@ SocketHandler.prototype.clientConnected = function(connection) {
 	connection.on('game turn', function(message) {
 		console.log("Received game turn message");
 		self.gameTurnValidator.validate({ sessionID: sessionID, message: message });
+	});
+
+	connection.on('leave game', function(message) {
+		console.log("Received leave game message");
+		self.leaveGameValidator.validate({ sessionID: sessionID, message: message });
 	});
 
 	connection.on('user info', function(message) {

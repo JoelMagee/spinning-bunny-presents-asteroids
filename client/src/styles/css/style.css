@@ -6520,3 +6520,8 @@ hr.primary {
 .update-text:hover {
   color: #ff6e19;
 }
+#sound-button {
+  width: 35px;
+  display: inline-block;
+  text-align: center;
+}
