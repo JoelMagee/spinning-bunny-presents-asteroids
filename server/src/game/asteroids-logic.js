@@ -216,7 +216,9 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 					playerOne.addCollision(t);
 					playerTwo.addCollision(t);
 					playerOne.score+= POINTS_PER_KILL;
-					playerTwo.score+= POINTS_PER_KILL;
+					playerTwo.score+= POINTS_PER_KILL;  //TODO: Move scoring into player class
+					playerOne.destroyedPlayer(playerTwo);
+					playerTwo.destroyedPlayer(playerOne);
 				}
 			});
 		});		

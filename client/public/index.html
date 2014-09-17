@@ -6,8 +6,8 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 		<link href='http://fonts.googleapis.com/css?family=Roboto:400,500,300,700' rel='stylesheet' type='text/css'>
+		<link href="/assets/styles/font-awesome.min.css" rel="stylesheet">
 		<link href="/assets/styles/style.css" rel="stylesheet">
 		
 		<script src="scripts/require.config.js"></script>
@@ -18,7 +18,7 @@
 			<header class="header">
 				<div class="row">
 					<div class="col-xs-12">
-						<img src="/assets/images/asteroids.png" alt="">
+						<img src="/assets/images/logo.png" alt="">
 					</div>
 				</div>
 			</header>
@@ -84,7 +84,7 @@
 				<header class="header">
 					<div class="row">
 						<div class="col-xs-12">
-							<img src="/assets/images/asteroids.png" alt="">
+							<img src="/assets/images/logo.png" alt="">
 						</div>
 					</div>
 				</header>
@@ -93,10 +93,11 @@
 					<div class="col-xs-12">
 						<nav class="tabs">
 							<ul>
-								<li data-bind="click: function() { activateTab('lobbies'); }">Lobbies</li>
+								<li data-bind="click: function() { activateTab('lobbies'); refreshLobbies(); }">Lobbies</li>
 								<li data-bind="click: function() { activateTab('profile'); updateProfile(); }">Profile</li>
 								<li data-bind="click: function() { activateTab('scoreboard'); updateScoreboard(); }">Scoreboard</li>
 								<li data-bind="click: function() { activateTab('help'); }">Help</li>
+								<li class="pull-right" data-bind="click: function() { logout(); }">Logout</li>
 							</ul>
 						</nav>
 					</div>
@@ -219,7 +220,7 @@
 				<header class="header">
 					<div class="row">
 						<div class="col-xs-12">
-							<img src="/assets/images/asteroids.png" alt="">
+							<img src="/assets/images/logo.png" alt="">
 						</div>
 					</div>
 				</header>
