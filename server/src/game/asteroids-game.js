@@ -259,17 +259,11 @@ AsteroidsGame.prototype.getWinners = function() {
 		return playerTwo.score - playerOne.score;
 	});
 
-	console.log("Ordered players");
-	console.dir(orderedPlayers);
-
 	if (orderedPlayers.length === 0) {
 		return [];
 	};
 
 	var highest = orderedPlayers[0].score;
-
-	console.log("Highest");
-	console.dir(highest);
 
 	orderedPlayers.forEach(function(player) {
 		if (player.score === highest) {

@@ -25,6 +25,9 @@ var Player = function(username) {
 
 	this.score = 0;
 
+	this.shotThisTurn = false;
+	this.shotT = 0;
+
 
 	this.killedPlayers = [];
 };
@@ -114,7 +117,9 @@ Player.prototype.getTurnData = function() {
 		position: this.position,
 		prediction: this.prediction,
 		destination: this.destination,
-		score: this.score
+		score: this.score,
+		shotThisTurn: this.shotThisTurn,
+		shotT: this.shotT
 	}
 }
 
@@ -149,6 +154,16 @@ Player.prototype.destroyedPlayer = function(player) {
 
 Player.prototype.moveToSelf = function() {
 	this.setDestination(this.position.x, this.position.y);
+}
+
+Player.prototype.firedShot = function(t) {
+	this.shotT = t;
+	this.shotThisTurn = true;
+}
+
+Player.prototype.resetTurnData = function() {
+	this.shotThisTurn = false;
+	this.shotT = 0;
 }
 
 module.exports = function() {

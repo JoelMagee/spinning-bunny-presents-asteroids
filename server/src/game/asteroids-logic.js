@@ -117,6 +117,11 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 	var newBullets = [];
 	this.allBullets = this.bullets.slice();
 
+	//Reset turn data
+	this.players.forEach(function(player) {
+		player.resetTurnData();
+	})
+
 	//Check all players submitted turns
 	this.players.forEach(function(player) {
 		if (player.alive()) {
@@ -134,6 +139,8 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 							player: player,
 							direction: turnData[player.username]['shot']['direction']
 						});
+					player.firedAt(turnData[player.username]['shot']['t'])
+
 				}
 			}
 		}

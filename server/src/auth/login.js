@@ -67,7 +67,6 @@ var Login = function(sessionManager, User) {
 							});
 
 							logoutListener.subscribe('login:' + username);
-
 						} else{
 							response.data.success = false;
 							response.data.message = "Invalid password";
