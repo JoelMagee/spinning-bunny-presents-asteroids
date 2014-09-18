@@ -102,10 +102,7 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 			});
 
 			var winners = game.getWinners();
-
-			console.log("Winners");
-			console.dir(winners);
-
+			
 			//Update users stats
 			user.gamesFinished++;
 			user.totalScore += player.score;
