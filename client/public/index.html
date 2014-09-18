@@ -180,10 +180,10 @@
 											</tbody>
 										</table>
 										<hr>
-										<p class="pull-left nav-text" data-bind="click: function() { if (true) { scoreboardPage(scoreboardPage() - 1); updateScoreboard(); }}">
+										<p class="pull-left nav-text" data-bind="click: previousTab, css: { navenabled: (scoreboardPage() > 1) }">
 											Previous
 										</p>
-										<p class="pull-right nav-text" data-bind="click: function() { if (true) { scoreboardPage(scoreboardPage() + 1); updateScoreboard(); }}">
+										<p class="pull-right nav-text" data-bind="click: nextTab, css: { navenabled: (scoreboardPage() <= userCount()/25) }">
 											Next
 										</p>
 									</div>

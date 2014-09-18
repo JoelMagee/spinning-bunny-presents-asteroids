@@ -6520,6 +6520,13 @@ hr.primary {
 .update-text:hover {
   color: #ff6e19;
 }
+.nav-text {
+  cursor: pointer;
+  color: #777;
+}
+.navenabled {
+  color: #f05800;
+}
 #sound-button {
   width: 35px;
   display: inline-block;

@@ -181,6 +181,18 @@ define([
 		},
 		updateProfile: function() {
 			this.socket.emit('user info', { username: this.session.username })
+		},
+		previousTab: function() {
+			if (this.scoreboardPage() > 1) {
+				this.scoreboardPage(this.scoreboardPage() - 1);
+				this.updateScoreboard();
+			}
+		},
+		nextTab: function() {
+			if (this.scoreboardPage() <= this.userCount()/25) {
+				this.scoreboardPage(this.scoreboardPage() + 1);
+				this.updateScoreboard();
+			}
 		}
     };
 	
