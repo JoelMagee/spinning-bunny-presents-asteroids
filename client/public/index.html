@@ -139,7 +139,7 @@
 										<p>Number of games finished: <strong data-bind="text: profile.gamesFinished"></strong></p>
 										<hr>
 										<p>Number of games won: <strong data-bind="text: profile.gamesWon"></strong></p>
-										<p>Win Percent: <strong data-bind="text: profile.winPercent"></strong>%</p>
+										<p>Win Percent: <strong data-bind="text: profile.winPercent"></strong><span data-bind="if: (profile.winPercent() !== 'N/A')">%</span></p>
 										<hr>
 										<p>Total Kills: <strong data-bind="text: profile.totalKills"></strong></p>
 										<hr>
@@ -267,11 +267,13 @@
 			<div id="game-ui">
 				<p class="phase-title" data-bind="text: phaseTitle"></p>
 				<div class="game-buttons" id="game-left-buttons">
-					<button id="end-turn-button" class="btn btn-primary" data-bind="click: endTurn, disable: waiting">End Turn</button>
+					<button id="end-turn-button" class="btn btn-primary" data-bind="click: endTurn, disable: waiting">Submit Turn</button>
 					<button id="undo-button" class="btn btn-primary" data-bind="click: undo, disable: waiting">Undo</button>
+					<button id="sound-button" class="btn btn-default" data-bind="click: toggleMute"><span data-bind="ifnot: muted"><i class="fa fa-volume-up"></i></span><span data-bind="if: muted"><i class="fa fa-volume-off"></i></span></button>
+					<audio id="audio"></audio>
 				</div>
 				<div class="game-buttons" id="game-right-buttons">
-					<button id="end-game-button" class="btn btn-defautl" data-bind="click: endGame">Leave game</button>
+					<button id="end-game-button" class="btn btn-default" data-bind="click: endGame">Leave game</button>
 				</div>
 			</div>
 		</section>
