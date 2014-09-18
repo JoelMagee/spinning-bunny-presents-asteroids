@@ -24,7 +24,7 @@ var Logout = function(sessionManager) {
 			response.data.message = "Successfully logged out";
 			logoutPub.publish('output message:' + sessionID, JSON.stringify(response));
 
-			logoutPub.publish('internal:logout:' + sessionID, JSON.stringify({o:o}));
+			logoutPub.publish('internal:logout:' + sessionID, JSON.stringify({sessionID:sessionID}));
 		} catch (e) {
 			response.data.success = false;
 			response.data.message = "Unknown exception when trying to log out";

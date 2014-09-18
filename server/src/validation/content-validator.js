@@ -33,6 +33,9 @@ MessageValidator.prototype.hasProperty = function(property) {
 	}
 };
 
+MessageValidator.prototype.propertyMatches = function(property, reg) {
+
+};
 
 module.exports = function() {
 	return MessageValidator;

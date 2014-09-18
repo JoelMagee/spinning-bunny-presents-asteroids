@@ -23,6 +23,7 @@ var ContentValidator     = require('./src/validation/content-validator')();
 
 var SocketHandler        = require('./src/connection/sockethandler')(redis, MessageValidator, SessionValidator, ContentValidator);
 var GlobalChat           = require('./src/chat/globalchat')(redis);
+var ServerChat           = require('./src/chat/server-chat')(redis);
 var LobbyManager         = require('./src/lobby/lobby-manager')();
 var GameManager          = require('./src/game/game-manager')(redis);
 var LobbyTransferManager = require('./src/lobby/lobby-transfer-manager')();
@@ -62,6 +63,7 @@ var sessionManager = new SessionManager(SessionStorage);
 sessionManager.clearAll();
 var socketHandler = new SocketHandler(io, sessionManager);
 var globalChat = new GlobalChat(sessionManager);
+var serverChat = new ServerChat();
 
 var lobbyManager = new LobbyManager();
 var gameManager = new GameManager(models);
