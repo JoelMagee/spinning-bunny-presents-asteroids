@@ -25,7 +25,6 @@ define([
 			if (response.success) {
 				self.socket.emit('info lobby', {}); // request the lobbies while logging in
 				self.showError(false);
-				console.log("logged in as " + self.username() + " with password " + self.password());
 				self.session.username = self.username();
 				
 				self.username("");

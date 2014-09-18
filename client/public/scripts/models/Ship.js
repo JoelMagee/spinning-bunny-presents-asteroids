@@ -4,7 +4,7 @@ define([
 ], function(PIXI, Helper) {
     'use strict';
 
-    var Ship = function Ship(username) {
+    var Ship = function Ship(username, muted) {
 		
 		this.width = 200;
 		this.color = 0xF05800;
@@ -18,6 +18,9 @@ define([
 		this.ghostAlpha = 0.5;
 		this.rotation = 0;
 		
+		this.shotT = 0;
+		this.shotThisTurn = false;
+		
 		this.animateTurn = false;
 		
 		this.startPosition = {}; //Start position for each turn
@@ -30,6 +33,11 @@ define([
 		
 		this.timeElapsed = 0; //Time elapsed in ms in current replay
 		this.replayTime = 2000;
+		
+		this.sound = new Audio("../../assets/sounds/shot.wav");
+		this.muted = muted;
+		
+		this.startSound = this.shotT*this.replayTime;
 
     };
 	
@@ -96,6 +104,11 @@ define([
 			this.currentMove.x = x;
 			this.currentMove.y = y;
 		},
+		setShotData: function(shotT, shotThisTurn) {
+			this.shotT = shotT;
+			this.shotThisTurn = shotThisTurn;
+			this.startSound = this.shotT*this.replayTime;
+		},
 		addCollisions: function(collisionData) {
 			var self = this;
 			collisionData.forEach(function(collision) {
@@ -107,6 +120,9 @@ define([
 		},
 		getPositionOnArc: function(t) {
 			return Helper.getBezier(t, this.startPosition, this.previousPrediction, this.destination);
+		},
+		playSound: function() {
+			this.sound.play();
 		},
 		drawGhost: function(x, y) {
 			

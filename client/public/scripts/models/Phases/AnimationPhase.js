@@ -79,26 +79,24 @@ define([
 		
 		this.ships.forEach(function(ship) {
 			ship.update(timeDiff);
+			
+			if (self.elapsedTime >= ship.startSound && ship.shotThisTurn && !ship.muted()) {
+				ship.playSound();
+				ship.shotThisTurn = false;
+			}
 		});
 		
 		this.bullets.forEach(function(bullet) {
-			
 			bullet.update(timeDiff);
-		
-			// if (self.elapsedTime >= bullet.startSound && !bullet.turnStartPosition.hasOwnProperty('x')) {
-				// if(!bullet.muted()) {
-					// bullet.playSound();
-				// }
-			// }
 		});
 			
 		this.explosions.forEach(function(explosion) {
 			if (self.elapsedTime >= explosion.startAnimation) {
-				self.startedExplosions.push(explosion);
-				self.explosions.splice(self.explosions.indexOf(explosion), 1);
 				if (!explosion.muted()) {
 					explosion.playSound();
 				}
+				self.startedExplosions.push(explosion);
+				self.explosions.splice(self.explosions.indexOf(explosion), 1);
 			}
 		});
 		

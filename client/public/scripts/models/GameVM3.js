@@ -116,13 +116,15 @@ define([
 		// add the renderer view element to the DOM
 		$('#game-screen').append(renderer.view);
 
-		// simple resize listener - can be expanded upon
+		// screen resize listener
 		$(window).resize(resizeRenderer);
 		function resizeRenderer() {
 		
 			console.log("resizing");
 			
 			renderer.resize($(window).width(), $(window).height());
+			
+			self.resetView();
 
 		}
 		
@@ -213,14 +215,14 @@ define([
 			}
 			
 			for (var i in response.data.asteroids) {
-				var position = response.data.asteroids[i].position;
+				var pos = response.data.asteroids[i].position;
 				var radius = response.data.asteroids[i].radius;
-				var asteroid = new Asteroid(position, radius);
+				var asteroid = new Asteroid(pos, radius);
 				self.world.addChild(asteroid.graphics);
 				self.asteroids.push(asteroid);
 				
 			}
-			
+					
 			self.phaseManager.setCurrentPhase(self.movementPhase);
 			
 		});
@@ -257,6 +259,7 @@ define([
 				if (response.turnResult.players.hasOwnProperty(ship.username)) {
 					shipResult = response.turnResult.players[ship.username];
 					ship.setDestination(shipResult.destination, shipResult.prediction);
+					ship.setShotData(shipResult.shotT, shipResult.shotThisTurn);
 					
 					if (response.turnResult.players[ship.username].collisions.length > 0) {
 						ship.addCollisions(response.turnResult.players[ship.username].collisions);
@@ -282,7 +285,7 @@ define([
 			self.bullets.length = 0;
 			
 			for (var i in response.turnResult.bullets) {
-				var bullet = new Bullet(response.turnResult.bullets[i], self.muted);
+				var bullet = new Bullet(response.turnResult.bullets[i]);
 				self.bullets.push(bullet);
 				self.bulletGraphics.addChild(bullet.graphics);
 				
@@ -398,7 +401,7 @@ define([
 			}
 		},
 		createShip: function(username) {
-			var ship = new Ship(username);
+			var ship = new Ship(username, this.muted);
 			
 			this.world.addChild(ship.graphics);
 			this.world.addChild(ship.text);

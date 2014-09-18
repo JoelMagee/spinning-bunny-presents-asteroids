@@ -88,6 +88,7 @@ define([
 				var lobby = new Lobby(response.id, self.lobbyName(), 0);
 				self.lobbies.push(lobby);
 				self.lobbyName("");
+				self.joinLobby(lobby);
 			} else {
 				console.log("Creation of lobby failed - " + response.message);
 			}
@@ -158,7 +159,7 @@ define([
 		},
 		createLobby: function () {
 			if (this.lobbyName()) {
-				this.socket.emit("create lobby", { "name": this.lobbyName()});	
+				this.socket.emit("create lobby", { "name": this.lobbyName()});
 			}
 		},
 		joinLobby: function (lobby) {

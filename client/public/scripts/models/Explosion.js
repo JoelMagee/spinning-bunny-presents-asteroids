@@ -15,7 +15,7 @@ define([
 		this.startAnimation = collideT*this.animationTime;
 		this.elapsedTime = 0;
 		
-		this.sound = new Audio("../../assets/sounds/explosion2.wav");
+		this.sound = new Audio("../../assets/sounds/explosion3.mp3");
 		this.muted = muted;
 		
     };

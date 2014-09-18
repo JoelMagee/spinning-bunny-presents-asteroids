@@ -4,7 +4,7 @@ define([
 ], function ($, PIXI) {
     'use strict';
 
-    var Bullet = function Bullet(bullet, muted) {
+    var Bullet = function Bullet(bullet) {
 		
 		this.destroyed = bullet.destroyed;
 		this.destroyedAt = bullet.destroyedAt;
@@ -24,13 +24,8 @@ define([
 			this.position = this.turnStartPosition;
 		}
 		
-		this.sound = new Audio("../../assets/sounds/shot.wav");
-		this.muted = muted;
-		
 		this.timeElapsed = 0; // Time elapsed in ms in current replay
-		this.replayTime = 2000;		
-		
-		this.startSound = this.startT*this.replayTime;
+		this.replayTime = 2000;
     };
 	
     Bullet.prototype = {
@@ -76,9 +71,6 @@ define([
 			this.position.x += dx;
 			this.position.y += dy;
 			
-		},
-		playSound: function() {
-			this.sound.play();
 		},
 		getPositionOnLine: function() {
 			var position = {};
