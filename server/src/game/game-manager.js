@@ -176,10 +176,10 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 			leaveSub.unsubscribe('leave game:' + sessionID);
 			leaveSub.unsubscribe('logout:' + sessionID);
 			leaveSub.unsubscribe('disconnect:' + sessionID);
-			leaveSub.end();
+			leaveSub.quit();
 			
 			turnSub.unsubscribe('game turn:' + sessionID);
-			turnSub.end();
+			turnSub.quit();
 			
 			game.removeListener('start turn', startTurn);
 			game.removeListener('turn result', turnResultProcessed);
