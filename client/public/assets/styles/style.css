@@ -6502,5 +6502,10 @@ hr.primary {
   color: #777;
 }
 .navenabled {
-  color: #000;
+  color: #f05800;
+}
+#sound-button {
+  width: 35px;
+  display: inline-block;
+  text-align: center;
 }

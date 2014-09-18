@@ -7,7 +7,9 @@ var Login = function(sessionManager, User) {
 	this.User = User;
 
 	var loginSub = redis.createClient();
-	var loginPub = redis.createClient();
+	var loginSessionPub = redis.createClient();
+	var loginUsernamePub = redis.createClient();
+	var logoutPub = redis.createClient();
 
 	loginSub.on('pmessage', function(channelPattern, actualChannel, message) {
 
@@ -27,34 +29,49 @@ var Login = function(sessionManager, User) {
 				if (err) {
 					response.data.message = "Error when attempting to log in";
 					response.data.success = false;
-					loginPub.publish('output message:' + sessionID, JSON.stringify(response));
+					loginSessionPub.publish('output message:' + sessionID, JSON.stringify(response));
 				} else if (users.length === 0) {
 					response.data.message = "Invalid username";
 					response.data.success = false;
-					loginPub.publish('output message:' + sessionID, JSON.stringify(response));
+					loginSessionPub.publish('output message:' + sessionID, JSON.stringify(response));
 				} else {
 					//Assume we only got 1 user as username is unique
 					users[0].comparePassword(password, function(err, match) {
 						if (err) {
 							response.data.success = false;
 							response.data.message = "Error validating password";
-							loginPub.publish('output message:' + sessionID, JSON.stringify(response));
+							loginSessionPub.publish('output message:' + sessionID, JSON.stringify(response));
 						} else if (match) {
 							sessionManager.login(sessionID, username);
 							response.data.success = true;
 							response.data.message = "Successfully logged in";
-							loginPub.publish('output message:' + sessionID, JSON.stringify(response));
+
+							loginSessionPub.publish('output message:' + sessionID, JSON.stringify(response));
 
 							var newMessageObj = {};
 							newMessageObj.message = {};
 							newMessageObj.message.content = username + " has just logged in";
 							newMessageObj.message.username = "Server";
-							loginPub.publish('output message', JSON.stringify({sessionID: sessionID, channel: "global message", data:newMessageObj }));
+							loginSessionPub.publish('output message', JSON.stringify({sessionID: sessionID, channel: "global message", data:newMessageObj }));
+
+							// Horrible horrible code from here out
+
+							loginUsernamePub.publish('login:' + username, "{'o':'o'}");
+
+							var logoutListener = redis.createClient();
+
+							logoutListener.on('message', function() {
+								logoutPub.publish('logout:' + sessionID, JSON.stringify({'sessionID': sessionID}));
+								logoutListener.unsubscribe('login:' + username);
+								logoutListener.quit();
+							});
+
+							logoutListener.subscribe('login:' + username);
 
 						} else{
 							response.data.success = false;
 							response.data.message = "Invalid password";
-							loginPub.publish('output message:' + sessionID, JSON.stringify(response));
+							loginSessionPub.publish('output message:' + sessionID, JSON.stringify(response));
 						}
 					});
 				}
@@ -62,7 +79,7 @@ var Login = function(sessionManager, User) {
 		} catch (e) {
 			response.data.success = false;
 			response.data.message = "Unknown exception when attempting to log in";
-			loginPub.publish('output message:' + sessionID, JSON.stringify(response));
+			loginSessionPub.publish('output message:' + sessionID, JSON.stringify(response));
 		}
 
 	});

@@ -55,6 +55,10 @@ SessionManager.prototype.get = function(sessionID, cb) {
 	this.sessionStorage.get(sessionID, cb);
 };
 
+SessionManager.prototype.clearAll = function() {
+	this.sessionStorage.clearAll();
+}
+
 module.exports = function() {
 	return SessionManager;
 };

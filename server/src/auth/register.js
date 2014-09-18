@@ -28,7 +28,7 @@ var Register = function(_User) {
 			user.save(function(err) {
 				if (err) {
 					response.data.success = false;
-					response.data.message = "Error registering user: " + err;
+					response.data.message = "Error registering user, this username may have already been taken";
 				} else {
 					response.data.success = true;
 					response.data.message = "Successfully registered user";
