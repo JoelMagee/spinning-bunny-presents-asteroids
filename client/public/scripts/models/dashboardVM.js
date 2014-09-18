@@ -55,7 +55,8 @@ define([
 			gamesWon: ko.observable(0),
 			gamesStarted: ko.observable(0),
 			gamesFinished: ko.observable(0),
-			highestScore: ko.observable(0)
+			highestScore: ko.observable(0),
+			winPercent: ko.observable("N/A")
 		}
 
 		this.socket.on('logout', function(response) {
@@ -117,6 +118,13 @@ define([
 				//Scoreboard request
 				self.scoreboardInformation(response.users);
 			} else if (response.success && response.user) {
+
+				var winRatio = "N/A";
+
+				if ((response.user.gamesWon > 0) && (response.user.gamesStarted > 0)) {
+					winPercent = (response.user.gamesWon/response.user.gamesStarted).toFixed(4) * 100;
+				}
+
 				//We're going to assume this is a profile user request
 				self.profile.username(response.user.username);
 				self.profile.totalKills(response.user.totalKills);
@@ -126,6 +134,7 @@ define([
 				self.profile.gamesStarted(response.user.gamesStarted);
 				self.profile.gamesFinished(response.user.gamesFinished);
 				self.profile.highestScore(response.user.highestScore);
+				self.profile.winPercent(winPercent)
 			} else {
 				//Error loading user info
 				console.error(response.message);

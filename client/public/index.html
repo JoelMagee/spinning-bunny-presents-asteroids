@@ -139,7 +139,7 @@
 										<p>Number of games finished: <strong data-bind="text: profile.gamesFinished"></strong></p>
 										<hr>
 										<p>Number of games won: <strong data-bind="text: profile.gamesWon"></strong></p>
-										<p>Start/Win ratio: <strong data-bind="text: (profile.gamesWon/profile.gamesFinished)"></strong></p>
+										<p>Win Percent: <strong data-bind="text: profile.winPercent"></strong>%</p>
 										<hr>
 										<p>Total Kills: <strong data-bind="text: profile.totalKills"></strong></p>
 										<hr>
@@ -180,10 +180,10 @@
 											</tbody>
 										</table>
 										<hr>
-										<p class="pull-left nav-text" data-bind="click: function() { if (scoreboardPage() > 1) { scoreboardPage(scoreboardPage() - 1); updateScoreboard(); }, css: { nav-enabled: (scoreboardPage() > 1) { scoreboardPage(scoreboardPage() - 1) }">
+										<p class="pull-left nav-text" data-bind="click: function() { if (true) { scoreboardPage(scoreboardPage() - 1); updateScoreboard(); }}">
 											Previous
 										</p>
-										<p class="pull-right nav-text" data-bind="click: function() { if (scoreboardPage() <= userCount()/25) { scoreboardPage(scoreboardPage() + 1); updateScoreboard(); }, css: { nav-enabled: (scoreboardPage() <= userCount()/25) }">
+										<p class="pull-right nav-text" data-bind="click: function() { if (true) { scoreboardPage(scoreboardPage() + 1); updateScoreboard(); }}">
 											Next
 										</p>
 									</div>
