@@ -34,6 +34,8 @@ var UserInfo = function(_User) {
 				var pg = request.message.page || 1;
 				var sort = request.message.sort || { username: 'asc' };
 
+				console.log("User info requested with lim: " + lim + ", pg: " + pg);
+				console.dir(request.message);
 				User.find({}).limit(lim)
 					.skip((pg - 1) * lim)
 					.sort(sort)

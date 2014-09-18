@@ -176,7 +176,8 @@ define([
 			this.activeTabName(tabName);
 		},
 		updateScoreboard: function() {
-			this.socket.emit('user info', { limit: USERS_PER_SCOREBOARD_PAGE, offset: (this.scoreboardPage - 1) * USERS_PER_SCOREBOARD_PAGE });
+			console.log("Loading page: " + this.scoreboardPage())
+			this.socket.emit('user info', { limit: USERS_PER_SCOREBOARD_PAGE, page: this.scoreboardPage() });
 			this.socket.emit('user count', {});
 		},
 		updateProfile: function() {
