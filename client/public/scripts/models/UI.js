@@ -72,7 +72,7 @@ define([
 			this.movementLine.moveTo(this.clientShip.position.x, this.clientShip.position.y);
 			this.movementLine.quadraticCurveTo(this.clientShip.prediction.x, this.clientShip.prediction.y, this.movementPosition.x, this.movementPosition.y);
 			
-			this.movementLine.drawCircle(this.clientShip.prediction.x, this.clientShip.prediction.y, 1/this.world.scale.x);
+			// this.movementLine.drawCircle(this.clientShip.prediction.x, this.clientShip.prediction.y, 1/this.world.scale.x);
 		},
 		drawFirePoint: function () {
 			Helper.bezierHelper.setBezier(this.clientShip.position.x, this.clientShip.position.y, this.clientShip.prediction.x, this.clientShip.prediction.y, this.clientShip.currentMove.x, this.clientShip.currentMove.y);

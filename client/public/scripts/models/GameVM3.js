@@ -39,6 +39,8 @@ define([
 		this.socket = socket;
 		this.session = session;
 		
+		this.scores = {};
+		
 		this.muted = ko.observable(false);
 		
 		this.world = new PIXI.DisplayObjectContainer();
@@ -105,7 +107,7 @@ define([
 		this.waitingPhase = new WaitingPhase(this.UI, stage, mouse, this.ships, this.phaseTitle);
 		this.animationPhase = new AnimationPhase(this.UI, this.ships, this.bullets, this.explosions, stage, mouse, this.phaseTitle);
 		this.deadPhase = new DeadPhase(this.UI, stage, mouse, this.ships, this.phaseTitle);
-		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.bullets, this.asteroids, this.explosions, this.socket);
+		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.bullets, this.asteroids, this.explosions, this.socket, this.scores);
 
 		this.phaseManager = new PhaseManager();
 
@@ -296,12 +298,23 @@ define([
 			
 		});
 		
+		this.socket.on('leave game', function(response) {
+						
+			if (response.success) {
+				self.phaseManager.setCurrentPhase(self.gameEndPhase);
+			} else { 
+				alert('Failed to leave');
+			}
+		
+		});
+		
 		this.socket.on('game end', function(response) {
 		
 			self.animationPhase.off('animation finished', setMovementPhase);
 			self.animationPhase.off('animation finished', setDeadPhase);
 			self.animationPhase.once('animation finished', function() {
 				console.log(response);
+				self.scores.result = response.scores;
 				self.phaseManager.setCurrentPhase(self.gameEndPhase);
 				self.waiting(false);
 				self.started = false;
@@ -314,7 +327,7 @@ define([
     GameVM3.prototype = {
 		endGame: function() {
 			
-			alert('work in progress');
+			this.socket.emit('leave game');
 			
 		},
 		endTurn: function() {

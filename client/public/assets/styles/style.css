@@ -6497,3 +6497,10 @@ hr.primary {
 .update-text:hover {
   color: #ff6e19;
 }
+.nav-text {
+  cursor: pointer;
+  color: #777;
+}
+.navenabled {
+  color: #000;
+}
