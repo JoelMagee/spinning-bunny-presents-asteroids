@@ -81,7 +81,8 @@ SessionStorage.prototype.setProperty = function(id, property, value) {
 };
 
 SessionStorage.prototype.clear = function(id) {
-	this.store.hmset("session_" + id, { __d : "d" });
+	this.store.del("session_" + id);
+	this.store.hmset("session_" + id, { __d: 'd' });
 	this.setExpire(id);
 };
 

@@ -33,8 +33,17 @@ MessageValidator.prototype.hasProperty = function(property) {
 	}
 };
 
-MessageValidator.prototype.propertyMatches = function(property, reg) {
+MessageValidator.prototype.propertyMatches = function(property, reg, errorMessage) {
+	var re = new RegExp(reg);
 
+	return function(request, next) {
+		if (re.test(request.message[property])) {
+			return next(null, true);
+		} else {
+			request.failMessage = errorMessage;
+			next(null, false);
+		}	
+	}
 };
 
 module.exports = function() {

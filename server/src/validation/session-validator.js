@@ -5,13 +5,23 @@ var SessionValidator = function(sessionManager) {
 };
 
 SessionValidator.prototype.hasSession = function() {
+	var self = this;
 	return function(request, next) {
 		if (typeof request.sessionID === "undefined") {
 			request.failMessage = "No session";
 			return next(null, false);
-		}
+		} else  {
+			self.sessionManager.exists(request.sessionID, function(err, exists) {
+			if (err) { return next(err); }
 
-		next(null, true);
+			if (!exists) {
+				request.failMessage = "No session"
+				return next(null, false);
+			}
+
+			next(null, true);
+		});
+		}
 	};
 };
 

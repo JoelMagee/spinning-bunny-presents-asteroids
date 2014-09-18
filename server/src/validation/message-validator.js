@@ -47,7 +47,7 @@ MessageValidator.prototype.prepare = function() {
 
 	var onSuccess = function(request) {
 		self.emit('success', request);
-	}
+	};
 
 	var onFail = function(request) {
 		self.emit('fail', request);

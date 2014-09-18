@@ -98,10 +98,18 @@ SocketHandler.prototype.setUpValidators = function() {
 	this.registrationValidator = new MessageValidator();
 
 	this.registrationValidator
-		.requirement(self.sessionValidator.hasSession());
+		.requirement(self.sessionValidator.hasSession())
+		.requirement(self.contentValidator.hasProperty('username'))
+		.requirement(self.contentValidator.hasProperty('password'))
+		.requirement(self.contentValidator.propertyMatches('username', '^[a-z0-9_-]{3,16}$', 'Username is invalid, requirements are 3-16 characters, a-z, 0-9 _ and -'))
+		.requirement(self.contentValidator.propertyMatches('password', '^.{6,}$', 'Password is invalid, requires at least 6 characters'));
 
 	this.registrationValidator.on('success', function(request) {
 		self.inputPublisher.publish('register:' + request.sessionID, JSON.stringify(request));
+	});
+
+	this.registrationValidator.on('fail', function(request) {
+		queueFailResponse(request, 'register', request.failMessage);
 	});
 
 	/*
@@ -112,12 +120,16 @@ SocketHandler.prototype.setUpValidators = function() {
 	this.createLobbyValidator
 		.requirement(self.sessionValidator.hasSession())
 		.requirement(self.sessionValidator.hasProperty('username'))
-		.requirement(self.contentValidator.hasProperty('name'));
+		.requirement(self.contentValidator.hasProperty('name'))
+		.requirement(self.contentValidator.propertyMatches('name', '^[a-z0-9_-]{3,160}$', 'Name is invalid, requirements are 3-160 characters, a-z, 0-9 _ and -'))
 
 	this.createLobbyValidator.on('success', function(request) {
 		self.inputPublisher.publish('create lobby:' + request.sessionID, JSON.stringify(request));
 	});
 
+	this.createLobbyValidator.on('fail', function(request) {
+		queueFailResponse(request, 'create lobby', request.failMessage);
+	});
 
 	/*
 	 * Join Lobby
@@ -268,44 +280,27 @@ SocketHandler.prototype.clientConnected = function(connection) {
 	var outputSubscriber = redis.createClient();
 
 	connection.on('session', function(data) {
-
+		console.log("Session request");
 		if (sessionID !== undefined) {
-			//Client requesting a new session but they already have one, don't allow it
-			//TODO: Error message to client
-			
+			//Client requesting a new session but they already have one
 			return;
 		}
 
-		if (data.sessionID) {
-			console.log("Client requesting old session");
-			//reconnect to old session
-			sessionID = data.sessionID;
-		} else {
-			console.log("Client requesting new session");
-			//Create new session ID
-			sessionID = self.sessionManager.create();
-			console.log("Created new session for client with ID: " + sessionID);
-		}
+		//Create new session ID
+		sessionID = self.sessionManager.create();
+		console.log("Created new session for client with ID: " + sessionID);
 
-		//Creation of socketClient also sends session message to client,
-		//should probably move that out of constructor
-		var socketClient = new SocketClient(sessionID, connection);
+		connection.emit('session', { sessionID: sessionID, success: true });
 
-		outputSubscriber.psubscribe('output message:' + sessionID);
-		outputSubscriber.subscribe('output message');
-
-		outputSubscriber.on('pmessage', function(channelPattern, actualChannel, message) {
-			data = JSON.parse(message);
-			connection.emit(data.channel, data.data);
-		});
-
-		outputSubscriber.on('message', function(actualChannel, message) {
-			data = JSON.parse(message);
-			connection.emit(data.channel, data.data);
-		});
+		outputSubscriber.subscribe('output message:' + sessionID);
 	});
-	
 
+	outputSubscriber.subscribe('output message');
+
+	outputSubscriber.on('message', function(channelPattern, message) {
+		data = JSON.parse(message);
+		connection.emit(data.channel, data.data);
+	});
 
 	connection.on('disconnect', function() {
 		if (typeof sessionID === "undefined") {
@@ -387,14 +382,6 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		console.log("Recieved user count message");
 		self.userCountValidator.validate({ sessionID: sessionID, message: message });
 	});
-};
-
-var SocketClient = function(sessionID, connection) {
-	this.sessionID = sessionID;
-	this.connection = connection;
-
-	//Send the client it's session ID so it can be saved
-	connection.emit('session', { sessionID: sessionID, success: true });
 };
 
 module.exports = function(_redis, _MessageValidator, _SessionValidator, _ContentValidator) {

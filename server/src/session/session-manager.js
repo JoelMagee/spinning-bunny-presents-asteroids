@@ -27,6 +27,10 @@ SessionManager.prototype.create = function() {
 	return sessionID;
 };
 
+SessionManager.prototype.exists = function(sessionID, cb) {
+	this.sessionStorage.exists(sessionID, cb);
+}
+
 SessionManager.prototype.login = function(sessionID, username) {
 	this.sessionStorage.setProperty(sessionID, 'username', username);
 };

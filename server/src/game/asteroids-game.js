@@ -10,7 +10,7 @@ var AsteroidsLogic;
 
 var defaultOptions = {
 	world: {},
-	turnLimit: 100
+	turnLimit: 0
 }
 
 
@@ -155,6 +155,7 @@ AsteroidsGame.prototype.startTurn = function() {
  * @return {Boolean} Whether end game conditions are met
  */
 AsteroidsGame.prototype.checkFinishConditions = function() {
+	console.log("Checking finish coniditions");
 	//Make sure more than one player is present
 	if (this.players.length < 2) {
 		this.gameEnd("Less than 2 players connected");
@@ -168,11 +169,12 @@ AsteroidsGame.prototype.checkFinishConditions = function() {
 
 	var playerAliveCount = 0;
 
-	for (var i = 0; i < this.players.length; i++) {
-		if (this.players[i].alive()) {
+	this.players.forEach(function(player) {
+		if (player.alive()) {
+			console.log("player alive: " + player.username);
 			playerAliveCount++;
 		}
-	}
+	});
 
 	if (playerAliveCount < 2) {
 		this.gameEnd("Less than 2 players alive");
@@ -243,6 +245,7 @@ AsteroidsGame.prototype.getStartData = function() {
 };
 
 AsteroidsGame.prototype.gameEnd = function(reason) {
+	console.log("Ending game");
 	this.emit('game end', reason);
 };
 
@@ -270,9 +273,6 @@ AsteroidsGame.prototype.getWinners = function() {
 			winners.push(player);
 		}
 	});
-
-	console.log("Winners:");
-	console.dir(winners);
 
 	return winners;
 }
