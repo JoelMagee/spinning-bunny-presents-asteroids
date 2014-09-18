@@ -139,7 +139,7 @@
 										<p>Number of games finished: <strong data-bind="text: profile.gamesFinished"></strong></p>
 										<hr>
 										<p>Number of games won: <strong data-bind="text: profile.gamesWon"></strong></p>
-										<p>Win Percent: <strong data-bind="text: profile.winPercent"></strong>%</p>
+										<p>Win Percent: <strong data-bind="text: profile.winPercent"></strong><span data-bind="if: (profile.winPercent() !== 'N/A')">%</span></p>
 										<hr>
 										<p>Total Kills: <strong data-bind="text: profile.totalKills"></strong></p>
 										<hr>
