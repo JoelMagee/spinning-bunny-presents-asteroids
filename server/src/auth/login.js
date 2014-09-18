@@ -45,28 +45,44 @@ var Login = function(sessionManager, User) {
 							sessionManager.login(sessionID, username);
 							response.data.success = true;
 							response.data.message = "Successfully logged in";
-
 							loginSessionPub.publish('output message:' + sessionID, JSON.stringify(response));
 
-							var newMessageObj = {};
-							newMessageObj.message = {};
-							newMessageObj.message.content = username + " has just logged in";
-							newMessageObj.message.username = "Server";
-							loginSessionPub.publish('output message', JSON.stringify({sessionID: sessionID, channel: "global message", data:newMessageObj }));
+							loginUsernamePub.publish('internal:login:username:' + username, JSON.stringify({ sessionID: sessionID, username: username }));
 
 							// Horrible horrible code from here out
-
-							loginUsernamePub.publish('login:' + username, "{'o':'o'}");
-
 							var logoutListener = redis.createClient();
 
-							logoutListener.on('message', function() {
-								logoutPub.publish('logout:' + sessionID, JSON.stringify({'sessionID': sessionID}));
-								logoutListener.unsubscribe('login:' + username);
-								logoutListener.quit();
+							logoutListener.on('message', function(channelPattern, message) {
+								console.log("Logout listener triggered");
+
+								var messageObj = JSON.parse(message);
+
+								if (messageObj.sessionID !== sessionID) {
+									logoutPub.publish('logout:' + sessionID, JSON.stringify({ sessionID: sessionID }));
+									removeListeners();
+								}
 							});
 
-							logoutListener.subscribe('login:' + username);
+							logoutListener.subscribe('internal:login:username:' + username);
+
+							var disconnectListener = redis.createClient();
+
+							disconnectListener.on('message', function() {
+								logoutPub.publish('internal:logout:username:' + sessionID, JSON.stringify({ sessionID: sessionID, username: username }));
+								removeListeners();
+							});
+
+							disconnectListener.subscribe('disconnect:' + sessionID);
+							disconnectListener.subscribe('internal:logout:' + sessionID);
+
+							var removeListeners = function() {
+								console.log("Logout listener quit");
+								disconnectListener.unsubscribe('disconnect:' + sessionID);
+								disconnectListener.unsubscribe('internal:logout:' + sessionID);
+								disconnectListener.quit();
+								logoutListener.unsubscribe('login:' + username);
+								logoutListener.quit();
+							}
 						} else{
 							response.data.success = false;
 							response.data.message = "Invalid password";
@@ -76,8 +92,10 @@ var Login = function(sessionManager, User) {
 				}
 			});
 		} catch (e) {
+			console.log("Login error");
+			throw e;
 			response.data.success = false;
-			response.data.message = "Unknown exception when attempting to log in";
+			response.data.message = "Unknown exception when attempting to log in: " + e.message;
 			loginSessionPub.publish('output message:' + sessionID, JSON.stringify(response));
 		}
 

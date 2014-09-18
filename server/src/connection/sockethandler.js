@@ -38,18 +38,6 @@ SocketHandler.prototype.setUpValidators = function() {
 	this.sessionValidator = new SessionValidator(this.sessionManager);
 	this.contentValidator = new ContentValidator();
 
-	
-	/*
-	 * Local chat
-	 */
-	this.chatValidator = new MessageValidator();
-
-	this.chatValidator.requirement(self.sessionValidator.hasSession());
-
-	this.chatValidator.on('success', function(request) {
-		self.inputPublisher.publish('chat message:' + request.sessionID, JSON.stringify(request));
-	});
-
 
 	/*
 	 * Global chat
@@ -328,12 +316,6 @@ SocketHandler.prototype.clientConnected = function(connection) {
 		outputSubscriber.unsubscribe('output message');
 
 		self.inputPublisher.publish('disconnect:' + sessionID, JSON.stringify({ sessionID: sessionID }));
-	});
-
-
-	connection.on('chat message', function(message) {
-		console.log("Received chat message");
-		self.chatValidator.validate({ sessionID: sessionID, message: message });
 	});
 
 	connection.on('global message', function(message) {
