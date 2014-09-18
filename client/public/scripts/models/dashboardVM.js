@@ -119,7 +119,7 @@ define([
 				self.scoreboardInformation(response.users);
 			} else if (response.success && response.user) {
 
-				var winRatio = "N/A";
+				var winPercent = "N/A";
 
 				if ((response.user.gamesWon > 0) && (response.user.gamesStarted > 0)) {
 					winPercent = (response.user.gamesWon/response.user.gamesStarted).toFixed(4) * 100;
