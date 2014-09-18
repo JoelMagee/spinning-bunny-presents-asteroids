@@ -139,7 +139,7 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 							player: player,
 							direction: turnData[player.username]['shot']['direction']
 						});
-					player.firedAt(turnData[player.username]['shot']['t'])
+					player.firedShot(turnData[player.username]['shot']['t'])
 
 				}
 			}
