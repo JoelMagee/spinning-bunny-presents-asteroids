@@ -51,18 +51,7 @@ define([
 		this.world.pannedAmountY = 0;
 		this.world.scaledAmount = 1;
 		
-		// these lines zoom out to show the full map
-		this.world.scale.x /= 16;
-		this.world.scale.y /= 16;
-		this.world.scaledAmount /= 16;
-		
-		// these lines centre the map
-		// $(window).width()/2: moves the x point to the middle of the window
-		// -10000/32: offsets it by the size of the playable world with the zoom factor applied and halved
-		this.world.x += $(window).width()/2-10000/32;
-		this.world.pannedAmountX += $(window).width()/2-10000/32;
-		this.world.y += $(window).height()/2-10000/32;
-		this.world.pannedAmountY += $(window).height()/2-10000/32;
+		this.resetView();
 
 		this.started = false;
 		this.waiting = ko.observable(false);
@@ -90,6 +79,8 @@ define([
 		};
 		
 		var mouse = createMouse(this.world, stage);
+		
+		this.target = undefined;
 		
 		var border = new PIXI.Graphics();
 		this.world.addChildAt(border, 0);
@@ -137,6 +128,7 @@ define([
 		
 		// mousewheel event handler for zooming in and out
 		$('#game-screen').on('mousewheel', function(e) {
+			self.target = e.target;
 			if(e.originalEvent.wheelDelta < 0) {
 				//scroll down
 				self._zoomOut(e.clientX, e.clientY);
@@ -146,6 +138,13 @@ define([
 			}
 			//prevent page from scrolling
 			return false;
+		});
+		
+		//spacebar event handler for resetting view
+		$(window).keydown(function(e) {
+			if (this.started && e.keyCode === 0 || e.keyCode === 32) {
+				self.resetView();
+			}
 		});
 
 		requestAnimFrame( animate );
@@ -415,6 +414,30 @@ define([
 		},
 		toggleMute: function() {
 			this.muted(!this.muted());
+		},
+		resetView: function() {
+		
+			this.world.pannedAmountX = 0;
+			this.world.pannedAmountY = 0;
+			this.world.scaledAmount = 1;
+			
+			this.world.scale.x = 1;
+			this.world.scale.y = 1;
+			this.world.x = 0;
+			this.world.y = 0;
+		
+			// these lines zoom out to show the full map
+			this.world.scale.x /= 16;
+			this.world.scale.y /= 16;
+			this.world.scaledAmount /= 16;
+			
+			// these lines centre the map
+			// $(window).width()/2: moves the x point to the middle of the window
+			// -10000/32: offsets it by the size of the playable world with the zoom factor applied and halved
+			this.world.x += $(window).width()/2-10000/32;
+			this.world.pannedAmountX += $(window).width()/2-10000/32;
+			this.world.y += $(window).height()/2-10000/32;
+			this.world.pannedAmountY += $(window).height()/2-10000/32;
 		}
     };
 	
