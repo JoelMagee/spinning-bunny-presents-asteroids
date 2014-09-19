@@ -109,7 +109,7 @@
 								<div class="panel panel-primary">
 									<div class="panel-heading">Open Lobbies
 										<span class="update-text" data-bind="click: refreshLobbies">Update list</span>
-										<input class="pull-right" placeholder="Lobby Name" data-bind="executeOnEnter: createLobby, value: lobbyName, valueUpdate: 'keydown'">
+										<input id="lobby-name-input" class="pull-right" placeholder="Lobby Name" data-bind="executeOnEnter: createLobby, value: lobbyName, valueUpdate: 'keydown'" data-toggle="tooltip" data-placement="top" title="">
 										<button class="btn btn-link lobby-link pull-right" data-bind="click: createLobby"><i class="fa fa-plus"></i></button>
 									</div>
 									<div class="panel-body lobby-panel">
@@ -160,14 +160,16 @@
 									</div>
 									<div class="panel-body">
 										<table class="table table-striped">
-											<tr>
-												<th>Username</th>
-												<th>Total Score</th>
-												<th>Highest Score</th>
-												<th>Games Started</th>
-												<th>Games Finished</th>
-												<th>Games Won</th>
-											</tr>
+											<thead>
+												<tr>
+													<th>Username</th>
+													<th>Total Score</th>
+													<th>Highest Score</th>
+													<th>Games Started</th>
+													<th>Games Finished</th>
+													<th>Games Won</th>
+												</tr>
+											</thead>
 											<tbody data-bind="foreach: scoreboardInformation">
 												<tr>
 													<td data-bind="text: username"></td>
@@ -263,7 +265,7 @@
 				</div>
 			</div>
 		</section>
-		<section id="game-screen" class="screen" tabindex="1" oncontextmenu="return false;">
+		<section id="game-screen" class="screen" oncontextmenu="return false;">
 			<div id="game-ui">
 				<p class="phase-title" data-bind="text: phaseTitle"></p>
 				<div class="game-buttons" id="game-left-buttons">
@@ -274,6 +276,37 @@
 				</div>
 				<div class="game-buttons" id="game-right-buttons">
 					<button id="end-game-button" class="btn btn-default" data-bind="click: endGame">Leave game</button>
+				</div>
+				<div class="modal fade" id="end-game-modal" tabindex="-1" role="dialog" aria-labelledby="end-game-modal-title" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+								<h4 class="modal-title" id="end-game-modal-title">Results</h4>
+							</div>
+							<div class="modal-body">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th>Username</th>
+											<th>Score</th>
+											<th>Kills</th>
+										</tr>
+									</thead>
+									<tbody data-bind="foreach: results">
+										<tr>
+											<td data-bind="text: username"></td>
+											<td data-bind="text: score"></td>
+											<td data-bind="text: kills"></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</section>

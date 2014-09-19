@@ -3,7 +3,8 @@ define([
     'knockout',
     'jquery',
 	'models/Lobby',
-	'moment'
+	'moment',
+	'bootstrap'
 ], function (LobbyVM, ko, $, Lobby, moment) {
 
 	var USERS_PER_SCOREBOARD_PAGE = 25;
@@ -68,6 +69,8 @@ define([
 
 		this.socket.on('info lobby', function(response) {
 			if (response.success) {
+				$('#lobby-name-input').removeClass('invalid-input');
+				$('#lobby-name-input').tooltip('destroy');
 				if (response.lobbyData instanceof Array) {
 					//Empty the list
 					self.lobbies.removeAll();
@@ -89,8 +92,15 @@ define([
 				self.lobbies.push(lobby);
 				self.lobbyName("");
 				self.joinLobby(lobby);
+				$('#lobby-name-input').removeClass('invalid-input');
+				$('#lobby-name-input').tooltip('destroy');
 			} else {
 				console.log("Creation of lobby failed - " + response.message);
+				$('#lobby-name-input').addClass('invalid-input');
+				$('#lobby-name-input').tooltip({
+					title: response.message
+				});
+				$('#lobby-name-input').tooltip('show');
 			}
 		});
 

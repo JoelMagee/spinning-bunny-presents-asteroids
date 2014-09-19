@@ -39,6 +39,7 @@ define([
 		});
 		
 		this.socket.on('register', function(response) {
+			console.log(response);
 			if (response.success) {
 				self.showError(false);
 				console.log("registered as " + self.usernameModal() + " with password " + self.passwordModal());

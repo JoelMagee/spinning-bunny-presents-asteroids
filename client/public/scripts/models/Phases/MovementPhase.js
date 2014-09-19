@@ -52,7 +52,6 @@ define([
 	};
 	
 	MovementPhase.prototype.draw = function () {
-		// console.log("Movement phase is drawing");
 		if (this.mouse.x() >= 0 && this.mouse.x() <= 10000 && this.mouse.y() >= 0 && this.mouse.y() <= 10000) {
 		
 			this.ui.clearMovementLine();
@@ -71,8 +70,7 @@ define([
 		});
 	};
 	
-	MovementPhase.prototype.update = function (t) {
-		// console.log("Movement phase is updating");
+	MovementPhase.prototype.update = function () {
 		this.ui.movementPosition.x = this.mouse.x();
 		this.ui.movementPosition.y = this.mouse.y();
 	};

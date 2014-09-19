@@ -90,7 +90,7 @@ canvas {
 }
 
 .form-control:focus {
-  border-color: @primary-color;
+  border-color: @primary-offset-1;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(red(@primary-color), green(@primary-color), blue(@primary-color), 0.6);
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(red(@primary-color), green(@primary-color), blue(@primary-color), 0.6);
 }
@@ -136,6 +136,10 @@ hr {
   top: 0;
   background-color: rgba(0,0,0, 0.6);
   text-align: center;
+  
+  td {
+	text-align: left;
+  }
 
   .btn {
     padding: 5px 10px;
@@ -321,5 +325,8 @@ hr {
   width: 35px;
   display: inline-block;
   text-align: center;
+}
 
+.invalid-input {
+	outline: red auto 5px;
 }

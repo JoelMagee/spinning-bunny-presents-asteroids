@@ -39,7 +39,9 @@ define([
 		this.socket = socket;
 		this.session = session;
 		
-		this.scores = {};
+		this.doneScores = ko.observable(false);
+		
+		this.results = ko.observableArray();
 		
 		this.muted = ko.observable(false);
 		
@@ -98,7 +100,7 @@ define([
 		this.waitingPhase = new WaitingPhase(this.UI, stage, mouse, this.ships, this.phaseTitle);
 		this.animationPhase = new AnimationPhase(this.UI, this.ships, this.bullets, this.explosions, stage, mouse, this.phaseTitle);
 		this.deadPhase = new DeadPhase(this.UI, stage, mouse, this.ships, this.phaseTitle);
-		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.bullets, this.asteroids, this.explosions, this.socket, this.scores);
+		this.gameEndPhase = new GameEndPhase(this.world, this.ships, this.bullets, this.asteroids, this.explosions, this.socket, this.doneScores);
 
 		this.phaseManager = new PhaseManager();
 
@@ -316,12 +318,24 @@ define([
 			self.animationPhase.off('animation finished', setDeadPhase);
 			self.animationPhase.once('animation finished', function() {
 				console.log(response);
-				self.scores.result = response.scores;
+				for (var username in response.scores) {
+					response.scores[username].username = username;
+					self.results.push(response.scores[username]);
+				}
+				self.results.sort(function(l, r) { return l.score == r.score ? 0 : (l.score < r.score ? 1 : -1); });
+				self.doneScores(true);
+
 				self.phaseManager.setCurrentPhase(self.gameEndPhase);
 				self.waiting(false);
 				self.started = false;
 			});
 
+		});
+		
+		$('#end-game-modal').on('hide.bs.modal', function () {
+			$('.screen').hide();
+			$('#dashboard-screen').show();
+			self.results.removeAll()
 		});
         
     };
