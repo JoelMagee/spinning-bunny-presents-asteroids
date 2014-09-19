@@ -36,7 +36,7 @@ define([
 		if (this.doneScores()) {	
 			$('#end-game-modal').modal('show');
 		} else {
-			alert('Left game');
+			// alert('Left game');
 			$('.screen').hide();
 			$('#dashboard-screen').show();
 		}

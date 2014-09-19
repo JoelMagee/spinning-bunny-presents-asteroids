@@ -271,7 +271,7 @@ define([
 						self.world.addChild(explosion.graphics);
 						
 						//Is this our ship
-						if ((ship.lives <= 0) && (ship.username === self.clientShip.username)) {
+						if (ship.username === self.clientShip.username) {
 							self.animationPhase.off('animation finished', setMovementPhase);
 							self.animationPhase.on('animation finished', setDeadPhase);
 						}
