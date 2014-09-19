@@ -51,6 +51,9 @@ define([
 		}, this);
 		this.scoreboardInformation = ko.observableArray();
 
+		this.orderBy = 'username';
+		this.orderDirection = 'asc';
+
 		this.profile = {
 			username: ko.observable(0),
 			totalKills: ko.observable(0),
@@ -120,7 +123,9 @@ define([
 		});
 
 		this.socket.on('global message', function(response) {
-			self.chatHistory.unshift({content: response.message.content, time: new Date(), username: response.message.username });
+			var server = (response.message.username === "");
+
+			self.chatHistory.unshift({content: response.message.content, time: new Date(), username: response.message.username, server: server });
 			if(self.chatHistory().length > MAX_CHAT_HISTORY) {
 				self.chatHistory.pop(); //Remove old messages
 			}
@@ -189,9 +194,20 @@ define([
 			console.log("Activating tab: " + tabName);
 			this.activeTabName(tabName);
 		},
+		updateOrderBy: function(orderBy) {
+			if (this.orderBy === orderBy) {
+				this.orderDirection = (this.orderDirection === 'asc') ? 'desc' : 'asc';
+			} else {
+				this.orderBy = orderBy;
+				this.orderDirection = 'desc';
+			}
+			this.updateScoreboard();
+		},
 		updateScoreboard: function() {
 			console.log("Loading page: " + this.scoreboardPage())
-			this.socket.emit('user info', { limit: USERS_PER_SCOREBOARD_PAGE, page: this.scoreboardPage() });
+			var sort = {};
+			sort[this.orderBy] = this.orderDirection;
+			this.socket.emit('user info', { limit: USERS_PER_SCOREBOARD_PAGE, page: this.scoreboardPage(), sort: sort });
 			this.socket.emit('user count', {});
 		},
 		updateProfile: function() {

@@ -6477,13 +6477,17 @@ hr.primary {
   background-color: #fff;
   border: 1px solid #eee;
   margin-top: 5px;
-  min-height: 80px;
-  max-height: 300px;
+  min-height: 200px;
+  max-height: 500px;
   overflow-y: scroll;
 }
 .chat-area p {
   margin: 5px;
   padding: 0;
+  font-size: 0.85rem;
+}
+.chat-area .server {
+  color: #777;
 }
 .tab {
   display: none;
@@ -6537,4 +6541,14 @@ hr.primary {
 }
 .invalid-input {
   outline: red auto 5px;
+}
+.score-table th {
+  cursor: pointer;
+}
+.score-table th:hover {
+  color: #f05800;
+}
+.score-table th,
+.score-table td {
+  width: 20%;
 }

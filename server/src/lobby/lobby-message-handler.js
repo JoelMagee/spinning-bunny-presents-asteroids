@@ -36,6 +36,7 @@ var LobbyMessageHandler = function(sessionManager, lobbyManager) {
 	this.infoSub = redis.createClient();
 	this.joinSub = redis.createClient();
 	this.outputPub = redis.createClient();
+	this.internalPub = redis.createClient();
 
 	this.createSub.on('pmessage', ChannelUtils.messageIn(this.createMessageReceived.bind(this), this.invalidMessage.bind(this)));
 	this.createSub.psubscribe('create lobby:*');
@@ -52,7 +53,13 @@ var LobbyMessageHandler = function(sessionManager, lobbyManager) {
 util.inherits(LobbyMessageHandler, events.EventEmitter);
 
 LobbyMessageHandler.prototype.createMessageReceived = function(sessionID, messageData) {
+	var self = this;
+	
 	var lobby = this.lobbyManager.createLobby(messageData.name, this.sendResponse.bind(this));
+	
+	this.sessionManager.getProperty(sessionID, 'username', function(err, username) {
+		self.internalPub.publish('internal:lobby:create', JSON.stringify({ username: username, sessionID: sessionID, lobbyName: messageData.name }));
+	});
 	this.sendResponse(sessionID, "create lobby", {success: true, message: "Lobby created", id: lobby.id});
 };
 
@@ -79,6 +86,8 @@ LobbyMessageHandler.prototype.joinMessageReceived = function(sessionID, messageD
 
 		var lobby = self.lobbyManager.getLobby(messageData.id);
 		lobby.join(username);
+
+		self.internalPub.publish('internal:lobby:join', JSON.stringify({ username: username, sessionID: sessionID, lobbyName: lobby.name }));
 
 		self.sendResponse(sessionID, "join lobby", {
 			id: messageData.id,

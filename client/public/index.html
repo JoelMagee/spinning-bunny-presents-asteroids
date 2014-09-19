@@ -159,15 +159,14 @@
 										Scoreboard - showing page <span data-bind="text: scoreboardPage"></span> of <span data-bind="text: scoreboardTotal"></span> with <span data-bind="text: userCount"></span> users.
 									</div>
 									<div class="panel-body">
-										<table class="table table-striped">
+										<table class="table table-striped score-table">
 											<thead>
 												<tr>
-													<th>Username</th>
-													<th>Total Score</th>
-													<th>Highest Score</th>
-													<th>Games Started</th>
-													<th>Games Finished</th>
-													<th>Games Won</th>
+													<th data-bind="click: function() { updateOrderBy('username'); }">Username</th>
+													<th data-bind="click: function() { updateOrderBy('totalScore'); }">Total Score</th>
+													<th data-bind="click: function() { updateOrderBy('highestScore'); }">Highest Score</th>
+													<th data-bind="click: function() { updateOrderBy('gamesFinished'); }">Games Finished</th>
+													<th data-bind="click: function() { updateOrderBy('gamesWon'); }">Games Won</th>
 												</tr>
 											</thead>
 											<tbody data-bind="foreach: scoreboardInformation">
@@ -175,7 +174,6 @@
 													<td data-bind="text: username"></td>
 													<td data-bind="text: totalScore"></td>
 													<td data-bind="text: highestScore"></td>
-													<td data-bind="text: gamesStarted"></td>
 													<td data-bind="text: gamesFinished"></td>
 													<td data-bind="text: gamesWon"></td>
 												</tr>
@@ -209,7 +207,7 @@
 									<input type="text" data-bind="executeOnEnter: sendGlobalMessage, value: chatMessage, valueUpdate: 'keydown'" placeholder="Enter a chat message">
 								</div>
 								<div class="chat-area" data-bind="foreach: chatHistory">
-										<p><span data-bind="text: moment(time).format('HH:mm:ss') "></span> <strong data-bind="text: username"></strong> - <span data-bind="text: content"></span></p>
+										<p data-bind="css: { server: server }"><span data-bind="text: moment(time).format('HH:mm:ss') "></span> <strong data-bind="text: username"></strong> - <span data-bind="text: content"></span></p>
 								</div>
 							</div>
 						</div>
@@ -257,7 +255,7 @@
 									<input type="text" data-bind="executeOnEnter: sendGlobalMessage, value: chatMessage, valueUpdate: 'keydown'" placeholder="Enter a chat message">
 								</div>
 								<div class="chat-area" data-bind="foreach: chatHistory">
-									<p><span data-bind="text: moment(time).format('HH:mm:ss') "></span> <strong data-bind="text: username"></strong> - <span data-bind="text: content"></span></p>
+									<p data-bind="css: { server: server }"><span data-bind="text: moment(time).format('HH:mm:ss') "></span> <strong data-bind="text: username"></strong> - <span data-bind="text: content"></span></p>
 								</div>
 							</div>
 						</div>
