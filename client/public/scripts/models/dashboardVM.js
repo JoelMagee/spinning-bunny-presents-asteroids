@@ -120,7 +120,9 @@ define([
 		});
 
 		this.socket.on('global message', function(response) {
-			self.chatHistory.unshift({content: response.message.content, time: new Date(), username: response.message.username });
+			var server = (response.message.username === "");
+
+			self.chatHistory.unshift({content: response.message.content, time: new Date(), username: response.message.username, server: server });
 			if(self.chatHistory().length > MAX_CHAT_HISTORY) {
 				self.chatHistory.pop(); //Remove old messages
 			}
