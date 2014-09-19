@@ -25,7 +25,7 @@ define([
 		}
 	};
 
-	var socket = io('http://sl-ws-230:8500/');
+	var socket = io('http://sl-ws-230:5000/');
 	
 	socket.on('connect', function() {
 		console.log("Connected to websocket on localhost");

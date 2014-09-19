@@ -6515,3 +6515,13 @@ hr.primary {
 .invalid-input {
   outline: red auto 5px;
 }
+.score-table th {
+  cursor: pointer;
+}
+.score-table th:hover {
+  color: #f05800;
+}
+.score-table th,
+.score-table td {
+  width: 20%;
+}

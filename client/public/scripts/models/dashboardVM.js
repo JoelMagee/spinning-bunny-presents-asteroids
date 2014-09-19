@@ -48,6 +48,9 @@ define([
 		this.scoreboardPage = ko.observable(1);
 		this.scoreboardInformation = ko.observableArray();
 
+		this.orderBy = 'username';
+		this.orderDirection = 'asc';
+
 		this.profile = {
 			username: ko.observable(0),
 			totalKills: ko.observable(0),
@@ -186,9 +189,20 @@ define([
 			console.log("Activating tab: " + tabName);
 			this.activeTabName(tabName);
 		},
+		updateOrderBy: function(orderBy) {
+			if (this.orderBy === orderBy) {
+				this.orderDirection = (this.orderDirection === 'asc') ? 'desc' : 'asc';
+			} else {
+				this.orderBy = orderBy;
+				this.orderDirection = 'desc';
+			}
+			this.updateScoreboard();
+		},
 		updateScoreboard: function() {
 			console.log("Loading page: " + this.scoreboardPage())
-			this.socket.emit('user info', { limit: USERS_PER_SCOREBOARD_PAGE, page: this.scoreboardPage() });
+			var sort = {};
+			sort[this.orderBy] = this.orderDirection;
+			this.socket.emit('user info', { limit: USERS_PER_SCOREBOARD_PAGE, page: this.scoreboardPage(), sort: sort });
 			this.socket.emit('user count', {});
 		},
 		updateProfile: function() {
