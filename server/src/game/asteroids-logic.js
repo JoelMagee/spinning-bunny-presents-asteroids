@@ -302,8 +302,14 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 					console.log("Player " + player.username + " was hit by a bullet");
 					player.addCollision(t);
 					bullet.setDestroyed(t);
-					bullet.getSource().score+= POINTS_PER_KILL;
-					bullet.getSource().destroyedPlayer(player);
+
+					if (bullet.getSource() === player) {
+						console.log("Player: " + player.username + " shot themselves, lol");
+					} else {
+						bullet.getSource().score+= POINTS_PER_KILL;
+						bullet.getSource().destroyedPlayer(player);	
+					}
+					
 				} 
 			});
 		});
