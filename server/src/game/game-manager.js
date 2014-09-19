@@ -102,22 +102,11 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 			});
 
 			var winners = game.getWinners();
-			
-			//Update users stats
-			user.gamesFinished++;
-			user.totalScore += player.score;
-			user.addKills(player.killedPlayers);
-			user.totalKills += player.killedPlayers.length;
-
-			if (user.highestScore < player.score) {
-				user.highestScore = player.score;
-			}
 
 			if (winners.indexOf(player) !== -1) {
 				user.gamesWon++;
+				user.save();
 			}
-
-			user.save();
 
 			//Cleanup
 			removeListeners();
@@ -154,6 +143,25 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 			}
 		});
 
+		var updateScore = function() {
+			var player = game.getPlayer(username);
+
+			if (!player) {
+				return;
+			}
+
+			//Update users stats
+			user.gamesFinished++;
+			user.totalScore += player.score;
+			user.addKills(player.killedPlayers);
+			user.totalKills += player.killedPlayers.length;
+
+			if (user.highestScore < player.score) {
+				user.highestScore = player.score;
+			}
+
+			user.save();
+		}
 
 		var leaveSub = redis.createClient();
 
@@ -170,6 +178,8 @@ GameManager.prototype.joinGame = function(_sessionID, _username, _game) {
 		});
 
 		var removeListeners = function() {
+			updateScore();
+
 			leaveSub.unsubscribe('leave game:' + sessionID);
 			leaveSub.unsubscribe('logout:' + sessionID);
 			leaveSub.unsubscribe('disconnect:' + sessionID);

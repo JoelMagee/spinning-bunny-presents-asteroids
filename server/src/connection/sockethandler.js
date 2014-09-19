@@ -121,7 +121,7 @@ SocketHandler.prototype.setUpValidators = function() {
 		.requirement(self.sessionValidator.hasSession())
 		.requirement(self.sessionValidator.hasProperty('username'))
 		.requirement(self.contentValidator.hasProperty('name'))
-		.requirement(self.contentValidator.propertyMatches('name', '^[a-z0-9_-]{3,160}$', 'Name is invalid, requirements are 3-160 characters, a-z, 0-9 _ and -'))
+		.requirement(self.contentValidator.propertyMatches('name', '^[\\sa-zA-Z0-9_-]{3,160}$', 'Name is invalid, requirements are 3-160 characters, a-z, A-Z, 0-9 _ and -'))
 
 	this.createLobbyValidator.on('success', function(request) {
 		self.inputPublisher.publish('create lobby:' + request.sessionID, JSON.stringify(request));
