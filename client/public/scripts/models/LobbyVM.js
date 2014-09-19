@@ -6,7 +6,7 @@ define([
 	
 	var MAX_CHAT_HISTORY = 100;
 	
-    var LobbyVM = function LobbyVM(socket) {
+    var LobbyVM = function LobbyVM(socket, session) {
 	
 		var self = this;
 	
@@ -18,6 +18,9 @@ define([
 		this.chatHistory = ko.observableArray();
 
 		this.socket = socket;
+		this.session = session;
+		
+		this.lobbyleader = ko.observable(false);
 		
 		this.socket.on('info lobby', function(response) {
 			if (response.success) {
@@ -31,7 +34,7 @@ define([
 						self.players.push({"name": response.lobbyData.usernames[i]});
 					}
 					
-					console.log("joined lobby #" + response.lobbyData.id);
+					self.setLobbyLeader();
 			
 					$('.screen').hide();
 					$('#lobby-screen').show();
@@ -47,10 +50,10 @@ define([
 				$('.screen').hide();
 				$('#dashboard-screen').show();
 				
+				self.lobbyleader();
+				
 				self.socket.emit('info lobby', {});
 		});
-		
-
 		
 		this.socket.on('user join lobby', function(response) {
 			console.log("Player joined: " + response.username);
@@ -60,6 +63,7 @@ define([
 		this.socket.on('user leave lobby', function(response) {
 			console.log("Player left: " + response.username);
 			self.players.remove(function(item) { return item.name === response.username; });
+			self.setLobbyLeader();
 		});
 		
 		this.socket.on('close lobby', function(response) {
@@ -67,10 +71,11 @@ define([
 				$('.screen').hide();
 				$('#dashboard-screen').show();
 				
+				self.setLobbyLeader();
+				
 				self.socket.emit('info lobby', {});
 			} else {
 				console.log(response.message);
-				alert(response.message);
 			}
 		});
 		
@@ -78,7 +83,7 @@ define([
 			if (response.success) {
 				console.log(response.message);
 			} else {
-				alert(response.message);
+				console.log(self.session.username);
 			}
 		});
 		
@@ -114,6 +119,13 @@ define([
 		sendGlobalMessage: function() {
 			this.socket.emit('global message', { content: this.chatMessage() });
 			this.chatMessage("");
+		},
+		setLobbyLeader: function() {
+			if (this.players()[0] && this.session.username === this.players()[0].name) {
+				this.lobbyleader(true);
+			} else {
+				this.lobbyleader(false);
+			}
 		}
     };
   

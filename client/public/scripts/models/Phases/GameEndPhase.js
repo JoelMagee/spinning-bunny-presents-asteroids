@@ -11,7 +11,6 @@ define([
 		this.asteroids = asteroids;
 		this.explosions = explosions;
 		this.socket = socket;
-		// this.scores = scores;
 		this.doneScores = doneScores;
 	};
 	
@@ -36,7 +35,6 @@ define([
 		if (this.doneScores()) {	
 			$('#end-game-modal').modal('show');
 		} else {
-			// alert('Left game');
 			$('.screen').hide();
 			$('#dashboard-screen').show();
 		}
@@ -51,8 +49,6 @@ define([
 	
 	GameEndPhase.prototype.onEnd = function () {
 		console.log("Game End phase has ended");
-		
-		// this.scores = {};
 		
 		this.doneScores(false);
 		

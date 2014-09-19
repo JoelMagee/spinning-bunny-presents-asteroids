@@ -46,6 +46,9 @@ define([
 
 		this.userCount = ko.observable(0);
 		this.scoreboardPage = ko.observable(1);
+		this.scoreboardTotal = ko.computed(function() {
+			return Math.ceil(this.userCount()/25);
+		}, this);
 		this.scoreboardInformation = ko.observableArray();
 
 		this.profile = {

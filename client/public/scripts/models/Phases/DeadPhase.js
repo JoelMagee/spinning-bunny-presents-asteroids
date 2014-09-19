@@ -43,28 +43,11 @@ define([
 	};
 	
 	DeadPhase.prototype.draw = function () {
-		// console.log("Waiting phase is drawing");
 		
 		this.ships.forEach(function(ship) {
 			ship.draw();
 		});
-		
-		// if (this.ui.moveSet) {
-			// this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
-			
-			// this.ui.clearMovementLine();
-			// this.ui.drawMovementLine();
-		// }
-		
-		// if (this.ui.firePointSet) {
-			// this.ui.clearFirePoint();
-			// this.ui.drawFirePoint();
-		// }
-		
-		// if (this.ui.fireDestinationSet) {
-			// this.ui.clearFireLine();
-			// this.ui.drawFireLine();
-		// }
+
 	};
 	
 	DeadPhase.prototype.update = function () {
@@ -75,19 +58,7 @@ define([
 		console.log("Dead phase has ended");
 		
 		this.phaseTitle('');
-		
-		// this.ui.clientShip.clearGhost();
-		
-		// this.ui.clearMovementLine();
-		// this.ui.clearFirePoint();
-		// this.ui.clearFireLine();
-		
-		// this.ui.clientShip.t = null;
-		// this.ui.clientShip.angle = null;
-		
-		// this.ui.moveSet = false;
-		// this.ui.firePointSet = false;
-		// this.ui.fireDestinationSet = false;
+
 	};
 	
 	return DeadPhase;

@@ -307,7 +307,7 @@ define([
 			if (response.success) {
 				self.phaseManager.setCurrentPhase(self.gameEndPhase);
 			} else { 
-				alert('Failed to leave');
+				alert(response.message);
 			}
 		
 		});

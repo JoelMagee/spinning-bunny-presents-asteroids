@@ -50,7 +50,7 @@ define([
 					this.prev.y = data.global.y;
 					
 					/* 
-						Add a check in here somewhere that means that
+						Potentially add a check in here somewhere that means that
 						the world can only be panned a certain distance
 						based on pannedAmountX and pannedAmountY
 					*/
@@ -72,7 +72,6 @@ define([
 			this.movementLine.moveTo(this.clientShip.position.x, this.clientShip.position.y);
 			this.movementLine.quadraticCurveTo(this.clientShip.prediction.x, this.clientShip.prediction.y, this.movementPosition.x, this.movementPosition.y);
 			
-			// this.movementLine.drawCircle(this.clientShip.prediction.x, this.clientShip.prediction.y, 1/this.world.scale.x);
 		},
 		drawFirePoint: function () {
 			Helper.bezierHelper.setBezier(this.clientShip.position.x, this.clientShip.position.y, this.clientShip.prediction.x, this.clientShip.prediction.y, this.clientShip.currentMove.x, this.clientShip.currentMove.y);
