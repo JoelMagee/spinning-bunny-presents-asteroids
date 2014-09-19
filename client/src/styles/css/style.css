@@ -6514,6 +6514,13 @@ hr.primary {
 .tabs ul li.active {
   background-color: #555;
 }
+.tabs ul .activetab {
+  background-color: #DDD;
+  color: #f05800;
+}
+.tabs ul .activetab:hover {
+  background-color: #DDD;
+}
 .lobbyleader {
   font-weight: 600;
 }

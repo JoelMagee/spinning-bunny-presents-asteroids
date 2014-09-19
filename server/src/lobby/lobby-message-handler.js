@@ -54,7 +54,7 @@ util.inherits(LobbyMessageHandler, events.EventEmitter);
 
 LobbyMessageHandler.prototype.createMessageReceived = function(sessionID, messageData) {
 	var self = this;
-	
+
 	var lobby = this.lobbyManager.createLobby(messageData.name, this.sendResponse.bind(this));
 	
 	this.sessionManager.getProperty(sessionID, 'username', function(err, username) {
@@ -160,7 +160,10 @@ LobbyMessageHandler.prototype.setUpLobbyListeners = function(sessionID, username
 	});
 
 	closeSub.on('message', function(channel, message) {
-		if (!lobby.getLeader() === username) {
+		console.log(lobby.getLeader());
+		console.log(username);
+
+		if (!(lobby.getLeader() === username)) {
 			//This user is not the lobby leader, they cannot destroy the lobby
 			return self.sendResponse(sessionID, "close lobby", { success: false, message: "You don't have permission to close this lobby" });
 		}
