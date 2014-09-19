@@ -146,10 +146,6 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 		}
 	});
 
-	//Update player scores
-	this.players.forEach(function(player) {
-		player.score+= POINTS_PER_ROUND;
-	});
 
 	//Update move information
 	this.players.forEach(function(player) {
@@ -351,6 +347,14 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 	this.players.forEach(function(player) {
 		if (!player.alive()) {
 			player.destroyed = true;
+		}
+	});
+
+	
+	//Update player scores
+	this.players.forEach(function(player) {
+		if (player.alive()) {
+			player.score+= POINTS_PER_ROUND;
 		}
 	});
 
