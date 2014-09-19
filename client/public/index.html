@@ -156,7 +156,7 @@
 							<div class="tab" id="scoreboard-tab" data-bind="css: {  active: activeTabName() === 'scoreboard' }">
 								<div class="panel panel-primary">
 									<div class="panel-heading">
-										Scoreboard - showing page <span data-bind="text: scoreboardPage"></span> of <span data-bind="text: userCount"></span> users.
+										Scoreboard - showing page <span data-bind="text: scoreboardPage"></span> of <span data-bind="text: scoreboardTotal"></span> with <span data-bind="text: userCount"></span> users.
 									</div>
 									<div class="panel-body">
 										<table class="table table-striped score-table">
@@ -228,7 +228,7 @@
 				<div class="row">
 					<div class="col-md-6">
 						<div class="panel panel-primary">
-							<div class="panel-heading"><span data-bind="text: name">Lobby name</span> <button class="btn btn-default pull-right" data-bind="click: leaveLobby">Leave</button><button class="btn btn-danger pull-right" data-bind="click: closeLobby">Close</button></div>
+							<div class="panel-heading"><span data-bind="text: name">Lobby name</span> <button class="btn btn-default pull-right" data-bind="click: leaveLobby">Leave</button><button class="btn btn-danger pull-right" data-bind="click: closeLobby, visible: lobbyleader">Close</button></div>
 							<div class="panel-body">
 								<div class="row">
 									<div class="col-xs-12">
@@ -240,7 +240,7 @@
 								</div>
 								<div class="row">
 									<div class="col-xs-12">
-										<button type="button" class="btn btn-primary btn-block btn-lg" data-bind="click: startLobby">Start <i class="fa fa-chevron-right"></i></button>
+										<button type="button" class="btn btn-primary btn-block btn-lg" data-bind="click: startLobby, visible: lobbyleader">Start <i class="fa fa-chevron-right"></i></button>
 									</div>
 								</div>
 							</div>

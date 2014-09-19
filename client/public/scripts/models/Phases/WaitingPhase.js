@@ -43,8 +43,7 @@ define([
 	};
 	
 	WaitingPhase.prototype.draw = function () {
-		// console.log("Waiting phase is drawing");
-		
+
 		if (this.ui.moveSet) {
 			this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
 			
@@ -68,7 +67,6 @@ define([
 	};
 	
 	WaitingPhase.prototype.update = function () {
-		// console.log("Waiting phase is updating");
 	};
 	
 	WaitingPhase.prototype.onEnd = function () {

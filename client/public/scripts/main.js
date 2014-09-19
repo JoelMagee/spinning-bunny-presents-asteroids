@@ -36,7 +36,7 @@ define([
 	
 	var loginVM = new LoginVM(socket, session);
 	var dashboardVM = new DashboardVM(socket, session);
-	var lobbyVM = new LobbyVM(socket);
+	var lobbyVM = new LobbyVM(socket, session);
 	var gameVM = new GameVM(socket, session);
 	
     ko.applyBindings(loginVM, $('#login-screen')[0]);

@@ -44,7 +44,6 @@ define([
 	};
 	
 	FirePointPhase.prototype.draw = function () {
-		// console.log("Fire Point phase is drawing");
 		
 		this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
 		
@@ -60,7 +59,6 @@ define([
 	};
 	
 	FirePointPhase.prototype.update = function () {
-		// console.log("Fire Point phase is updating");
 		
 		this.ui.firePoint.x = this.mouse.x();
 		this.ui.firePoint.y = this.mouse.y();

@@ -15,11 +15,11 @@ define([
 	};
 	
 	LoadingPhase.prototype.draw = function () {
-		// console.log("Loading phase is drawing");
+
 	};
 	
 	LoadingPhase.prototype.update = function () {
-		// console.log("Loading phase is updating");
+
 	};
 	
 	LoadingPhase.prototype.onEnd = function () {

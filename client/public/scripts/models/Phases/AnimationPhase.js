@@ -51,7 +51,6 @@ define([
 	};
 	
 	AnimationPhase.prototype.draw = function () {
-		// console.log("Animation phase is drawing");
 		
 		this.ships.forEach(function(ship) {
 			ship.draw();
@@ -65,15 +64,12 @@ define([
 			explosion.draw();
 		});
 		
-		// console.log(
 		if (this.elapsedTime >= 2000) {
-			console.log("emitting animation finished");
 			this.emitEvent('animation finished');
 		}
 	};
 	
 	AnimationPhase.prototype.update = function (timeDiff) {
-		// console.log("Animation phase is updating");
 		
 		var self = this;
 		

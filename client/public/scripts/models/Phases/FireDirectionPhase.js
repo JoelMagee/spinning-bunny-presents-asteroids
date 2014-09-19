@@ -46,7 +46,6 @@ define([
 	};
 	
 	FireDirectionPhase.prototype.draw = function () {
-		// console.log("Fire Direction phase is drawing");
 		
 		this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
 		
@@ -65,7 +64,6 @@ define([
 	};
 	
 	FireDirectionPhase.prototype.update = function () {
-		// console.log("Fire Direction phase is updating");
 		
 		this.ui.possibleFireDestination.x = this.mouse.x();
 		this.ui.possibleFireDestination.y = this.mouse.y();
