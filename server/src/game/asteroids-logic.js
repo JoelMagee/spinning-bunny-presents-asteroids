@@ -156,6 +156,19 @@ AsteroidsLogic.prototype.processTurnResult = function(turnData, cb) {
 		if (!player.alive()) {
 			return;
 		}
+
+		if (!turnData[player.username].hasOwnProperty('destination')) {
+			turnData[player.username].destination = {};
+		}
+
+		if (!turnData[player.username].destination.hasOwnProperty('x')) {
+			turnData[player.username].destination.x = player.position.x;
+		}
+
+		if (!turnData[player.username].destination.hasOwnProperty('y')) {
+			turnData[player.username].destination.y = player.position.y;
+		}
+
 		player.setDestination(turnData[player.username].destination.x, turnData[player.username].destination.y);
 	});
 
