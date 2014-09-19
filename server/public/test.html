@@ -140,7 +140,7 @@
 							createdLobby = true;
 							//Lobby is not there, this client creates it
 							updateStatus("No lobbys, creating one");
-							socket1.emit("create lobby", { name: "Test lobby" });
+							socket1.emit("create lobby", { name: "test lobby" });
 						}
 					} else {
 						updateStatus("ERROR - Lobby info request failed");
@@ -157,6 +157,7 @@
 						});
 					} else {
 						updateStatus("ERROR - session 1 create lobby failed");
+						console.log(e);
 					}
 				});
 
