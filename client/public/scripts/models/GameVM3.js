@@ -305,6 +305,7 @@ define([
 		this.socket.on('leave game', function(response) {
 						
 			if (response.success) {
+				self.waiting(false);
 				self.phaseManager.setCurrentPhase(self.gameEndPhase);
 			} else { 
 				alert(response.message);
