@@ -306,6 +306,7 @@ define([
 						
 			if (response.success) {
 				self.waiting(false);
+				self.started = false;
 				self.phaseManager.setCurrentPhase(self.gameEndPhase);
 			} else { 
 				alert(response.message);
