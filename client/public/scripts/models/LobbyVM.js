@@ -123,7 +123,7 @@ define([
 			this.chatMessage("");
 		},
 		setLobbyLeader: function() {
-			if (this.players()[0] && this.session.username === this.players()[0].name) {
+			if (this.players()[0] && (this.session.username === this.players()[0].name)) {
 				this.lobbyleader(true);
 			} else {
 				this.lobbyleader(false);

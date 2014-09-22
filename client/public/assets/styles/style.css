@@ -6536,3 +6536,7 @@ hr.primary {
 .score-table td {
   width: 20%;
 }
+.guide-image {
+  border: 4px solid #DDD;
+  background-color: #222;
+}

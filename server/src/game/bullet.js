@@ -1,7 +1,7 @@
 /*jslint node: true, white: true */
 
 
-var BULLET_START_DISTANCE = 120; //Distance from ship a bullet will spawn so ship doesn't collide with it when shooting
+var BULLET_START_DISTANCE = 200; //Distance from ship a bullet will spawn so ship doesn't collide with it when shooting
 
 var Bullet = function(source, originPosition, direction, speed, startT) {
 	//Player that the bullet originated from

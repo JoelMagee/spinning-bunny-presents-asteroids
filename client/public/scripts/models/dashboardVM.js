@@ -141,7 +141,7 @@ define([
 				var winPercent = "N/A";
 
 				if ((response.user.gamesWon > 0) && (response.user.gamesStarted > 0)) {
-					winPercent = (response.user.gamesWon/response.user.gamesStarted).toFixed(4) * 100;
+					winPercent = ((response.user.gamesWon/response.user.gamesStarted) * 100).toFixed(4);
 				}
 
 				//We're going to assume this is a profile user request
