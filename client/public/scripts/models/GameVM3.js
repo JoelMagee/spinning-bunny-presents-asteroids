@@ -22,7 +22,22 @@ define([
     'use strict';
 	
 	/*jslint browser: true*/
-    
+
+	var MAX_CHAT_HISTORY = 100;
+
+    $(document).ready(function() {
+		$('.hide-chat').on('click', function() {
+			$(this).parent().parent().parent().toggleClass('up');
+			$(this).parent().parent().parent().toggleClass('down');
+		});
+
+		$('body').mousedown(function(event) {
+			if (event.target !== $('.chat-top input').get(0)) {
+				$('.chat-top input').blur();
+			}
+		});
+    });
+
     var GameVM3 = function GameVM3(socket, session) {
 		
 		var setMovementPhase = function() {
@@ -66,6 +81,20 @@ define([
 		this.asteroids = [];
 		this.explosions = [];
 	
+
+		//Chat observables
+		this.chatMessage = ko.observable();
+		this.chatHistory = ko.observableArray();
+
+		this.socket.on('global message', function(response) {
+			var server = (response.message.username === "");
+
+			self.chatHistory.unshift({content: response.message.content, time: new Date(), username: response.message.username, server: server });
+			if(self.chatHistory().length > MAX_CHAT_HISTORY) {
+				self.chatHistory.pop(); //Remove old messages
+			}
+		});
+
 		this.SCREEN_WIDTH = $(window).width();
 		this.SCREEN_HEIGHT = $(window).height();
 				
@@ -146,7 +175,7 @@ define([
 		
 		//spacebar event handler for resetting view
 		$(window).keydown(function(e) {
-			if (this.started && e.keyCode === 0 || e.keyCode === 32) {
+			if ((this.started && e.keyCode === 0 || e.keyCode === 32) && !($(".chat-top input").is(":focus"))) {
 				self.resetView();
 			}
 		});
@@ -434,6 +463,10 @@ define([
 		},
 		toggleMute: function() {
 			this.muted(!this.muted());
+		},
+		sendGlobalMessage: function() {
+			this.socket.emit('global message', { content: this.chatMessage() });
+			this.chatMessage("");
 		},
 		resetView: function() {
 		

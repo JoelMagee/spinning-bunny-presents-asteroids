@@ -46,18 +46,18 @@ define([
 	};
 	
 	FireDirectionPhase.prototype.draw = function () {
-		
-		this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
-		
-		this.ui.clearMovementLine();
-		this.ui.drawMovementLine();
-		
-		this.ui.clearFirePoint();
-		this.ui.drawFirePoint();
-		
-		this.ui.clearFireLine();
-		this.ui.drawFireLine();
-		
+		if (this.mouse.x() >= 0 && this.mouse.x() <= 10000 && this.mouse.y() >= 0 && this.mouse.y() <= 10000) {
+			this.ui.clientShip.drawGhost(this.ui.movementPosition.x, this.ui.movementPosition.y);
+			
+			this.ui.clearMovementLine();
+			this.ui.drawMovementLine();
+			
+			this.ui.clearFirePoint();
+			this.ui.drawFirePoint();
+			
+			this.ui.clearFireLine();
+			this.ui.drawFireLine();
+		}
 		this.ships.forEach(function(ship) {
 			ship.draw();
 		});

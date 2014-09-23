@@ -28,6 +28,7 @@ define([
 	})();
 
 
+
 	var DashboardVM = function(socket, session) {
 		this.socket = socket;
 		this.session = session;

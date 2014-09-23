@@ -6540,3 +6540,62 @@ hr.primary {
   border: 4px solid #DDD;
   background-color: #222;
 }
+#game-chat {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 5px;
+  width: 500px;
+  max-width: 90%;
+  background-color: rgba(0, 0, 0, 0.7);
+  font-size: 0.8rem;
+  font-weight: 300;
+}
+#game-chat .chat-input input {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 4px;
+  color: #fff;
+  border: 0;
+  outline: none;
+}
+#game-chat .chat-input input:focus {
+  border-color: #ff6e19;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(240, 88, 0, 0.6);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(240, 88, 0, 0.6);
+}
+#game-chat .chat-top {
+  padding-right: 22px;
+  margin-bottom: 5px;
+}
+#game-chat .hide-chat {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+#game-chat .hide-chat:hover {
+  color: #fff;
+}
+#game-chat .server {
+  display: none;
+}
+#game-chat .game-chat-area {
+  display: none;
+  height: 220px;
+}
+#game-chat .game-chat-area p {
+  color: #fff;
+  margin: 0;
+  line-height: 1.4;
+}
+#game-chat.up .game-chat-area {
+  display: block;
+}
+#game-chat.up .hide-chat .fa::before {
+  content: "\f078";
+}
+#game-chat.down .hide-chat .fa::before {
+  content: "\f077";
+}

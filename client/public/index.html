@@ -353,6 +353,17 @@
 					</div>
 				</div>
 			</div>
+			<div id="game-chat" class="up">
+				<div class="chat-input">
+					<div class="chat-top">
+						<input type="text" data-bind="executeOnEnter: sendGlobalMessage, value: chatMessage, valueUpdate: 'keydown'" placeholder="Enter a chat message">
+						<span class="hide-chat"><i class="fa"></i></span>
+					</div>
+				</div>
+				<div class="game-chat-area" data-bind="foreach: chatHistory">
+					<p data-bind="css: { server: server }"><span data-bind="text: moment(time).format('HH:mm:ss') "></span> <strong data-bind="text: username"></strong> - <span data-bind="text: content"></span></p>
+				</div>
+			</div>
 		</section>
 	</body>
 </html>
