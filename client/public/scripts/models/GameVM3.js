@@ -305,6 +305,7 @@ define([
 		this.socket.on('leave game', function(response) {
 						
 			if (response.success) {
+				self.animationPhase.removeEvent('animation finished');
 				self.waiting(false);
 				self.started = false;
 				self.phaseManager.setCurrentPhase(self.gameEndPhase);
