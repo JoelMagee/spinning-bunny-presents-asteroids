@@ -190,10 +190,11 @@ LobbyMessageHandler.prototype.infoMessageReceived = function(sessionID, messageD
 	if (messageData && messageData.hasOwnProperty('id')) {
 		//Lobby info for a specific lobby
 		if (!this.lobbyManager.lobbyExists(messageData.id)) {
-			this.sendResponse(sessionID, 'info lobby', { success: false, message: 'No lobby with this ID'});
+			return this.sendResponse(sessionID, 'info lobby', { success: false, message: 'No lobby with this ID'});
 		}
 
 		var lobby = this.lobbyManager.getLobby(messageData.id);
+
 		this.sendResponse(sessionID, 'info lobby', { success: true, message: 'Lobby info request successful', lobbyData: lobby.info()});
 
 	} else {
