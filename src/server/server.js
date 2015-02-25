@@ -36,7 +36,7 @@ var UserInfo             = require('./src/auth/user-info')(redis);
 // Parse provided arguments
 program
   .version('1.0.2')
-  .option('-p, --port <n>', 'Listen port [5000]', 5000)
+  .option('-p, --port <n>', 'Listen port [5100]', 5100)
   .option('-d, --dev', 'Development version')
   .parse(process.argv);
 
