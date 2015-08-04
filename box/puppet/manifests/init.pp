@@ -19,8 +19,4 @@ class {'::mongodb::server':
 	verbose => true,
 }
 
-class { 'redis':
-	version => '2.8.19',
-	redis_bind_address => '127.0.0.1',
-	redis_max_memory   => '200mb',
-}
+class { 'redis': }
