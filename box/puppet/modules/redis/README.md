@@ -1,58 +1,93 @@
-redis puppet module
-===================
+# Puppet Redis
 
-[![Build Status](https://secure.travis-ci.org/thomasvandoren/puppet-redis.png)](http://travis-ci.org/thomasvandoren/puppet-redis)
+## Build status
 
-Install and configure redis.
+[![Build Status](https://travis-ci.org/arioch/puppet-redis.png?branch=master)](https://travis-ci.org/arioch/puppet-redis)
 
-Usage
------
-Installs redis server and client with reasonable defaults.
+## Example usage
 
-```puppet
-include redis
-```
+### Standalone
 
-Installs redis server and client with version 2.6.5.
+    class { 'redis':;
+    }
 
-```puppet
-class { 'redis':
-  version => '2.6.5',
-}
-```
+### Master node
 
-Installs version 2.4.17, listens on default port 6379 with default settings.
-Sets up 2nd instance on port 6900, binds to address 10.1.2.3 (instead of all 
-available interfaces), sets max memory to 1 gigabyte, and sets a password from 
-hiera.
+    class { 'redis':
+      bind        => '10.0.1.1';
+      #masterauth  => 'secret';
+    }
 
-```puppet
-class { 'redis':
-  version            => '2.4.17',
-}
-redis::instance { 'redis-6900':
-  redis_port         => '6900',
-  redis_bind_address => '10.1.2.3',
-  redis_password     => hiera('redis_password'),
-  redis_max_memory   => '1gb',
-}
-```
+### Slave node
 
-Development
------------
+    class { 'redis':
+      bind        => '10.0.1.2',
+      slaveof     => '10.0.1.1 6379';
+      #masterauth  => 'secret';
+    }
 
-To run the linter and spec tests locally:
+### Redis 3.0 Clustering
 
-```bash
-bundle install --gemfile .gemfile
-rake lint
-rake spec
-```
+    class { 'redis':
+      bind                 => '10.0.1.2',
+      appendonly           => true,
+      cluster_enabled      => true,
+      cluster_config_file  => 'nodes.conf',
+      cluster_node_timeout => 5000,
+    }
 
-Authors
--------
-Thomas Van Doren
+### Manage repositories
 
-License
--------
-BSD
+Disabled by default but if you really want the module to manage the required
+repositories you can use this snippet:
+
+    class { 'redis':
+      manage_repo => true,
+    }
+
+On Ubuntu, "chris-lea/redis-server" ppa repo will be added. You can change it by using ppa_repo parameter:
+
+    class { 'redis':
+      manage_repo => true,
+      ppa_repo    => 'ppa:rwky/redis',
+    }
+### Redis Sentinel
+
+Optionally install and configuration a redis-sentinel server.
+
+With default settings:
+
+    class { 'redis::sentinel':}
+
+With adjustments:
+
+    class { 'redis::sentinel':
+      master_name => 'cow',
+      redis_host  => '192.168.1.5',
+      failover_timeout => 30000,
+    }
+
+## Unit testing
+
+Plain RSpec:
+
+    $ rake spec
+
+Using bundle:
+
+    $ bundle exec rake spec
+
+Test against a specific Puppet or Facter version:
+
+    $ PUPPET_VERSION=3.2.1  bundle update && bundle exec rake spec
+    $ PUPPET_VERSION=2.7.19 bundle update && bundle exec rake spec
+    $ FACTER_VERSION=1.6.8  bundle update && bundle exec rake spec
+
+## Contributing
+
+* Fork it
+* Create a feature branch (`git checkout -b my-new-feature`)
+* Run rspec tests (`bundle exec rake spec`)
+* Commit your changes (`git commit -am 'Added some feature'`)
+* Push to the branch (`git push origin my-new-feature`)
+* Create new Pull Request

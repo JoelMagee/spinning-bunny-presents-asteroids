@@ -1,10 +1,10 @@
 /*jslint white: true node: true */
 
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 var SALT_WORK_FACTOR = 10;
 
 module.exports = function(_mongoose) {
-	
+
 	// Dependencies
 	var mongoose = _mongoose;
 	var Schema = _mongoose.Schema;

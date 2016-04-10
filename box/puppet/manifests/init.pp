@@ -7,7 +7,10 @@ nginx::resource::vhost { 'localhost':
 	listen_port => 5000,
 }
 
-include nodejs
+class { 'nodejs':
+  version      => 'stable',
+  make_install => false,
+}
 
 package { 'grunt-cli':
 	ensure   => present,
@@ -19,4 +22,5 @@ class {'::mongodb::server':
 	verbose => true,
 }
 
-class { 'redis': }
+class { 'redis':;
+}
