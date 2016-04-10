@@ -1,3 +1,3 @@
 #!/bin/bash
 
-(cd /var/src/server) && (npm instal --no-bin-links)
+(cd /var/src/server) && (npm install --no-bin-links)
