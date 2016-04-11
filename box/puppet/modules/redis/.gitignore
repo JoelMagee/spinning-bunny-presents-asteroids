@@ -1,9 +1,8 @@
-*.swp
-.DS_Store
-.vagrant/
-.yardoc
-Gemfile.lock
-doc
-log/
-pkg
-spec/fixtures
+# Emacs stuff.
+*~
+*#*#
+*.#*
+
+# puppet-module build artifacts
+/pkg
+/.gemfile.lock

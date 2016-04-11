@@ -22,5 +22,4 @@ class {'::mongodb::server':
 	verbose => true,
 }
 
-class { 'redis':;
-}
+include redis
